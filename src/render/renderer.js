@@ -54,9 +54,12 @@ export class Renderer {
     this.width = 0;
     this.height = 0;
     this.time = 0;
-    this.cam = { x: 0, y: 0, mx: 0, my: 0 };
+    this.cam = { x: 0, y: 0, mx: 0, my: 0, panX: 0 };
     this.cssWidth = 0;
     this.cssHeight = 0;
+    /** Linke obere Ecke des Anzeigebereichs im Fenster (Hochformat-Band). */
+    this.originX = 0;
+    this.originY = 0;
     /** Aktiv überfahrener Punkt: Bildschirm-UV x, y, Radius, Stärke. */
     this.hover = [0, 0, 0, 0];
   }
@@ -128,7 +131,15 @@ export class Renderer {
     };
   }
 
-  /** Bildschirm-UV → Platten-UV (Cover-Fit + Zoom). */
+  /**
+   * Bildschirm-UV → Platten-UV. Die Platte deckt den Anzeigebereich immer
+   * vollständig; die schmalere Seite wird beschnitten.
+   *
+   * Auf einem hochkant gehaltenen Handy bleibt davon nur ein Ausschnitt der
+   * Gasse übrig. Den Rest erreicht man durch seitliches Schieben (`cam.panX`)
+   * — die Platte einzupassen wäre die Alternative gewesen, hätte aber ein
+   * briefmarkengroßes Bild in einer schwarzen Fläche ergeben.
+   */
   uvScale() {
     const screenAspect = this.width / this.height;
     const z = 1 / this.params.zoom;
@@ -137,10 +148,17 @@ export class Renderer {
       : [(screenAspect / PLATE_ASPECT) * z, z];
   }
 
+  /** Wie weit sich das Bild seitlich schieben lässt (in Plattenkoordinaten). */
+  panLimit() {
+    return Math.max(0, (1 - this.uvScale()[0]) * 0.5);
+  }
+
   layerOffset(parallax) {
     const c = this.cam;
+    // panX wirkt in voller Stärke auf alle Ebenen — es ist kein
+    // Tiefeneffekt, sondern ein Blickwechsel: das Bild folgt dem Finger 1:1.
     return [
-      -(c.x + c.mx) * parallax,
+      -(c.x + c.mx) * parallax + c.panX,
       -(c.y + c.my) * parallax * 0.55,
     ];
   }
@@ -206,7 +224,12 @@ export class Renderer {
     const du = su - cx * k;
     const dv = sv - cy * k;
 
-    return [du * this.cssWidth, (1 - dv) * this.cssHeight];
+    return [this.originX + du * this.cssWidth, this.originY + (1 - dv) * this.cssHeight];
+  }
+
+  /** Höhe der Platte auf dem Schirm in Pixeln — Maßstab für Klickflächen. */
+  plateScreenHeight() {
+    return this.cssHeight / Math.max(0.001, this.uvScale()[1]);
   }
 
   /** Fluchtpunkt in Bildschirm-UV — Ursprung der Lichtschächte. */
@@ -284,6 +307,8 @@ export class Renderer {
       gl.uniform1f(p.u('uAmount'), P.rain);
       gl.uniform1f(p.u('uWind'), P.wind);
       gl.uniform1f(p.u('uWander'), this.cam.x + this.cam.mx);
+      gl.uniform1f(p.u('uHorizonY'),
+        this.horizonScreenY(this.scene.ground ? this.scene.ground.parallax : 0.085));
       bindTextures(gl, p, [['uScene', cur.tex]]);
       this.tri.draw();
     }

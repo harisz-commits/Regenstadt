@@ -46,6 +46,23 @@ Sichtbar ist normalerweise nichts. Beim Ueberfahren geht ein Lichtsaum **im
 Bild** auf (`uHover` im Endbild-Shader), nicht als Marke davor. **TAB** gedrueckt
 halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
+## Handy
+
+Im **Querformat** fuellt das Bild den Schirm. Im **Hochformat** bekommt es ein
+Band im oberen Drittel, darunter liegt die Bedienung: ein 16:9-Bild auf einem
+hochkant gehaltenen Handy ist sonst entweder briefmarkengross (eingepasst) oder
+zeigt nur einen senkrechten Streifen (gefuellt). Den Rest der Gasse erreicht man
+durch **seitliches Ziehen** — das Bild folgt dem Finger 1:1, und die
+Untersuchungspunkte wandern mit.
+
+Ohne Mauszeiger gibt es kein Ueberfahren, deshalb sind die Punkte auf
+Beruehrgeraeten dauerhaft schwach sichtbar und leuchten beim Antippen auf.
+
+`src/ui/viewport.js` nagelt die vier Zoom-Wege von iOS einzeln zu — Kneifen,
+Doppeltippen, Fokus auf ein Eingabefeld und Ueberziehen am Rand. Einen
+einzelnen Schalter dafuer gibt es nicht; `user-scalable=no` allein ignoriert
+Safari seit iOS 10.
+
 ## Aufbau
 
 ```
@@ -58,9 +75,10 @@ src/
   scene/alley.js        „Kanalgasse" — baut den kompletten Plattensatz
   shaders/*.glsl        ein Shader pro Pass
   ui/overlay.js         Regler + Frame-Zeit-Kurve (F1)
+  ui/viewport.js        Zoom-Sperren und Geraeteraender fuer Mobilgeraete
   game/hotspots.js      Untersuchungspunkte je Ort, in Bildkoordinaten
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
-tools/shot.mjs          Standbilder aufnehmen (--backdrop, --reveal, --hotspot)
+tools/shot.mjs          Standbilder aufnehmen (--backdrop, --reveal, --hotspot, --touch, --pan)
 tools/gen.mjs           Platten von einem Bildmodell uebermalen lassen
 prompts/                Bildanweisungen, getrennt vom Code
 public/plates/          fertige Hintergruende (siehe README dort)

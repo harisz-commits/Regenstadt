@@ -43,9 +43,14 @@ const browser = await chromium.launch({
   ],
 });
 
+// --touch 1 emuliert ein Beruehrgeraet: dadurch greifen (hover: none) und
+// (pointer: coarse), und das Spiel schaltet auf die Handy-Bedienung um.
+const mobile = arg('touch', '0') === '1';
 const page = await browser.newPage({
   viewport: { width, height },
-  deviceScaleFactor: 1,
+  deviceScaleFactor: parseFloat(arg('dpr', mobile ? '2' : '1')),
+  isMobile: mobile,
+  hasTouch: mobile,
 });
 
 const problems = [];
@@ -114,6 +119,14 @@ if (freeze) {
     } else {
       problems.push(`[hotspot] Index ${nth} existiert nicht`);
     }
+  }
+  // Seitliches Schieben pruefen: -1 = ganz links, +1 = ganz rechts.
+  const pan = arg('pan', null);
+  if (pan !== null) {
+    await page.evaluate((v) => {
+      const r = window.__regenstadt.renderer;
+      r.cam.panX = r.panLimit() * v;
+    }, parseFloat(pan));
   }
   // Ein paar Frames laufen lassen, damit die Änderung im Bild ankommt.
   await page.waitForTimeout(500);

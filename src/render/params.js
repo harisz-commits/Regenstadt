@@ -31,7 +31,7 @@ export const params = {
   ripple: 1.0,
 
   // Regen
-  rain: 1.05,
+  rain: 1.0,
   wind: 1.0,
 
   // Bloom
@@ -76,7 +76,7 @@ export const platePreset = {
   haze: 0.10,
   rays: 0.08,
   steam: 0.28,
-  rain: 0.85,
+  rain: 1.0,
   ripple: 1.15,
   // Fast kein Schwarzwertanheben: die Platte bringt ihre eigene Tonwertkurve
   // mit, und ein zweites Aufhellen macht die Schatten milchig.

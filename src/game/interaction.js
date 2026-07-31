@@ -10,6 +10,8 @@
  * es hält das Standbild frei.
  */
 
+import { isTouch } from '../ui/viewport.js';
+
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
 #hs-layer .hs {
@@ -28,6 +30,10 @@ const CSS = `
 #hs-layer .hs.person .mark { border-color: rgba(255,178,110,.62); box-shadow: 0 0 16px rgba(255,178,110,.32); }
 #hs-layer .hs.exit .mark { border-style: dashed; }
 #hs-layer.reveal .hs .mark, #hs-layer .hs:focus-visible .mark { opacity: .8; }
+/* Ohne Mauszeiger gibt es kein Ueberfahren — dann muessen die Punkte
+   dauerhaft sichtbar sein, sonst findet sie niemand. */
+#hs-layer.touch .hs .mark { opacity: .34; }
+#hs-layer.touch .hs.active .mark { opacity: .95; }
 
 #hs-label {
   position: fixed; z-index: 14; pointer-events: none;
@@ -98,6 +104,55 @@ const CSS = `
   color: #9ec8e4; background: rgba(126,190,230,.07); border: 1px solid rgba(126,190,230,.3);
 }
 #akte button:hover { background: rgba(126,190,230,.16); }
+#hint-bar {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 15;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  font: 10px/1.6 ui-monospace, Menlo, monospace; letter-spacing: .18em;
+  text-transform: uppercase; color: rgba(206,226,244,.72);
+  background: rgba(4,6,10,.62); border: 1px solid rgba(126,190,230,.18);
+  padding: 9px 16px; text-align: center; max-width: min(92vw, 640px);
+  opacity: 0; transition: opacity .5s ease; pointer-events: none;
+  text-shadow: 0 1px 6px rgba(0,0,0,.9);
+}
+#hint-bar.on { opacity: 1; }
+#topbar .help {
+  pointer-events: auto; cursor: pointer; margin-left: 16px;
+  border: 1px solid rgba(126,190,230,.3); border-radius: 50%;
+  width: 22px; height: 22px; display: inline-flex;
+  align-items: center; justify-content: center; letter-spacing: 0;
+}
+#topbar .help:hover { color: #e8f2ff; border-color: rgba(126,190,230,.7); }
+#topbar .actions { display: flex; align-items: center; }
+
+/* Aussparungen randloser Geraete */
+#topbar { padding-top: calc(16px + env(safe-area-inset-top)); }
+#panel { padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
+#akte { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+
+@media (max-width: 780px) {
+  #panel { font-size: 15px; line-height: 1.75; padding: 20px 18px 26px; }
+  #panel .body { max-width: none; }
+  #panel button { padding: 12px 18px; font-size: 12px; }
+  #topbar { padding-left: 14px; padding-right: 14px; }
+  #topbar .place { font-size: 12px; }
+  #akte { font-size: 14px; padding: 20px 18px; }
+  #hs-label { font-size: 12px; }
+  #hint-bar { font-size: 10px; letter-spacing: .12em; }
+}
+/* --- Hochformat -----------------------------------------------------------
+   Das Bild liegt in einem Band im oberen Drittel, darunter die Bedienung.
+   Der Untersuchungstext schiebt sich dort nicht ueber die Szene, sondern
+   fuellt den Bereich, der ohnehin dafuer da ist. */
+body.portrait #stage {
+  box-shadow: 0 0 0 1px rgba(126,190,230,.14), 0 18px 60px rgba(0,0,0,.7);
+}
+body.portrait #panel {
+  background: linear-gradient(to top, rgba(4,6,10,.99) 70%, rgba(4,6,10,.94));
+  border-top: 1px solid rgba(126,190,230,.14);
+  max-height: 42dvh; overflow-y: auto;
+}
+body.portrait #hint-bar { bottom: calc(14px + env(safe-area-inset-bottom)); }
+
 @media (prefers-reduced-motion: reduce) { #panel { transition: none; } }
 `;
 
@@ -111,14 +166,25 @@ export function createInteraction(renderer, { spots, place, sector }) {
   top.id = 'topbar';
   top.innerHTML =
     `<div><div class="sector">${sector}</div><div class="place">${place}</div></div>`;
+  const actions = document.createElement('div');
+  actions.className = 'actions';
   const akteBtn = document.createElement('div');
   akteBtn.className = 'right';
-  top.appendChild(akteBtn);
+  const helpBtn = document.createElement('div');
+  helpBtn.className = 'right help';
+  helpBtn.textContent = '?';
+  helpBtn.setAttribute('role', 'button');
+  helpBtn.setAttribute('aria-label', 'Steuerung anzeigen');
+  actions.append(akteBtn, helpBtn);
+  top.appendChild(actions);
   document.body.appendChild(top);
+
+  const touch = isTouch();
 
   /* --- Punkte ------------------------------------------------------------ */
   const layer = document.createElement('div');
   layer.id = 'hs-layer';
+  if (touch) layer.classList.add('touch');
   document.body.appendChild(layer);
 
   const label = document.createElement('div');
@@ -138,6 +204,31 @@ export function createInteraction(renderer, { spots, place, sector }) {
   const akte = document.createElement('div');
   akte.id = 'akte';
   document.body.appendChild(akte);
+
+  /* --- Steuerungshilfe ---------------------------------------------------- */
+  const hintBar = document.createElement('div');
+  hintBar.id = 'hint-bar';
+  hintBar.textContent = touch
+    ? 'Auf einen Punkt tippen zum Untersuchen  ·  Akte oben rechts'
+    : 'Klicken zum Untersuchen  ·  TAB zeigt alle Punkte  ·  ESC schließt';
+  document.body.appendChild(hintBar);
+
+  let hintTimer = null;
+  function showHint(ms = 7000) {
+    hintBar.classList.add('on');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hintBar.classList.remove('on'), ms);
+  }
+  function toggleHint() {
+    if (hintBar.classList.contains('on')) {
+      hintBar.classList.remove('on');
+      clearTimeout(hintTimer);
+    } else showHint(9000);
+  }
+  helpBtn.addEventListener('click', toggleHint);
+  // Beim ersten Start einmal von selbst zeigen — wer nicht weiß, dass er
+  // klicken kann, sieht nur ein hübsches Standbild.
+  setTimeout(() => showHint(), 900);
 
   const notes = [];
   const seen = new Set();
@@ -216,6 +307,10 @@ export function createInteraction(renderer, { spots, place, sector }) {
     panel.classList.remove('on');
     clearInterval(typer);
     typer = null;
+    if (touch) {
+      for (const n of nodes) n.el.classList.remove('active');
+      hovered = null;
+    }
   }
 
   /* --- Schaltflächen anlegen --------------------------------------------- */
@@ -225,17 +320,55 @@ export function createInteraction(renderer, { spots, place, sector }) {
     b.type = 'button';
     b.setAttribute('aria-label', s.label);
     b.innerHTML = '<span class="mark"></span>';
-    b.addEventListener('pointerenter', () => { hovered = s; });
-    b.addEventListener('pointerleave', () => { if (hovered === s) hovered = null; });
+    b.addEventListener('pointerenter', () => { if (!touch) hovered = s; });
+    b.addEventListener('pointerleave', () => { if (!touch && hovered === s) hovered = null; });
     b.addEventListener('focus', () => { hovered = s; });
     b.addEventListener('blur', () => { if (hovered === s) hovered = null; });
-    b.addEventListener('click', () => say(s));
+    b.addEventListener('click', () => {
+      // Wer quer gezogen hat, wollte den Blick verschieben, nicht untersuchen.
+      if (wasDrag()) return;
+      if (touch) {
+        // Auf Beruehrgeraeten gibt es kein Ueberfahren: der Lichtsaum geht
+        // beim Antippen auf und bleibt, solange die Tafel offen ist.
+        for (const n of nodes) n.el.classList.remove('active');
+        b.classList.add('active');
+        hovered = s;
+      }
+      say(s);
+    });
     layer.appendChild(b);
     return { spot: s, el: b };
   });
 
   let hovered = null;
   let hoverAmt = 0;
+
+  /* --- Seitliches Schieben ---------------------------------------------- */
+  // Im Hochformat zeigt der Schirm nur einen Ausschnitt der Gasse. Ziehen
+  // verschiebt den Blick; das Bild folgt dem Finger 1:1.
+  let dragging = false;
+  let lastX = 0;
+  let moved = 0;
+  const stageEl = document.getElementById('stage');
+
+  stageEl.addEventListener('pointerdown', (e) => {
+    dragging = true; lastX = e.clientX; moved = 0;
+  });
+  addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    moved += Math.abs(dx);
+    const lim = renderer.panLimit();
+    if (lim <= 0.0005) return;
+    const perPx = renderer.uvScale()[0] / Math.max(1, renderer.cssWidth);
+    renderer.cam.panX = Math.max(-lim, Math.min(lim, renderer.cam.panX - dx * perPx));
+  });
+  for (const ev of ['pointerup', 'pointercancel']) {
+    addEventListener(ev, () => { dragging = false; });
+  }
+  /** true, wenn der letzte Zeigerkontakt ein Ziehen war und kein Tippen. */
+  const wasDrag = () => moved > 9;
 
   addEventListener('keydown', (e) => {
     if (e.key === 'Tab') { e.preventDefault(); layer.classList.add('reveal'); }
@@ -251,9 +384,10 @@ export function createInteraction(renderer, { spots, place, sector }) {
       const h = renderer.cssHeight || 1;
       for (const { spot, el } of nodes) {
         const [x, y] = renderer.plateUvToScreen(spot.u, spot.v);
-        // Radius in Bildkoordinaten → Pixel. Grob über die Bildhöhe, das
-        // reicht für einen Klickbereich.
-        const px = Math.max(28, spot.r * h * 1.35);
+        // Radius in Bildkoordinaten → Pixel. Maßstab ist die Höhe der PLATTE
+        // auf dem Schirm, nicht die Fensterhöhe — sonst werden die Flächen im
+        // Hochformat riesig, weil das Bild dort nur ein Band einnimmt.
+        const px = Math.max(30, Math.min(spot.r * renderer.plateScreenHeight() * 1.35, h * 0.5));
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
         el.style.width = `${px}px`;
@@ -271,7 +405,7 @@ export function createInteraction(renderer, { spots, place, sector }) {
         renderer.hover[2] = hovered.r * 1.15;
         renderer.hover[3] = hoverAmt;
         label.style.left = `${x}px`;
-        label.style.top = `${y + Math.max(28, hovered.r * h * 1.35) * 0.5 + 12}px`;
+        label.style.top = `${y + Math.max(30, hovered.r * renderer.plateScreenHeight() * 1.35) * 0.5 + 12}px`;
         label.textContent = hovered.label;
         label.classList.add('on');
       } else {

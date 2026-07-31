@@ -4,6 +4,10 @@ import { buildAlley } from './scene/alley.js';
 import { createOverlay } from './ui/overlay.js';
 import { createInteraction } from './game/interaction.js';
 import { HOTSPOTS } from './game/hotspots.js';
+import { guardViewport, isTouch } from './ui/viewport.js';
+
+// Zoom-Sperren und Geraeteraender setzen, bevor irgendetwas gezeichnet wird.
+guardViewport();
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('gl'));
 const boot = document.getElementById('boot');
@@ -27,6 +31,14 @@ try {
 let seed = 7;
 let backdropOnly = false;
 let interaction = null;
+
+// Auf Mobilgeraeten kleiner rendern und den Mausblick abschalten — es gibt
+// keinen Zeiger, dem die Kamera folgen koennte.
+const TOUCH = isTouch();
+if (TOUCH) {
+  params.renderScale = 0.7;
+  params.mouseLook = 0;
+}
 
 /** Lädt ein Bild; liefert null, wenn es nicht existiert. */
 function loadImage(url) {
@@ -88,18 +100,48 @@ const overlay = createOverlay(params, {
   onReseed: () => { seed = (Math.random() * 1e9) | 0; loadScene(); },
 });
 
+const stage = document.getElementById('stage');
+
+/**
+ * Anzeigebereich festlegen.
+ *
+ * Im Querformat fuellt das Bild den Schirm. Im Hochformat bekommt es ein Band
+ * im oberen Drittel und die Bedienung den Rest: ein 16:9-Bild auf einem
+ * hochkant gehaltenen Handy ist entweder briefmarkengross oder zeigt einen
+ * senkrechten Streifen. Das Band ist der Kompromiss — sichtbar gross, und den
+ * Rest der Gasse erreicht man durch seitliches Schieben.
+ */
+function stageRect() {
+  const vv = window.visualViewport;
+  const W = Math.round(vv?.width || window.innerWidth);
+  const H = Math.round(vv?.height || window.innerHeight);
+  if (W / H >= 1.0) return { x: 0, y: 0, w: W, h: H };
+  return { x: 0, y: Math.round(H * 0.11), w: W, h: Math.round(H * 0.54) };
+}
+
 function fit(force = false) {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  const r = stageRect();
+  document.body.classList.toggle('portrait', r.h !== (window.visualViewport?.height || window.innerHeight));
+  stage.style.left = `${r.x}px`;
+  stage.style.top = `${r.y}px`;
+  stage.style.width = `${r.w}px`;
+  stage.style.height = `${r.h}px`;
+  stage.style.right = 'auto';
+  stage.style.bottom = 'auto';
+  renderer.originX = r.x;
+  renderer.originY = r.y;
   if (force) renderer.width = 0;
-  renderer.resize(w, h);
+  renderer.resize(r.w, r.h);
 }
 
 addEventListener('resize', () => fit());
+addEventListener('orientationchange', () => setTimeout(fit, 220));
+window.visualViewport?.addEventListener('resize', () => fit());
 
 // Sanfter Mausblick — die Kamera folgt träge, nie sprunghaft.
 let targetMx = 0, targetMy = 0;
 addEventListener('pointermove', (e) => {
+  if (TOUCH) return;
   targetMx = (e.clientX / window.innerWidth - 0.5) * 2;
   targetMy = (e.clientY / window.innerHeight - 0.5) * 2;
 });
