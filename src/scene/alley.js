@@ -336,7 +336,257 @@ function protrudingSign(ctx, rng, side, d, o = {}) {
   // Meldet sich als Lichtquelle für den Wandschein zurück.
   const cx = (face[0][0] + face[2][0]) * 0.5;
   const cy = (face[0][1] + face[2][1]) * 0.5;
-  return { x: cx, y: cy, r: Math.max(90, 520 / d), color: col, alpha: 0.34 };
+  return { x: cx, y: cy, r: Math.max(70, 300 / d), color: col, alpha: 0.20 };
+}
+
+/* ------------------------------------------------------------------------ *
+ *  Requisiten auf Straßenniveau.
+ *
+ *  Der Unterschied zwischen „zwei Wände mit Rechtecken" und „eine Straße"
+ *  ist Krempel: Markisen, Stände, Kisten, Geländer, Gitter, Graffiti. In der
+ *  Vorlage trägt jede Fläche Gegenstände. Die oberen Etagen dürfen schlicht
+ *  bleiben — dort schaut niemand hin.
+ * ------------------------------------------------------------------------ */
+
+/** Kasten an der Wand, der in die Gasse ragt. Liefert Stirn- und Längsfläche. */
+function wallBox(ctx, sgn, dN, dF, yTop, yBot, out, faceCol, sideCol) {
+  const plane = sgn * STREET_HALF;
+  const inner = plane - sgn * out;
+  // Längsfläche (zur Straßenmitte gewandt)
+  ctx.fillStyle = sideCol;
+  polyPath(ctx, [
+    project(inner, yTop, dN), project(inner, yTop, dF),
+    project(inner, yBot, dF), project(inner, yBot, dN),
+  ]);
+  ctx.fill();
+  // Stirnfläche (zur Kamera gewandt)
+  ctx.fillStyle = faceCol;
+  polyPath(ctx, [
+    project(plane, yTop, dN), project(inner, yTop, dN),
+    project(inner, yBot, dN), project(plane, yBot, dN),
+  ]);
+  ctx.fill();
+  return { plane, inner };
+}
+
+/** Markise über einem Ladeneingang. */
+function awning(ctx, rng, sgn, dN, dF, yTop, col) {
+  const plane = sgn * STREET_HALF;
+  const out = rr(rng, 130, 230);
+  const inner = plane - sgn * out;
+  const drop = rr(rng, 60, 110);
+
+  // Dachfläche
+  ctx.fillStyle = '#0c0a08';
+  polyPath(ctx, [
+    project(plane, yTop, dN), project(plane, yTop, dF),
+    project(inner, yTop + drop, dF), project(inner, yTop + drop, dN),
+  ]);
+  ctx.fill();
+
+  // Streifen quer über das Dach
+  const n = Math.max(2, Math.round((dF - dN) / 0.07));
+  for (let i = 0; i < n; i++) {
+    if (i % 2) continue;
+    const a = dN + ((dF - dN) * i) / n;
+    const b = dN + ((dF - dN) * (i + 1)) / n;
+    ctx.fillStyle = col;
+    ctx.globalAlpha = 0.30;
+    polyPath(ctx, [
+      project(plane, yTop, a), project(plane, yTop, b),
+      project(inner, yTop + drop, b), project(inner, yTop + drop, a),
+    ]);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Vordere Blende, leicht angeleuchtet vom Laden darunter
+  ctx.fillStyle = col;
+  ctx.globalAlpha = 0.5;
+  polyPath(ctx, [
+    project(inner, yTop + drop, dN), project(inner, yTop + drop, dF),
+    project(inner, yTop + drop + 34, dF), project(inner, yTop + drop + 34, dN),
+  ]);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/** Marktstand mit warm beleuchtetem Inneren. */
+function stall(ctx, rng, sgn, dN, dF, col) {
+  const yTop = rr(rng, 40, 120);
+  const out = rr(rng, 90, 170);
+  const plane = sgn * STREET_HALF;
+  const inner = plane - sgn * out;
+
+  // Warmes Innenlicht hinter dem Tresen — leuchtet an die Wand
+  glow(ctx, '#ffb15e', 46);
+  ctx.fillStyle = '#ffcf94';
+  ctx.globalAlpha = 0.6;
+  polyPath(ctx, [
+    project(plane, yTop + 40, dN), project(plane, yTop + 40, dF),
+    project(plane, CAM_H - 40, dF), project(plane, CAM_H - 40, dN),
+  ]);
+  ctx.fill();
+  noGlow(ctx);
+  ctx.globalAlpha = 1;
+
+  // Tresen davor
+  wallBox(ctx, sgn, dN, dF, CAM_H - 190, CAM_H, out, '#0a0806', '#12100c');
+
+  // Dach
+  ctx.fillStyle = '#080706';
+  polyPath(ctx, [
+    project(plane, yTop, dN), project(plane, yTop, dF),
+    project(inner, yTop + 30, dF), project(inner, yTop + 30, dN),
+  ]);
+  ctx.fill();
+
+  // Leuchtstreifen unter dem Dach
+  glow(ctx, col, 26);
+  ctx.fillStyle = col;
+  ctx.globalAlpha = 0.85;
+  polyPath(ctx, [
+    project(inner, yTop + 30, dN), project(inner, yTop + 30, dF),
+    project(inner, yTop + 48, dF), project(inner, yTop + 48, dN),
+  ]);
+  ctx.fill();
+  noGlow(ctx);
+  ctx.globalAlpha = 1;
+}
+
+/** Stapel Kisten am Wandfuß. */
+function crates(ctx, rng, sgn, d) {
+  const n = ri(rng, 2, 5);
+  let y = CAM_H;
+  for (let i = 0; i < n; i++) {
+    const s = rr(rng, 55, 100);
+    const dN = d + rr(rng, -0.04, 0.04);
+    wallBox(ctx, sgn, dN, dN + s / 620, y - s, y, rr(rng, 60, 110), '#0b0906', '#151109');
+    // Kante oben, damit die Kisten nicht als Schatten verschwinden
+    ctx.strokeStyle = 'rgba(190,160,120,0.13)';
+    ctx.lineWidth = Math.max(0.6, 2 / dN);
+    const plane = sgn * STREET_HALF;
+    ctx.beginPath();
+    const [ax, ay] = project(plane, y - s, dN);
+    const [bx, by] = project(plane - sgn * 90, y - s, dN);
+    ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+    ctx.stroke();
+    y -= s * rr(rng, 0.8, 1.0);
+  }
+}
+
+/** Dunkler Hauseingang mit warmem Licht dahinter. */
+function doorway(ctx, rng, sgn, d, col) {
+  const plane = sgn * STREET_HALF;
+  const w = 0.10;
+  const yTop = rr(rng, 130, 210);
+  ctx.fillStyle = '#030201';
+  polyPath(ctx, [
+    project(plane, yTop, d), project(plane, yTop, d + w),
+    project(plane, CAM_H, d + w), project(plane, CAM_H, d),
+  ]);
+  ctx.fill();
+  // Lichtspalt
+  glow(ctx, col, 30);
+  ctx.fillStyle = col;
+  ctx.globalAlpha = rr(rng, 0.4, 0.85);
+  polyPath(ctx, [
+    project(plane, yTop + 20, d + w * 0.62), project(plane, yTop + 20, d + w * 0.86),
+    project(plane, CAM_H - 10, d + w * 0.86), project(plane, CAM_H - 10, d + w * 0.62),
+  ]);
+  ctx.fill();
+  noGlow(ctx);
+  ctx.globalAlpha = 1;
+}
+
+/** Geländer entlang des Bordsteins. */
+function railing(ctx, sgn, dN, dF) {
+  const plane = sgn * STREET_HALF - sgn * 40;
+  const yTop = CAM_H - 130;
+  ctx.strokeStyle = 'rgba(150,140,120,0.35)';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  let [x, y] = project(plane, yTop, dN);
+  ctx.moveTo(x, y);
+  [x, y] = project(plane, yTop, dF);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  for (let d = dN; d <= dF; d += 0.055) {
+    const [px, py] = project(plane, yTop, d);
+    const [qx, qy] = project(plane, CAM_H, d);
+    ctx.moveTo(px, py); ctx.lineTo(qx, qy);
+  }
+  ctx.stroke();
+}
+
+/** Farbflecken auf dem Mauerwerk. */
+function graffiti(ctx, rng, sgn, d) {
+  const plane = sgn * STREET_HALF;
+  const col = pick(rng, ['#c8402e', '#3f7fd0', '#d8c24a', '#5fb04a', '#b04ad0']);
+  ctx.globalAlpha = rr(rng, 0.10, 0.26);
+  ctx.fillStyle = col;
+  const n = ri(rng, 3, 7);
+  for (let i = 0; i < n; i++) {
+    const y = rr(rng, 120, CAM_H - 30);
+    const dd = d + rr(rng, 0, 0.14);
+    const [x0, y0] = project(plane, y, dd);
+    const [x1, y1] = project(plane, y + rr(rng, 30, 90), dd + rr(rng, 0.02, 0.09));
+    ctx.beginPath();
+    ctx.ellipse((x0 + x1) / 2, (y0 + y1) / 2, Math.abs(x1 - x0) * 0.7 + 4,
+      Math.abs(y1 - y0) * 0.5 + 3, rr(rng, -0.4, 0.4), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/** Satellitenschüssel an der Fassade. */
+function dish(ctx, rng, sgn, d, y) {
+  const plane = sgn * STREET_HALF;
+  const [x0, y0] = project(plane, y, d);
+  const r = Math.max(4, 90 / d);
+  ctx.fillStyle = '#0a0a09';
+  ctx.beginPath();
+  ctx.ellipse(x0 - sgn * r * 0.6, y0, r * 0.45, r, 0.2 * sgn, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(160,150,130,0.20)';
+  ctx.lineWidth = Math.max(0.7, 2.4 / d);
+  ctx.stroke();
+}
+
+/** Natriumdampf-Laterne am Ausleger. */
+function streetLamp(ctx, sgn, d, col) {
+  const plane = sgn * STREET_HALF;
+  const y = -60;
+  const out = 230;
+  const [ax, ay] = project(plane, y, d);
+  const [bx, by] = project(plane - sgn * out, y + 40, d);
+  ctx.strokeStyle = '#0a0806';
+  ctx.lineWidth = Math.max(1.5, 9 / d);
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.quadraticCurveTo(ax - sgn * out * 0.7, ay - 40 / d, bx, by);
+  ctx.stroke();
+  // Schirm und Leuchtmittel
+  const r = Math.max(2.5, 26 / d);
+  ctx.fillStyle = '#0a0806';
+  ctx.beginPath();
+  ctx.ellipse(bx, by, r * 1.5, r * 0.7, 0, Math.PI, Math.PI * 2);
+  ctx.fill();
+  glow(ctx, col, Math.max(20, 150 / d));
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.ellipse(bx, by + r * 0.3, r, r * 0.75, 0, 0, Math.PI * 2);
+  ctx.fill();
+  noGlow(ctx);
+  ctx.fillStyle = '#fff3dd';
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.ellipse(bx, by + r * 0.3, r * 0.45, r * 0.34, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  return { x: bx, y: by, r: Math.max(130, 430 / d), color: col, alpha: 0.22 };
 }
 
 /**
@@ -426,6 +676,8 @@ function plateStreet(rng) {
   const { canvas, ctx, w } = makeCanvas();
   /** Alle Leuchtquellen; ihr Schein wird ganz am Ende auf die Wände gelegt. */
   const lights = [];
+  /** Laternen — die Bodenplatte braucht sie für die Lichtpfützen. */
+  const lamps = [];
 
   /** Eine Straßenseite. */
   function side(sgn) {
@@ -442,10 +694,11 @@ function plateStreet(rng) {
 
     for (const b of blocks) {
       const topY = -rr(rng, 620, 2100);
-      // Entfernte Baukörper sind durch Dunst heller.
+      // Entfernte Baukörper sind durch Dunst heller. Warmer Grundton:
+      // Olivbraun und Rost, nicht Marineblau.
       const t = Math.min(1, (b.d0 - NEAR_D) / (FAR_D - NEAR_D));
-      const shade = Math.round(6 + t * 22);
-      const body = `rgb(${shade},${shade + 4},${Math.round(shade * 1.7 + 6)})`;
+      const shade = 6 + t * 20;
+      const body = `rgb(${Math.round(shade * 1.55 + 5)},${Math.round(shade * 1.22 + 4)},${Math.round(shade)})`;
 
       ctx.fillStyle = body;
       polyPath(ctx, [
@@ -548,7 +801,50 @@ function plateStreet(rng) {
       ctx.globalAlpha = 1;
 
       const [lx, ly] = project(plane, y0 + 45, dd + 0.11);
-      lights.push({ x: lx, y: ly, r: Math.max(120, 620 / dd), color: col, alpha: 0.30 });
+      lights.push({ x: lx, y: ly, r: Math.max(90, 340 / dd), color: col, alpha: 0.16 });
+    }
+
+    /* --- Straßenniveau: hier lebt die Gasse --------------------------- */
+    // Von hinten nach vorn, damit Nahes das Ferne verdeckt.
+    const props = [];
+    for (let d = 0.72; d < FAR_D - 0.6; d += rr(rng, 0.26, 0.52)) props.push(d);
+    props.reverse();
+
+    for (const d of props) {
+      const kind = rng();
+      const col = pick(rng, PAL.neon);
+
+      if (kind < 0.30) {
+        // Ladenfront: Markise über beleuchtetem Eingang
+        awning(ctx, rng, sgn, d, d + rr(rng, 0.18, 0.34), rr(rng, 40, 150), col);
+        doorway(ctx, rng, sgn, d + 0.04, chance(rng, 0.65) ? '#ffb15e' : col);
+        if (chance(rng, 0.5)) crates(ctx, rng, sgn, d + rr(rng, 0.16, 0.30));
+      } else if (kind < 0.52) {
+        stall(ctx, rng, sgn, d, d + rr(rng, 0.16, 0.30), col);
+        const [sx, sy] = project(sgn * STREET_HALF, 260, d + 0.1);
+        lights.push({ x: sx, y: sy, r: Math.max(110, 380 / d), color: '#ffb15e', alpha: 0.18 });
+      } else if (kind < 0.68) {
+        crates(ctx, rng, sgn, d);
+        if (chance(rng, 0.6)) graffiti(ctx, rng, sgn, d);
+      } else if (kind < 0.80) {
+        doorway(ctx, rng, sgn, d, chance(rng, 0.5) ? '#ffb15e' : col);
+        graffiti(ctx, rng, sgn, d + 0.12);
+      } else if (kind < 0.90) {
+        railing(ctx, sgn, d, d + rr(rng, 0.3, 0.7));
+        if (chance(rng, 0.5)) graffiti(ctx, rng, sgn, d);
+      } else {
+        graffiti(ctx, rng, sgn, d);
+      }
+
+      // Aufbauten in mittlerer Höhe
+      if (chance(rng, 0.3) && d < 3.4) dish(ctx, rng, sgn, d + rr(rng, 0, 0.2), rr(rng, -380, -60));
+    }
+
+    // Natriumlaternen — der warme Gegenpol zum kalten Neon.
+    for (let d = 1.05; d < FAR_D - 0.8; d += rr(rng, 1.1, 1.8)) {
+      const L = streetLamp(ctx, sgn, d, PAL.sodium);
+      lights.push({ ...L, alpha: 0.16 });
+      lamps.push({ sgn, d, color: PAL.sodium });
     }
   }
 
@@ -604,7 +900,7 @@ function plateStreet(rng) {
   figure(ctx, rng, 340, 2.40, { umbrella: false, rim: '#ff8a4a', rimSide: -1, height: 320 });
 
   grime(ctx, rng, PLATE_W, PLATE_H, 0.05);
-  return { canvas, ctx };
+  return { canvas, ctx, lamps };
 }
 
 /* ========================================================================= */
@@ -622,19 +918,41 @@ function streetPath(ctx) {
   ]);
 }
 
-function plateGround(rng) {
+function plateGround(rng, lamps = []) {
   const { canvas, ctx } = makeCanvas();
   ctx.save();
   streetPath(ctx);
   ctx.clip();
 
-  // Asphalt: dunkel, zum Horizont hin durch Dunst leicht aufgehellt.
+  // Asphalt: dunkel und leicht warm, zum Horizont hin durch Dunst aufgehellt.
   const g = ctx.createLinearGradient(0, VP_Y, 0, PLATE_H);
-  g.addColorStop(0, '#141a26');
-  g.addColorStop(0.25, '#0c111b');
-  g.addColorStop(1, '#070a11');
+  g.addColorStop(0, '#1c1a1c');
+  g.addColorStop(0.25, '#121011');
+  g.addColorStop(1, '#0b0909');
   ctx.fillStyle = g;
   ctx.fillRect(0, VP_Y - 10, PLATE_W, PLATE_H - VP_Y + 10);
+
+  // Lichtpfützen unter den Natriumlaternen. Warme Inseln auf dem Asphalt
+  // sind der Gegenpol zum kalten Neon — ohne sie kippt das Bild ins Blaue.
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  for (const L of lamps) {
+    const [cx, cy] = project(L.sgn * (STREET_HALF - 230), CAM_H, L.d);
+    const rw = 620 / L.d;
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, rw);
+    grd.addColorStop(0, 'rgba(255,163,71,0.30)');
+    grd.addColorStop(0.4, 'rgba(200,120,55,0.09)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, 0.38);
+    ctx.beginPath();
+    ctx.arc(0, 0, rw, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
 
   // Fahrbahnstruktur: Platten- und Rinnenlinien laufen zum Fluchtpunkt.
   ctx.strokeStyle = 'rgba(150,175,210,0.055)';
@@ -879,7 +1197,7 @@ export function buildAlley(seed = 7) {
   const sky = plateSky(rng);
   const far = plateFar(rng);
   const street = plateStreet(rng);
-  const ground = plateGround(rng);
+  const ground = plateGround(rng, street.lamps);
   const wet = plateWet(rng);
   const near = plateNear(rng);
 

@@ -54,12 +54,39 @@ export function noGlow(ctx) {
 
 /* ------------------------------ Paletten --------------------------------- */
 
+/**
+ * Palette.
+ *
+ * Blade Runner ist warm: Natriumdampflicht, Olivbraun, Rost — Neon ist der
+ * Akzent, nicht der Grundton. Eine Gasse durchgehend in Cyan und Magenta ist
+ * Synthwave und trifft die Vorlage nicht.
+ *
+ * Deshalb sind die Neonfarben hier gewichtet: Bernstein, Rot und Grün kommen
+ * häufig vor, Cyan und Magenta selten.
+ */
 export const PAL = {
-  // Fensterlicht — überwiegend gedämpft, wenige sehr helle.
-  windowWarm: ['#ffb15e', '#ffcf94', '#e8913f', '#c9702c', '#ffdcae'],
-  windowCool: ['#7fe8ff', '#b6f2ff', '#4fc6e8', '#8fd8f0', '#d9f7ff'],
-  windowRare: ['#ff4d8d', '#ff2d6f', '#b57bff', '#66ffc2'],
-  neon: ['#2ee6ff', '#ff2d6f', '#f0a340', '#b57bff', '#66ffc2', '#ff5a3c'],
+  // Fensterlicht — überwiegend Glühlampe, wenige kalte Leuchtstoffröhren.
+  windowWarm: ['#ffb15e', '#ffcf94', '#e8913f', '#c9702c', '#ffdcae', '#f7a54e'],
+  windowCool: ['#9fd8e8', '#c2e6f0', '#6fb0c4', '#a8ccd8'],
+  windowRare: ['#ff6a3c', '#ff4d3d', '#8fe07a', '#ff2d6f'],
+
+  // Wandfarben: Olivbraun und Rost statt Marineblau.
+  wallNear: ['#0d0b09', '#100c0a', '#0b0a0b'],
+  wallMid: ['#1a1512', '#1d1611', '#161513'],
+  wallFar: ['#2a2320', '#2d2621', '#262428'],
+
+  /** Neon nach Häufigkeit — vorne die warmen, hinten die seltenen. */
+  neon: [
+    '#ff9a2e', '#ffb15e', '#f0a340',          // Bernstein, häufig
+    '#ff4d3d', '#e8342a',                      // Rot
+    '#8fe07a', '#4fd06a',                      // Grün
+    '#ffe27a',                                 // Gelb
+    '#2ee6ff', '#ff2d6f',                      // Cyan/Magenta — Akzent
+  ],
+  /** Nur die seltenen, für gezielte Farbtupfer. */
+  neonAccent: ['#2ee6ff', '#ff2d6f', '#b57bff'],
+  /** Natriumdampf-Straßenlaterne. */
+  sodium: '#ffa347',
 };
 
 /* ---------------------------- Grundformen -------------------------------- */
@@ -468,8 +495,12 @@ export function grime(ctx, rng, w, h, amount = 0.05) {
  */
 export function wallSpill(ctx, x, y, r, color, alpha = 0.5) {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  // Steiler Abfall. Ein breiter Verlauf summiert sich über viele Quellen zu
+  // einem gleichmäßigen Wisch über die ganze Wand — dann ist der Kontrast
+  // weg und das Bild sieht aus wie durch einen Farbfilter fotografiert.
   g.addColorStop(0, color);
-  g.addColorStop(0.45, color + '66');
+  g.addColorStop(0.18, color + '77');
+  g.addColorStop(0.45, color + '22');
   g.addColorStop(1, 'transparent');
   ctx.save();
   ctx.globalCompositeOperation = 'source-atop';
