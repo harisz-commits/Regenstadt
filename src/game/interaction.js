@@ -14,6 +14,7 @@
  */
 
 import { isTouch } from '../ui/viewport.js';
+import { createTalk } from './talk.js';
 
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
@@ -246,6 +247,22 @@ export function createInteraction(renderer, host) {
   /* --- Akte -------------------------------------------------------------- */
   const notes = [];
   const seen = new Set();
+  let currentScene = null;
+
+  /** Eine Spur in die Akte legen. Doppelte werden verworfen. */
+  function addNote(label, text) {
+    if (notes.some((n) => n.label === label)) return;
+    notes.push({ label, text });
+    updateAkteBtn();
+  }
+
+  // Das Verhoer traegt seine eigenen Spuren ein und liest die Akte, um
+  // Vorhalten anbieten zu koennen.
+  const talk = createTalk({
+    getNotes: () => notes,
+    addNote,
+    getPlace: () => currentScene?.name || 'Kanalgasse',
+  });
 
   function renderAkte() {
     akte.innerHTML = '<h2>Ermittlungsakte</h2>';
@@ -322,6 +339,14 @@ export function createInteraction(renderer, host) {
       }, 14);
     }
 
+    if (talk.has(spot.id)) {
+      const t = document.createElement('button');
+      t.className = 'go';
+      t.textContent = 'Ansprechen';
+      t.onclick = () => { close(); talk.open(spot.id); };
+      pAct.appendChild(t);
+    }
+
     if (spot.goto) {
       const g = document.createElement('button');
       g.className = 'go';
@@ -336,8 +361,7 @@ export function createInteraction(renderer, host) {
       b.textContent = 'In die Akte';
       b.onclick = () => {
         seen.add(spot.id);
-        notes.push({ label: spot.label, text: full });
-        updateAkteBtn();
+        addNote(spot.label, full);
         b.remove();
       };
       pAct.appendChild(b);
@@ -437,7 +461,11 @@ export function createInteraction(renderer, host) {
 
   addEventListener('keydown', (e) => {
     if (e.key === 'Tab') { e.preventDefault(); layer.classList.add('reveal'); }
-    if (e.key === 'Escape') { close(); akte.classList.remove('on'); }
+    if (e.key === 'Escape') {
+      if (talk.isOpen()) return;   // das Verhoer schliesst sich selbst
+      close();
+      akte.classList.remove('on');
+    }
   });
   addEventListener('keyup', (e) => {
     if (e.key === 'Tab') layer.classList.remove('reveal');
@@ -446,6 +474,8 @@ export function createInteraction(renderer, host) {
   return {
     /** Ort wechseln: Punkte neu setzen, Kopfzeile beschriften. */
     setScene(scene) {
+      currentScene = scene;
+      talk.close();
       buildSpots(scene.spots);
       where.querySelector('.sector').textContent = scene.sector;
       where.querySelector('.place').textContent = scene.name;

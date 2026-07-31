@@ -46,14 +46,52 @@ Sichtbar ist normalerweise nichts. Beim Ueberfahren geht ein Lichtsaum **im
 Bild** auf (`uHover` im Endbild-Shader), nicht als Marke davor. **TAB** gedrueckt
 halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
+## Verhoere
+
+Figuren antworten nicht aus einem Antwortbaum, sondern von einem Sprachmodell.
+Jede Figur in `src/game/characters.js` hat drei Angaben, die zusammen die
+Anweisung ergeben: **Wesen** (wie sie redet), **Wissen** (was sie preisgeben
+kann) und ein **Geheimnis, das nicht die Tat ist**.
+
+Das Geheimnis ist der eigentliche Kniff. Wer etwas zu verbergen hat, weicht
+aus — auch als Unschuldiger. Damit laesst sich aus Nervositaet allein nicht auf
+den Taeter schliessen, und Verhoere werden mehr als eine Ja/Nein-Abfrage.
+
+Was in der Akte steht, wird der Figur als Kenntnisstand mitgegeben und
+erscheint als **Vorhalten**-Knopf. Erst dann gibt Doran Vey zu, dass die
+Frachtkisten ihm gehoeren. Gibt eine Figur etwas wirklich Neues preis, haengt
+sie eine Zeile `[SPUR] …` an; die wandert in die Akte und steht ab dann selbst
+zum Vorhalten bereit.
+
+Der Schluessel darf **nicht** ins Browser-Buendel — was dort landet, kann jeder
+auslesen, und die Rechnung zahlt der Kontoinhaber. Deshalb kennt der Browser nur
+`/api/chat`. Lokal bildet `vite.config.js` diesen Endpunkt nach (in `dev` **und**
+`preview`), veroeffentlicht laeuft er als Serverless-Funktion:
+
+```
+cp .env.example .env     # GEMINI_API_KEY eintragen
+```
+
+Beim Veroeffentlichen dieselbe Variable in der Umgebung des Anbieters setzen.
+
+Ein Hinweis zur Obergrenze in `api/chat.js`: Bei den Gemini-3-Modellen zaehlen
+die **Denk-Token gegen dasselbe Budget** wie der ausgegebene Text und liegen
+beim Acht- bis Zehnfachen davon (gemessen: 499 gedacht, 72 ausgegeben). Mit
+`maxOutputTokens: 700` brachen Antworten mitten im Wort ab. Die Kuerze der
+Figurenrede regelt die Anweisung, nicht dieses Limit.
+
 ## Handy
 
-Im **Querformat** fuellt das Bild den Schirm. Im **Hochformat** bekommt es ein
-Band im oberen Drittel, darunter liegt die Bedienung: ein 16:9-Bild auf einem
-hochkant gehaltenen Handy ist sonst entweder briefmarkengross (eingepasst) oder
-zeigt nur einen senkrechten Streifen (gefuellt). Den Rest der Gasse erreicht man
-durch **seitliches Ziehen** — das Bild folgt dem Finger 1:1, und die
-Untersuchungspunkte wandern mit.
+Das Bild fuellt in **beiden** Lagen den ganzen Schirm. Ein Band im oberen
+Drittel mit der Bedienung darunter war einmal da und wurde wieder verworfen:
+Der leere untere Teil liess das Bild kaputt aussehen, und von diesem Bild lebt
+die Szene. Im Hochformat sieht man deshalb einen Ausschnitt; den Rest der Gasse
+erreicht man durch **seitliches Ziehen** — das Bild folgt dem Finger 1:1, und
+die Untersuchungspunkte wandern mit.
+
+Was man untersucht, klappt **von unten** in die Tafel auf, statt das Bild zu
+verdecken. Verhoere bekommen als einzige den ganzen Schirm — ein Gespraech
+dauert laenger als ein Blick auf eine Kiste.
 
 Ohne Mauszeiger gibt es kein Ueberfahren, deshalb sind die Punkte auf
 Beruehrgeraeten dauerhaft schwach sichtbar und leuchten beim Antippen auf.
@@ -76,8 +114,11 @@ src/
   shaders/*.glsl        ein Shader pro Pass
   ui/overlay.js         Regler + Frame-Zeit-Kurve (F1)
   ui/viewport.js        Zoom-Sperren und Geraeteraender fuer Mobilgeraete
-  game/hotspots.js      Untersuchungspunkte je Ort, in Bildkoordinaten
+  game/scenes.js        Orte und Untersuchungspunkte, in Bildkoordinaten
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
+  game/characters.js    Figuren: Wesen, Wissen, Geheimnis — und die Anweisung daraus
+  game/talk.js          Verhoer: Vollbildansicht, Vorhalten, Spuren in die Akte
+api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt serverseitig)
 tools/shot.mjs          Standbilder aufnehmen (--backdrop, --reveal, --hotspot, --touch, --pan)
 tools/gen.mjs           Platten von einem Bildmodell uebermalen lassen
 prompts/                Bildanweisungen, getrennt vom Code

@@ -131,7 +131,6 @@ function stageRect() {
 
 function fit(force = false) {
   const r = stageRect();
-  document.body.classList.toggle('portrait', r.w < r.h);
   stage.style.left = `${r.x}px`;
   stage.style.top = `${r.y}px`;
   stage.style.width = `${r.w}px`;

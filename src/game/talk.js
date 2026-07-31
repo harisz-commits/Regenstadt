@@ -1,0 +1,273 @@
+/**
+ * Verhör.
+ *
+ * Eine eigene Vollbildansicht, kein Aufsatz in der Untersuchungstafel: Ein
+ * Gespräch dauert länger als ein Blick auf eine Kiste und braucht Platz für
+ * Verlauf und Eingabe.
+ *
+ * Die Antworten kommen von einem Sprachmodell über `/api/chat`. Der Schlüssel
+ * liegt dort auf der Serverseite — siehe `api/chat.js`.
+ */
+
+import { CHARACTERS, buildSystem } from './characters.js';
+
+const CSS = `
+#talk {
+  position: fixed; inset: 0; z-index: 32; display: none; flex-direction: column;
+  background: rgba(3,5,9,.97);
+  font: 14px/1.85 ui-monospace, "SFMono-Regular", Menlo, monospace; color: #cfe0f0;
+}
+#talk.on { display: flex; }
+#talk .head {
+  display: flex; gap: 18px; align-items: flex-start; flex-shrink: 0;
+  padding: calc(18px + env(safe-area-inset-top)) clamp(18px, 5vw, 60px) 16px;
+  border-bottom: 1px solid rgba(126,190,230,.16);
+}
+#talk .head img {
+  width: 96px; height: 96px; object-fit: cover; flex-shrink: 0;
+  border: 1px solid rgba(126,190,230,.22); filter: saturate(.9);
+}
+#talk .who { flex: 1; min-width: 0; }
+#talk .who .n { font-size: 17px; letter-spacing: .16em; color: #eaf6ff; }
+#talk .who .r { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,150,90,.8); margin-top: 5px; }
+#talk .who .a { font-size: 12.5px; line-height: 1.7; opacity: .62; margin-top: 9px; max-width: 62ch; }
+#talk .head button { flex-shrink: 0; }
+
+#talk .log { flex: 1; overflow-y: auto; padding: 22px clamp(18px, 5vw, 60px); }
+#talk .turn { margin-bottom: 24px; max-width: 74ch; }
+#talk .q { font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: #7fb4d8; margin-bottom: 8px; }
+/* Bewusst auf .turn eingeschraenkt: der Steckbrief oben benutzt dieselbe
+   Klasse und bekam sonst den orangen Balken der Antworten ab. */
+#talk .turn .a { border-left: 2px solid rgba(255,150,90,.45); padding-left: 14px; white-space: pre-wrap; }
+#talk .turn .a.err { border-color: rgba(255,90,90,.6); color: #ffb0b0; }
+#talk .opener { opacity: .55; max-width: 66ch; font-style: italic; }
+#talk .thinking { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,190,116,.85); }
+
+#talk .ask {
+  flex-shrink: 0; border-top: 1px solid rgba(126,190,230,.16);
+  padding: 16px clamp(18px, 5vw, 60px) calc(18px + env(safe-area-inset-bottom));
+  display: grid; gap: 9px;
+}
+#talk .ask .sug { display: grid; gap: 8px; }
+#talk .ask .row { display: flex; gap: 9px; }
+#talk .ask input {
+  flex: 1; min-width: 0; background: rgba(255,255,255,.045);
+  border: 1px solid rgba(159,180,204,.28); color: #dbe8f5;
+  padding: 12px 13px; font-family: inherit;
+}
+#talk .ask input:focus { outline: none; border-color: rgba(126,190,230,.7); }
+#talk button {
+  font: inherit; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  padding: 11px 16px; cursor: pointer; color: #9ec8e4; text-align: left;
+  background: rgba(126,190,230,.07); border: 1px solid rgba(126,190,230,.3);
+  transition: background .15s, border-color .15s;
+  /* Notizen aus dem Verhoer sind unterschiedlich lang. Lieber sauber
+     abschneiden als den Knopf sprengen oder mitten im Wort enden. */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#talk button:hover:not(:disabled) { background: rgba(126,190,230,.16); border-color: rgba(126,190,230,.6); }
+#talk button:disabled { opacity: .35; cursor: wait; }
+#talk button.hold { color: #ffbe74; border-color: rgba(255,190,116,.38); background: rgba(255,190,116,.07); }
+
+@media (max-width: 820px) {
+  #talk { font-size: 15px; }
+  #talk .head { gap: 13px; padding-left: 16px; padding-right: 16px; }
+  #talk .head img { width: 68px; height: 68px; }
+  #talk .who .a { display: none; }
+  #talk .log { padding: 18px 16px; }
+  #talk .ask { padding-left: 16px; padding-right: 16px; }
+}
+`;
+
+/**
+ * @param {{ getNotes: () => {label:string,text:string}[],
+ *           addNote: (label: string, text: string) => void,
+ *           getPlace: () => string }} host
+ */
+export function createTalk(host) {
+  const style = document.createElement('style');
+  style.textContent = CSS;
+  document.head.appendChild(style);
+
+  const el = document.createElement('div');
+  el.id = 'talk';
+  el.innerHTML = `
+    <div class="head">
+      <img alt="" />
+      <div class="who"><div class="n"></div><div class="r"></div><div class="a"></div></div>
+      <button class="back" type="button">Zurück</button>
+    </div>
+    <div class="log"></div>
+    <div class="ask"><div class="sug"></div><div class="row">
+      <input type="text" placeholder="Eigene Frage…" autocomplete="off" />
+      <button class="send" type="button">Fragen</button>
+    </div></div>`;
+  document.body.appendChild(el);
+
+  const img = el.querySelector('img');
+  const nEl = el.querySelector('.who .n');
+  const rEl = el.querySelector('.who .r');
+  const aEl = el.querySelector('.who .a');
+  const log = el.querySelector('.log');
+  const sug = el.querySelector('.sug');
+  const input = el.querySelector('input');
+  const sendBtn = el.querySelector('.send');
+  const backBtn = el.querySelector('.back');
+
+  const base = import.meta.env.BASE_URL || '/';
+
+  /** Kürzt auf Wortgrenze — abgeschnittene Wörter sehen nach Fehler aus. */
+  function kurz(s, max) {
+    if (s.length <= max) return s;
+    const cut = s.slice(0, max);
+    const sp = cut.lastIndexOf(' ');
+    return (sp > max * 0.5 ? cut.slice(0, sp) : cut).replace(/[,;:.\s]+$/, '') + '…';
+  }
+
+  let char = null;
+  /** @type {{role:'user'|'model', text:string}[]} */
+  let history = [];
+  let busy = false;
+
+  function setBusy(v) {
+    busy = v;
+    sendBtn.disabled = v;
+    input.disabled = v;
+    for (const b of sug.querySelectorAll('button')) b.disabled = v;
+  }
+
+  function addTurn(question, answer, isError = false) {
+    const d = document.createElement('div');
+    d.className = 'turn';
+    d.innerHTML = '<div class="q"></div><div class="a"></div>';
+    d.querySelector('.q').textContent = 'Du · ' + question;
+    const a = d.querySelector('.a');
+    a.textContent = answer;
+    if (isError) a.classList.add('err');
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+    return a;
+  }
+
+  /** Vorschläge neu bauen: drei feste plus alles, was in der Akte steht. */
+  function buildSuggestions() {
+    sug.innerHTML = '';
+    const fixed = [
+      'Was machen Sie hier draußen im Regen?',
+      'Wer geht hier sonst noch durch?',
+      'Sie verschweigen mir etwas. Was?',
+    ];
+    for (const q of fixed) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = q;
+      b.onclick = () => ask(q);
+      sug.appendChild(b);
+    }
+    for (const n of host.getNotes().slice(0, 4)) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hold';
+      b.textContent = `Vorhalten: ${n.label}`;
+      b.onclick = () => ask(`Ich halte Ihnen etwas vor — ${n.label}: ${n.text}`);
+      sug.appendChild(b);
+    }
+  }
+
+  async function ask(question) {
+    if (busy || !char) return;
+    setBusy(true);
+    const slot = addTurn(question, '');
+    slot.innerHTML = '<span class="thinking">…' + char.name + ' überlegt</span>';
+
+    history.push({ role: 'user', text: question });
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: buildSystem(char, host.getNotes(), host.getPlace()),
+          messages: history,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+      const raw = String(data.text || '');
+      // Die Figur markiert eine neue Spur mit [SPUR] in der letzten Zeile.
+      const m = raw.match(/\[SPUR\]\s*(.+)\s*$/im);
+      const clean = raw.replace(/\[SPUR\].*$/ims, '').trim();
+
+      slot.textContent = clean;
+      history.push({ role: 'model', text: clean });
+
+      if (m) {
+        const spur = m[1].trim();
+        // Die Spur steht in der dritten Person und beginnt oft mit dem Namen
+        // der Figur — dann nicht noch einmal davorsetzen.
+        const doppelt = spur.toLowerCase().startsWith(char.name.toLowerCase());
+        const label = doppelt ? kurz(spur, 46) : `${char.name}: ${kurz(spur, 38)}`;
+        host.addNote(label, spur);
+        buildSuggestions();
+      }
+    } catch (e) {
+      slot.classList.add('err');
+      slot.textContent =
+        `Keine Antwort — ${String(e.message || e)}.\n`
+        + 'Ohne Verbindung zum Archiv redet hier niemand.';
+      // Fehlgeschlagene Frage nicht im Verlauf lassen, sonst zieht sie sich
+      // durch jede weitere Anfrage.
+      history.pop();
+    }
+    setBusy(false);
+    input.value = '';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  sendBtn.onclick = () => { const q = input.value.trim(); if (q) ask(q); };
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { const q = input.value.trim(); if (q) ask(q); }
+  });
+  backBtn.onclick = close;
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && el.classList.contains('on')) close();
+  });
+
+  function close() {
+    el.classList.remove('on');
+    input.blur();
+  }
+
+  return {
+    /** true, wenn es für diesen Punkt überhaupt eine Figur gibt. */
+    has: (spotId) => Boolean(CHARACTERS[spotId]),
+
+    open(spotId) {
+      const c = CHARACTERS[spotId];
+      if (!c) return;
+      // Verlauf nur bei Figurenwechsel zurücksetzen — wer zurückkommt, soll
+      // das Gespräch fortsetzen können.
+      if (char?.id !== c.id) {
+        char = c;
+        history = [];
+        log.innerHTML = '';
+        const o = document.createElement('div');
+        o.className = 'opener';
+        o.textContent = c.opener;
+        log.appendChild(o);
+      }
+      img.src = base + c.portrait;
+      img.alt = c.name;
+      nEl.textContent = c.name;
+      rEl.textContent = c.role;
+      aEl.textContent = c.appearance;
+      buildSuggestions();
+      setBusy(false);
+      el.classList.add('on');
+    },
+
+    close,
+    isOpen: () => el.classList.contains('on'),
+  };
+}
