@@ -122,3 +122,37 @@ eine andere Gasse. Mit gemalten Platten liegt die Optik fest, und variabel
 bleibt der Fall — genau das Modell des Blade-Runner-Spiels von 1997. Der
 prozedurale Weg bleibt als Rückfall erhalten: fehlt die Plattendatei, zeichnet
 das Spiel wie zuvor.
+
+## Nahaufnahmen statt nur Text
+
+Ein Untersuchungspunkt zeigte anfangs nur einen Satz. Das ist zu wenig — beim
+Anklicken soll etwas passieren. Wichtige Punkte haben jetzt eine **Nahaufnahme**
+(`detail` in `scenes.js`), erzeugt aus demselben Hintergrundbild mit der
+Anweisung „dieselbe Kamera, nur viel näher". Dadurch stimmen Licht, Wetter,
+Farben und Umgebung mit der Weitsicht überein; die Nahsicht liest sich als
+derselbe Ort und nicht als fremdes Bild.
+
+## Kreis heißt ansehen, Pfeil heißt hingehen
+
+Ausgänge bekommen einen Pfeil statt eines Kreises und sind dauerhaft sichtbar.
+Wohin man gehen kann, soll man sehen, ohne danach zu suchen — und die beiden
+Bedeutungen dürfen nicht gleich aussehen.
+
+## Kein Übergang auf der Deckkraft der Marken
+
+Die Hotspot-Schaltflächen bekommen jeden Frame neue Inline-Maße. Dabei startete
+der CSS-Übergang auf `opacity` ständig neu und blieb bei `currentTime: 0`
+hängen — die Marke wurde nie sichtbar, obwohl der Selektor nachweislich griff
+und die Regel die höhere Spezifität hatte. Ein frisch eingefügtes Element mit
+derselben Klasse rechnete korrekt 0,8, das bestehende blieb auf 0.
+
+Der Übergang ist entfernt. Das ist eine Umgehung, keine vollständige
+Ursachenklärung: warum genau der Übergang neu startet, ist nicht abschließend
+geklärt. Für eine rein kosmetische Einblendung war weiteres Graben den Aufwand
+nicht wert.
+
+## Was im Plattenbetrieb abgeschaltet ist
+
+Der Dampf-Pass ist aus, sobald ein generiertes Bild geladen ist. Das Bild
+bringt gemalten Dampf an den Schloten mit; ein zweiter, animierter Dampf
+darüber liest sich als ständiges Aufsteigen und lenkt vom Regen ab.

@@ -1,0 +1,16 @@
+This is a wide shot of a rainy neo-noir alley. Produce a CLOSE-UP of one element from this exact scene, as if the same camera moved much nearer.
+
+SUBJECT: the person in the long coat holding a black umbrella, standing on the left side of the alley in front of the market stalls. Seen from behind and slightly to the side. We never see the face — the hood and umbrella keep it hidden.
+
+CONTINUITY — these must match the wide shot exactly:
+- Same lighting: warm sodium lamp from the upper left, cold neon spill from the signs behind, deep shadow elsewhere.
+- Same palette: rust, olive-brown, wet concrete, amber highlights, restrained neon accents.
+- Same weather: heavy rain, wet fabric, water running off the umbrella rim, damp haze.
+- Same coat: long, heavy, soaked to the shoulders, rain-slick.
+- The alley behind stays recognisably the same place, thrown out of focus.
+
+FRAMING: medium close-up, the figure occupying roughly the middle third of the frame, standing. Shallow depth of field, the background soft.
+
+LOOK: photorealistic cinematic film still, anamorphic 35mm, Blade Runner 2049. Fine film grain. Highlights roll off, never clip.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters anywhere. No visible face. Not an illustration, not anime, no painterly brushwork.

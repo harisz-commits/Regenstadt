@@ -76,6 +76,13 @@ if (arg('backdrop', '0') === '1') {
   await page.evaluate(() => window.__regenstadt?.setBackdropOnly(true));
 }
 
+// Direkt an einen anderen Ort springen, ohne den Pfeil anzuklicken.
+const loc = arg('ort', null);
+if (loc !== null) {
+  await page.evaluate((id) => window.__regenstadt?.goTo(id), loc);
+  await page.waitForTimeout(1400);
+}
+
 const seed = arg('seed', null);
 if (seed !== null) {
   await page.evaluate((s) => window.__regenstadt?.reseed(s), parseInt(seed, 10));

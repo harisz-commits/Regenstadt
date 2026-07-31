@@ -42,7 +42,7 @@ float band(vec2 uv, float sx, float sy, float speed, float thin,
 
   // Waagrechte Lage in der Zelle
   float dx = abs(f.x - (0.2 + h.y * 0.6));
-  float streak = smoothstep(thin, thin * 0.15, dx);
+  float streak = smoothstep(thin, thin * 0.05, dx);
 
   // Senkrechter Verlauf: heller Kopf, langer ausfransender Schweif
   float dy = f.y;
@@ -88,13 +88,13 @@ void main() {
   // Strichen — Regen liest man an einzelnen Tropfen, nicht an Menge.
   //
   // Fern: viele feine, kurze Striche
-  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 40.0, 1.05, 0.11, 0.085, 0.72, t, slant);
+  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 44.0, 1.05, 0.055, 0.038, 0.70, t, slant);
   // Mitte: die tragende Ebene, klare Striche
-  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 95.0, 20.0, 1.55, 0.10, 0.075, 0.80, t, slant);
+  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 22.0, 1.60, 0.055, 0.042, 0.78, t, slant);
   // Nah: wenige, dicke, unscharfe Tropfen
-  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 34.0, 9.0, 2.35, 0.30, 0.038, 0.92, t, slant);
+  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 10.0, 2.40, 0.22, 0.022, 0.90, t, slant);
 
-  float rain = far * 0.30 + mid * 0.55 + near * 0.30;
+  float rain = far * 0.34 + mid * 0.80 + near * 0.34;
 
   // Beleuchtung durch die Umgebung, grob abgetastet.
   vec3 around = scene;
@@ -113,7 +113,7 @@ void main() {
 
   // Aufschläge auf der nassen Fahrbahn
   float sp = splash(suv, t);
-  col += vec3(0.78, 0.87, 1.0) * sp * (0.35 + amb * 1.1) * uAmount * 0.85;
+  col += vec3(0.78, 0.87, 1.0) * sp * (0.35 + amb * 1.1) * uAmount * 0.42;
 
   fragColor = vec4(col, 1.0);
 }

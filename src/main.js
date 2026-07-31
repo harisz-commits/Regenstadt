@@ -3,7 +3,7 @@ import { params, platePreset } from './render/params.js';
 import { buildAlley } from './scene/alley.js';
 import { createOverlay } from './ui/overlay.js';
 import { createInteraction } from './game/interaction.js';
-import { HOTSPOTS } from './game/hotspots.js';
+import { SCENES } from './game/scenes.js';
 import { guardViewport, isTouch } from './ui/viewport.js';
 
 // Zoom-Sperren und Geraeteraender setzen, bevor irgendetwas gezeichnet wird.
@@ -31,6 +31,7 @@ try {
 let seed = 7;
 let backdropOnly = false;
 let interaction = null;
+let current = null;
 
 // Auf Mobilgeraeten kleiner rendern und den Mausblick abschalten — es gibt
 // keinen Zeiger, dem die Kamera folgen koennte.
@@ -51,22 +52,28 @@ function loadImage(url) {
 }
 
 /**
- * Baut die Szene. Liegt unter `public/plates/<id>-backdrop.png` ein fertiges
- * Bild, ersetzt es den gesamten gezeichneten Ebenenstapel.
+ * Einen Ort laden.
  *
- * Boden, Nässemaske, Spiegelung, Regen und Luft bleiben davon unberührt — sie
- * arbeiten weiter mit derselben Projektion. Genau dafür wird die Vorlage
- * ohne Boden und ohne Regen exportiert: der Bodenpass braucht dieses Bild als
- * Spiegelquelle, die nasse Straße darf darin noch nicht enthalten sein.
+ * `buildAlley()` liefert weiterhin Boden- und Naessemaske — die braucht der
+ * Bodenpass, um die Pfuetzen zu kraeuseln, und sie gelten fuer alle Ansichten
+ * derselben Gasse, weil die Projektion dieselbe ist.
+ *
+ * Liegt unter `public/plates/<backdrop>.jpg` ein fertiges Bild, ersetzt es den
+ * gezeichneten Ebenenstapel. Fehlt es, zeichnet das Spiel prozedural weiter.
  */
-async function loadScene() {
+async function loadLocation(id) {
+  const def = SCENES[id];
+  if (!def) throw new Error(`Unbekannter Ort: ${id}`);
   const t0 = performance.now();
+
   const scene = buildAlley(seed);
+  scene.id = def.id;
+  scene.name = def.name;
+  scene.sector = def.sector;
 
   const base = import.meta.env.BASE_URL || '/';
-  // Bildmodelle liefern je nach Größe JPEG oder PNG — beide Endungen prüfen.
-  let img = await loadImage(`${base}plates/${scene.id}-backdrop.jpg`);
-  if (!img) img = await loadImage(`${base}plates/${scene.id}-backdrop.png`);
+  let img = await loadImage(`${base}plates/${def.backdrop}.jpg`);
+  if (!img) img = await loadImage(`${base}plates/${def.backdrop}.png`);
   if (img) {
     // WebGL nimmt ein Bild genauso entgegen wie ein Canvas — deshalb ist der
     // Tausch hier eine Zuweisung und kein Umbau.
@@ -76,52 +83,55 @@ async function loadScene() {
     }];
     scene.foreground = [];
     scene.usingPlate = true;
-    // Ein generiertes Bild ist bereits belichtet — die volle Kette noch einmal
-    // darueber wuerde es auswaschen.
     Object.assign(params, platePreset);
   }
 
   renderer.setScene(scene);
-  if (!interaction) {
-    interaction = createInteraction(renderer, {
-      spots: HOTSPOTS[scene.id] || [],
-      place: scene.name,
-      sector: scene.sector,
-    });
-  }
+  current = def;
+  interaction?.setScene(def);
   console.info(
-    `Szene bereit in ${(performance.now() - t0).toFixed(0)} ms ` +
-    `(Seed ${seed}, ${img ? 'fertige Platte' : 'gezeichnet'})`,
+    `Ort "${def.name}" bereit in ${(performance.now() - t0).toFixed(0)} ms ` +
+    `(${img ? 'fertige Platte' : 'gezeichnet'})`,
   );
+}
+
+/** Ortswechsel mit kurzer Schwarzblende, damit das Bild nicht springt. */
+async function goTo(id) {
+  if (!id || id === current?.id) return;
+  await interaction.fadeOut();
+  await loadLocation(id);
+  interaction.fadeIn();
 }
 
 const overlay = createOverlay(params, {
   onChange: (key) => { if (key === 'renderScale') fit(true); },
-  onReseed: () => { seed = (Math.random() * 1e9) | 0; loadScene(); },
+  onReseed: () => { seed = (Math.random() * 1e9) | 0; loadLocation(current?.id || 'alley'); },
 });
+
+interaction = createInteraction(renderer, { getScene: () => current, goTo });
 
 const stage = document.getElementById('stage');
 
 /**
- * Anzeigebereich festlegen.
+ * Anzeigebereich: immer der ganze Schirm.
  *
- * Im Querformat fuellt das Bild den Schirm. Im Hochformat bekommt es ein Band
- * im oberen Drittel und die Bedienung den Rest: ein 16:9-Bild auf einem
- * hochkant gehaltenen Handy ist entweder briefmarkengross oder zeigt einen
- * senkrechten Streifen. Das Band ist der Kompromiss — sichtbar gross, und den
- * Rest der Gasse erreicht man durch seitliches Schieben.
+ * Ein Band im oberen Drittel war der erste Versuch fuers Hochformat. Es hat
+ * die Gasse zwar vollstaendig gezeigt, aber die untere Haelfte blieb leer und
+ * das Bild wirkte abgeschnitten. Vollbild plus seitliches Ziehen ist besser:
+ * das Bild traegt, und die Tafel schiebt sich bei Bedarf darueber.
  */
 function stageRect() {
   const vv = window.visualViewport;
-  const W = Math.round(vv?.width || window.innerWidth);
-  const H = Math.round(vv?.height || window.innerHeight);
-  if (W / H >= 1.0) return { x: 0, y: 0, w: W, h: H };
-  return { x: 0, y: Math.round(H * 0.11), w: W, h: Math.round(H * 0.54) };
+  return {
+    x: 0, y: 0,
+    w: Math.round(vv?.width || window.innerWidth),
+    h: Math.round(vv?.height || window.innerHeight),
+  };
 }
 
 function fit(force = false) {
   const r = stageRect();
-  document.body.classList.toggle('portrait', r.h !== (window.visualViewport?.height || window.innerHeight));
+  document.body.classList.toggle('portrait', r.w < r.h);
   stage.style.left = `${r.x}px`;
   stage.style.top = `${r.y}px`;
   stage.style.width = `${r.w}px`;
@@ -146,7 +156,7 @@ addEventListener('pointermove', (e) => {
   targetMy = (e.clientY / window.innerHeight - 0.5) * 2;
 });
 
-loadScene();
+loadLocation('alley');
 fit();
 
 let last = performance.now();
@@ -183,7 +193,8 @@ requestAnimationFrame(loop);
 window.__regenstadt = {
   renderer,
   params,
-  reseed(s) { seed = s; return loadScene(); },
+  reseed(s) { seed = s; return loadLocation(current?.id || 'alley'); },
+  goTo,
   setTime(t) { renderer.time = t; },
   freeze() { params.drift = 0; params.mouseLook = 0; renderer.cam.mx = 0; renderer.cam.my = 0; },
   /** Vorlage zum Übermalen: nur die Ebenen, ohne Boden, Regen und Luft. */

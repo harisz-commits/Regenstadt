@@ -74,8 +74,11 @@ export const platePreset = {
   bloomThreshold: 1.10,
   scatter: 0.03,
   haze: 0.10,
-  rays: 0.08,
-  steam: 0.28,
+  rays: 0.06,
+  // Aus. Das generierte Bild hat gemalten Dampf an den Schloten; ein zweiter,
+  // animierter Dampf darueber liest sich als staendiges Aufsteigen im Bild und
+  // lenkt vom Regen ab.
+  steam: 0.0,
   rain: 1.0,
   ripple: 1.15,
   // Fast kein Schwarzwertanheben: die Platte bringt ihre eigene Tonwertkurve

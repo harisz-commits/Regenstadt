@@ -1,8 +1,9 @@
 /**
- * Einstellungs- und Messwert-Overlay. Früh gebaut, weil ohne Regler jede
- * Bildabstimmung ein Neustart-Zyklus wäre.
+ * Einstellungs- und Messwert-Overlay — ein WERKZEUG, kein Teil des Spiels.
  *
- * F1 oder ^ blendet ein/aus. Standardmäßig unsichtbar.
+ * F1 oder ^ blendet es ein. Es weist sich im Spielbild bewusst mit nichts
+ * mehr aus: eine Zeile „F1 · Bildsteuerung" am unteren Rand liest sich für
+ * jemanden, der spielen will, als sinnlose Beschriftung.
  */
 
 import { SCHEMA } from '../render/params.js';
@@ -34,8 +35,6 @@ const CSS = `
   background: rgba(5,8,14,.72); padding: 6px 8px; border: 1px solid rgba(46,230,255,.18); }
 #perf.on { display: block; }
 #perf canvas { display: block; margin-top: 4px; image-rendering: pixelated; }
-#hint { position: fixed; left: 12px; bottom: 10px; z-index: 28; font: 10px/1.4 ui-monospace, Menlo, monospace;
-  color: rgba(159,180,204,.38); letter-spacing: .14em; pointer-events: none; }
 `;
 
 export function createOverlay(params, hooks = {}) {
@@ -105,11 +104,6 @@ export function createOverlay(params, hooks = {}) {
   document.body.appendChild(perf);
   const pctx = cv.getContext('2d');
 
-  const hint = document.createElement('div');
-  hint.id = 'hint';
-  hint.textContent = 'F1 · BILDSTEUERUNG';
-  document.body.appendChild(hint);
-
   const hist = new Float32Array(150);
   let hi = 0;
   let acc = 0;
@@ -120,7 +114,6 @@ export function createOverlay(params, hooks = {}) {
       e.preventDefault();
       const on = ov.classList.toggle('on');
       perf.classList.toggle('on', on);
-      hint.style.display = on ? 'none' : '';
     }
   });
 
