@@ -86,6 +86,35 @@ if (freeze) {
     document.getElementById('boot')?.remove();
     document.getElementById('hint')?.remove();
   }, time);
+  // Alle Untersuchungspunkte einblenden — zum Pruefen, ob sie auf ihren
+  // Gegenstaenden sitzen.
+  if (arg('reveal', '0') === '1') {
+    await page.evaluate(() => document.getElementById('hs-layer')?.classList.add('reveal'));
+  }
+
+  // Einen Untersuchungspunkt anfahren und anklicken — so laesst sich der
+  // Lichtsaum und die Tafel im Standbild pruefen.
+  const hs = arg('hotspot', null);
+  if (hs !== null) {
+    const nth = parseInt(hs, 10);
+    const box = await page.evaluate((n) => {
+      const el = document.querySelectorAll('#hs-layer .hs')[n];
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    }, nth);
+    if (box) {
+      await page.mouse.move(box.x, box.y);
+      await page.waitForTimeout(450);
+      if (arg('click', '0') === '1') {
+        await page.mouse.click(box.x, box.y);
+        await page.waitForTimeout(1600); // Schreibmaschine auslaufen lassen
+        await page.mouse.move(box.x, box.y);
+      }
+    } else {
+      problems.push(`[hotspot] Index ${nth} existiert nicht`);
+    }
+  }
   // Ein paar Frames laufen lassen, damit die Änderung im Bild ankommt.
   await page.waitForTimeout(500);
 }

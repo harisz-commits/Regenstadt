@@ -2,6 +2,8 @@ import { Renderer } from './render/renderer.js';
 import { params, platePreset } from './render/params.js';
 import { buildAlley } from './scene/alley.js';
 import { createOverlay } from './ui/overlay.js';
+import { createInteraction } from './game/interaction.js';
+import { HOTSPOTS } from './game/hotspots.js';
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('gl'));
 const boot = document.getElementById('boot');
@@ -24,6 +26,7 @@ try {
 
 let seed = 7;
 let backdropOnly = false;
+let interaction = null;
 
 /** Lädt ein Bild; liefert null, wenn es nicht existiert. */
 function loadImage(url) {
@@ -67,6 +70,13 @@ async function loadScene() {
   }
 
   renderer.setScene(scene);
+  if (!interaction) {
+    interaction = createInteraction(renderer, {
+      spots: HOTSPOTS[scene.id] || [],
+      place: scene.name,
+      sector: scene.sector,
+    });
+  }
   console.info(
     `Szene bereit in ${(performance.now() - t0).toFixed(0)} ms ` +
     `(Seed ${seed}, ${img ? 'fertige Platte' : 'gezeichnet'})`,
@@ -108,6 +118,7 @@ function loop(now) {
   renderer.cam.mx += (targetMx * params.mouseLook - renderer.cam.mx) * k;
   renderer.cam.my += (targetMy * params.mouseLook - renderer.cam.my) * k;
 
+  interaction?.update(dt);
   renderer.frame(dt, backdropOnly);
   overlay.sample(performance.now() - now);
 

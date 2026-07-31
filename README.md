@@ -34,6 +34,18 @@ Fensterachsen mit der Entfernung enger — und deshalb kann der Boden-Shader aus
 jedem Bildschirmpunkt die Tiefe zurückrechnen und Pfützen perspektivisch
 richtig kräuseln.
 
+## Point-and-Click
+
+Untersuchungspunkte sind in **Bildkoordinaten der Hintergrundplatte** verankert
+(`src/game/hotspots.js`), nicht in Bildschirmprozenten. `plateUvToScreen()`
+rechnet sie jeden Frame in Pixel um — inklusive Naeherungsumkehr der
+Objektivverzeichnung. Dadurch wandern sie bei jeder Kamerabewegung mit dem Bild
+mit und bleiben auch bei anderem Fensterformat auf ihrem Gegenstand.
+
+Sichtbar ist normalerweise nichts. Beim Ueberfahren geht ein Lichtsaum **im
+Bild** auf (`uHover` im Endbild-Shader), nicht als Marke davor. **TAB** gedrueckt
+halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
+
 ## Aufbau
 
 ```
@@ -46,7 +58,12 @@ src/
   scene/alley.js        „Kanalgasse" — baut den kompletten Plattensatz
   shaders/*.glsl        ein Shader pro Pass
   ui/overlay.js         Regler + Frame-Zeit-Kurve (F1)
-tools/shot.mjs          Standbilder aufnehmen
+  game/hotspots.js      Untersuchungspunkte je Ort, in Bildkoordinaten
+  game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
+tools/shot.mjs          Standbilder aufnehmen (--backdrop, --reveal, --hotspot)
+tools/gen.mjs           Platten von einem Bildmodell uebermalen lassen
+prompts/                Bildanweisungen, getrennt vom Code
+public/plates/          fertige Hintergruende (siehe README dort)
 DECISIONS.md            Begründungen, vor allem für bewusste Abweichungen
 ```
 

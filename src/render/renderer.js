@@ -55,6 +55,10 @@ export class Renderer {
     this.height = 0;
     this.time = 0;
     this.cam = { x: 0, y: 0, mx: 0, my: 0 };
+    this.cssWidth = 0;
+    this.cssHeight = 0;
+    /** Aktiv überfahrener Punkt: Bildschirm-UV x, y, Radius, Stärke. */
+    this.hover = [0, 0, 0, 0];
   }
 
   /** Lädt einen Plattensatz (siehe scene/alley.js) auf die GPU. */
@@ -90,6 +94,8 @@ export class Renderer {
 
   resize(cssW, cssH) {
     const gl = this.gl;
+    this.cssWidth = cssW;
+    this.cssHeight = cssH;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const scale = this.params.renderScale;
     const w = Math.max(2, Math.round(cssW * dpr * scale));
@@ -169,6 +175,38 @@ export class Renderer {
     const [, oy] = this.layerOffset(parallax);
     const plateHorizonUv = 1 - VP_Y / PLATE_H; // Textur ist Y-gespiegelt
     return (plateHorizonUv - 0.5 - oy) / sy + 0.5;
+  }
+
+  /**
+   * Bildkoordinate der Hintergrundplatte → Bildschirmkoordinate in Pixeln.
+   *
+   * Das ist die Verbindung zwischen Bild und Spiel: Ein Untersuchungspunkt
+   * wird an einer Stelle IM BILD festgemacht und wandert dadurch bei jeder
+   * Kamerabewegung mit, statt über der Szene zu kleben.
+   *
+   * @param {number} u 0…1 waagrecht auf der Platte
+   * @param {number} v 0…1 senkrecht auf der Platte, von OBEN gezählt
+   * @returns {[number, number]} Pixel im Anzeigebereich (y von oben)
+   */
+  plateUvToScreen(u, v) {
+    const [sx, sy] = this.uvScale();
+    const par = this.scene?.layers?.[0]?.parallax ?? 0.022;
+    const [ox, oy] = this.layerOffset(par);
+
+    // Texturkoordinaten laufen von unten nach oben, Bildkoordinaten von oben.
+    const su = (u - 0.5 - ox) / sx + 0.5;
+    let sv = (1 - v - 0.5 - oy) / sy + 0.5;
+
+    // Näherungsweise Umkehr der Objektivverzeichnung. Ohne sie liegen die
+    // Punkte am Bildrand sichtbar neben dem, worauf sie zeigen.
+    const cx = su - 0.5;
+    const cy = sv - 0.5;
+    const r2 = cx * cx + cy * cy;
+    const k = this.params.barrel * r2;
+    const du = su - cx * k;
+    const dv = sv - cy * k;
+
+    return [du * this.cssWidth, (1 - dv) * this.cssHeight];
   }
 
   /** Fluchtpunkt in Bildschirm-UV — Ursprung der Lichtschächte. */
@@ -334,6 +372,7 @@ export class Renderer {
       gl.uniform1f(p.u('uSaturation'), P.saturation);
       gl.uniform1f(p.u('uDroplets'), P.droplets * lens);
       gl.uniform1f(p.u('uLift'), P.lift);
+      gl.uniform4f(p.u('uHover'), this.hover[0], this.hover[1], this.hover[2], this.hover[3]);
       bindTextures(gl, p, [
         ['uScene', litScene.tex],
         ['uBloom', mips[0].tex],

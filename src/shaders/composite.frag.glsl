@@ -30,6 +30,15 @@ uniform float uSaturation;
 uniform float uDroplets;
 uniform float uLift;          // Schwarzwert anheben (Nebel vor der Linse)
 
+/**
+ * Überfahrener Untersuchungspunkt: xy = Bildschirm-UV, z = Radius, w = Stärke.
+ *
+ * Der Saum wird IM Bild aufgehellt, nicht als Marke davorgelegt. Ein Punkt,
+ * der über der Szene schwebt, verrät sofort, dass Bild und Spiel zwei
+ * getrennte Dinge sind.
+ */
+uniform vec4  uHover;
+
 out vec4 fragColor;
 
 /* --- Tropfen auf dem Objektiv ------------------------------------------- */
@@ -111,6 +120,19 @@ void main() {
 
   float l = luma(col);
   col = mix(vec3(l), col, uSaturation);
+
+  // --- Lichtsaum um den überfahrenen Punkt --------------------------------
+  if (uHover.w > 0.001) {
+    float aspH = uResolution.x / uResolution.y;
+    float d = length((uv - uHover.xy) * vec2(aspH, 1.0));
+    float rad = uHover.z * aspH;
+    // Weicher Kern plus ein etwas hellerer Ring — das liest sich als Licht,
+    // das auf die Sache fällt, und nicht als aufgeklebter Kreis.
+    float core = 1.0 - smoothstep(0.0, rad, d);
+    float ring = smoothstep(rad * 0.72, rad * 0.92, d) * (1.0 - smoothstep(rad * 0.92, rad * 1.12, d));
+    float amt = (core * 0.55 + ring * 0.85) * uHover.w;
+    col += col * amt * 0.85 + vec3(0.16, 0.21, 0.27) * amt * 0.5;
+  }
 
   // --- Vignette ----------------------------------------------------------
   // Nach unten begrenzt: eine Vignette, die die Ecken auf Null zieht,
