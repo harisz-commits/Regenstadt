@@ -156,3 +156,36 @@ nicht wert.
 Der Dampf-Pass ist aus, sobald ein generiertes Bild geladen ist. Das Bild
 bringt gemalten Dampf an den Schloten mit; ein zweiter, animierter Dampf
 darüber liest sich als ständiges Aufsteigen und lenkt vom Regen ab.
+
+## Animationszeit kommt aus der Wanduhr, nicht aus Frame-Zeiten
+
+Die Zeit für alle Shader lief zuvor über `time += dt` mit `dt` auf 50 ms
+gedeckelt. Der Deckel soll Sprünge nach einem Tab-Wechsel abfangen — er lässt
+die Zeit aber langsamer laufen als die echte, sobald die Bildrate darunter
+fällt: bei 10 Bildern/s halb so schnell, bei 2 Bildern/s zehnmal zu langsam.
+Auf einem Handy sah der Regen dadurch aus, als stünde er still.
+
+`renderer.time` kommt jetzt aus der Wanduhr. `dt` bleibt gedeckelt, weil es
+Dämpfungen steuert, die bei einem großen Sprung überschießen würden.
+
+## Der Zähler für „war das ein Ziehen?" gehört ans Fenster
+
+Ein Klick wird verworfen, wenn der Zeiger sich vorher bewegt hat — sonst löst
+jedes seitliche Ziehen am Bildende einen Untersuchungsklick aus.
+
+Der Zähler wurde beim Druck auf die **Bildfläche** zurückgesetzt. Die
+Untersuchungspunkte liegen aber in einer eigenen Ebene darüber; ein Druck
+darauf erreicht die Bildfläche nie. Nach dem ersten Ziehen blieb der Zähler
+deshalb für immer stehen, und **jeder** weitere Klick wurde als Ziehen
+verworfen — einmal ziehen, und nichts reagierte mehr.
+
+Der Zähler hängt jetzt am Fenster (Capture-Phase) und wird bei jedem Druck
+zurückgesetzt. Gezogen wird nur, wenn der Druck im Bild beginnt.
+
+## Qualität wird nachgeführt
+
+Auf welchem Gerät das läuft, weiß niemand vorher. Statt einen festen Wert zu
+raten, senkt `adaptQuality()` die Rechenauflösung, wenn die Bildrate einbricht,
+und hebt sie wieder an, wenn Luft ist. Eine Animation mit 5 Bildern je Sekunde
+sieht aus, als stünde sie still — lieber etwas weicher und flüssig als scharf
+und ruckelnd. Auf Berührgeräten außerdem höchstens ein Bildpunkt je CSS-Pixel.

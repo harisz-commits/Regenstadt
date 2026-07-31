@@ -53,7 +53,17 @@ export class Renderer {
     this.scene = null;
     this.width = 0;
     this.height = 0;
+    /**
+     * Zeit für alle Animationen, in Sekunden.
+     *
+     * Wird von aussen aus der WANDUHR gesetzt, nicht aus aufsummierten
+     * Frame-Zeiten. Der alte Weg (`time += dt` mit `dt` auf 50 ms gedeckelt)
+     * liess die Zeit bei niedriger Bildrate langsamer laufen als die echte:
+     * bei 10 Bildern/s halb so schnell, bei 2 Bildern/s zehnmal zu langsam.
+     * Auf einem Handy sah der Regen dadurch aus, als stünde er still.
+     */
     this.time = 0;
+    this.timeFrozen = false;
     this.cam = { x: 0, y: 0, mx: 0, my: 0, panX: 0 };
     this.cssWidth = 0;
     this.cssHeight = 0;
@@ -99,7 +109,12 @@ export class Renderer {
     const gl = this.gl;
     this.cssWidth = cssW;
     this.cssHeight = cssH;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    // Auf Beruehrgeraeten hoechstens 1 Bildpunkt je CSS-Pixel. Neun
+    // Vollbild-Durchgaenge bei dreifacher Pixeldichte sind fuer ein Telefon
+    // zu viel — und was zu langsam laeuft, sieht aus, als bewege es sich gar
+    // nicht.
+    const maxDpr = matchMedia('(hover: none), (pointer: coarse)').matches ? 1.0 : 1.5;
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
     const scale = this.params.renderScale;
     const w = Math.max(2, Math.round(cssW * dpr * scale));
     const h = Math.max(2, Math.round(cssH * dpr * scale));
@@ -250,7 +265,6 @@ export class Renderer {
     const gl = this.gl;
     const P = this.params;
     if (!this.scene || !this.targets) return;
-    this.time += dt;
 
     // Langsame Kamerafahrt — ein Standbild soll komponiert sein, aber leben.
     const t = this.time * P.driftSpeed;

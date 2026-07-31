@@ -88,11 +88,15 @@ void main() {
   // Strichen — Regen liest man an einzelnen Tropfen, nicht an Menge.
   //
   // Fern: viele feine, kurze Striche
-  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 44.0, 1.05, 0.055, 0.038, 0.70, t, slant);
+  // Laengere Striche, etwas langsamer. So zeichnet auch eine echte Kamera
+  // Regen auf — und ein langer Strich bleibt bei niedriger Bildrate lesbar,
+  // waehrend ein kurzer, schneller Punkt von Bild zu Bild springt und dann
+  // aussieht, als bewege sich gar nichts.
+  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 30.0, 0.90, 0.055, 0.040, 0.82, t, slant);
   // Mitte: die tragende Ebene, klare Striche
-  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 22.0, 1.60, 0.055, 0.042, 0.78, t, slant);
+  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 15.0, 1.30, 0.055, 0.045, 0.88, t, slant);
   // Nah: wenige, dicke, unscharfe Tropfen
-  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 10.0, 2.40, 0.22, 0.022, 0.90, t, slant);
+  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 7.0, 1.95, 0.22, 0.024, 0.94, t, slant);
 
   float rain = far * 0.34 + mid * 0.80 + near * 0.34;
 

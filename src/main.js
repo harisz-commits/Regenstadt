@@ -37,7 +37,7 @@ let current = null;
 // keinen Zeiger, dem die Kamera folgen koennte.
 const TOUCH = isTouch();
 if (TOUCH) {
-  params.renderScale = 0.7;
+  params.renderScale = 0.62;
   params.mouseLook = 0;
 }
 
@@ -160,11 +160,46 @@ loadLocation('alley');
 fit();
 
 let last = performance.now();
+const started = last;
 let warmed = 0;
 
+/* --- Qualitaet nachfuehren ------------------------------------------------
+   Auf welchem Geraet das laeuft, weiss niemand vorher. Statt einen festen
+   Wert zu raten, wird die Rechenaufloesung gesenkt, wenn die Bildrate
+   einbricht — und wieder angehoben, wenn wieder Luft ist. Eine Animation, die
+   mit 5 Bildern je Sekunde laeuft, sieht aus, als stuende sie still; lieber
+   etwas weicher und fluessig als scharf und ruckelnd. */
+const QUALITY_MIN = 0.38;
+let qualityBase = params.renderScale;
+let slowFrames = 0;
+let fastFrames = 0;
+let lastAdapt = 0;
+
+function adaptQuality(frameMs) {
+  if (warmed < 4) return;                    // Aufwaermphase nicht bewerten
+  const now = performance.now();
+  if (frameMs > 40) { slowFrames++; fastFrames = 0; }
+  else if (frameMs < 20) { fastFrames++; slowFrames = 0; }
+
+  if (now - lastAdapt < 1500) return;
+  if (slowFrames > 30 && params.renderScale > QUALITY_MIN) {
+    params.renderScale = Math.max(QUALITY_MIN, params.renderScale - 0.12);
+    console.info(`Zu langsam — Rechenaufloesung auf ${params.renderScale.toFixed(2)} gesenkt.`);
+    fit(true); lastAdapt = now; slowFrames = 0;
+  } else if (fastFrames > 90 && params.renderScale < qualityBase) {
+    params.renderScale = Math.min(qualityBase, params.renderScale + 0.08);
+    fit(true); lastAdapt = now; fastFrames = 0;
+  }
+}
+
 function loop(now) {
+  // `dt` bleibt gedeckelt — es steuert Daempfungen, die bei einem grossen
+  // Sprung ueberschiessen wuerden.
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
+  // Die Animationszeit kommt dagegen aus der Wanduhr. Sonst laeuft der Regen
+  // bei niedriger Bildrate in Zeitlupe und wirkt eingefroren.
+  if (!renderer.timeFrozen) renderer.time = (now - started) / 1000;
 
   const k = 1 - Math.pow(0.001, dt); // rahmenratenunabhängige Dämpfung
   renderer.cam.mx += (targetMx * params.mouseLook - renderer.cam.mx) * k;
@@ -172,7 +207,9 @@ function loop(now) {
 
   interaction?.update(dt);
   renderer.frame(dt, backdropOnly);
-  overlay.sample(performance.now() - now);
+  const frameMs = performance.now() - now;
+  overlay.sample(frameMs);
+  adaptQuality(frameMs);
 
   // Erst nach ein paar Frames einblenden: alle Shader sind dann übersetzt,
   // die Render-Targets warm. Kein Ruckler im ersten Bild.
@@ -195,7 +232,7 @@ window.__regenstadt = {
   params,
   reseed(s) { seed = s; return loadLocation(current?.id || 'alley'); },
   goTo,
-  setTime(t) { renderer.time = t; },
+  setTime(t) { renderer.time = t; renderer.timeFrozen = true; },
   freeze() { params.drift = 0; params.mouseLook = 0; renderer.cam.mx = 0; renderer.cam.my = 0; },
   /** Vorlage zum Übermalen: nur die Ebenen, ohne Boden, Regen und Luft. */
   setBackdropOnly(v) { backdropOnly = !!v; },

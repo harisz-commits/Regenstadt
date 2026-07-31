@@ -405,9 +405,21 @@ export function createInteraction(renderer, host) {
   let moved = 0;
   const stageEl = document.getElementById('stage');
 
-  stageEl.addEventListener('pointerdown', (e) => {
-    dragging = true; lastX = e.clientX; moved = 0;
-  });
+  // Am FENSTER lauschen, nicht an der Bildfläche.
+  //
+  // Die Untersuchungspunkte liegen in einer eigenen Ebene über der Bildfläche.
+  // Ein Druck darauf erreicht `#stage` nie — und wenn `moved` nur dort
+  // zurückgesetzt wird, bleibt es nach dem ersten Ziehen für immer stehen.
+  // Dann hält `wasDrag()` jeden weiteren Klick für einen Ziehvorgang und
+  // schluckt ihn. Genau dieser Fehler war es: einmal ziehen, und nichts
+  // reagiert mehr.
+  addEventListener('pointerdown', (e) => {
+    moved = 0;
+    lastX = e.clientX;
+    // Gezogen wird nur, wenn der Druck im Bild beginnt — nicht auf der Tafel
+    // oder der Kopfzeile.
+    dragging = stageEl.contains(e.target) || layer.contains(e.target);
+  }, true);
   addEventListener('pointermove', (e) => {
     if (!dragging) return;
     const dx = e.clientX - lastX;
