@@ -36,6 +36,16 @@ uniform float uRipple;         // Stärke der Regentropfen-Ringe
 uniform float uRainWind;
 uniform float uWander;         // seitlicher Kameraversatz, für die Ripple-Welt
 
+/**
+ * 1 = eine fertige Platte liegt im Hintergrund.
+ *
+ * Dann ist die nasse Straße bereits gemalt: Albedo und Spiegelung dürfen nicht
+ * ersetzt werden, sonst wird der gemalte Asphalt von einer glatten Fläche
+ * überdeckt. Es bleibt nur die Aufgabe, das vorhandene Bild zu kräuseln —
+ * damit die Pfützen leben, ohne dass etwas neu erfunden wird.
+ */
+uniform float uPlateMode;
+
 out vec4 fragColor;
 
 /* Regentropfen-Ringe auf der Wasseroberfläche, in Weltkoordinaten. */
@@ -103,6 +113,16 @@ void main() {
   // Störung in Bildschirmpixel umrechnen: nah = stark, fern = kaum.
   float persp = 1.0 / d;
   vec2 distort = rn * vec2(0.0075, 0.0075) * persp;
+
+  // --- Plattenmodus: nur kräuseln, nichts ersetzen ------------------------
+  if (uPlateMode > 0.5) {
+    // Kräuselung nach unten hin kräftiger; am Horizont wäre sie eine
+    // Pixelwanderung und würde nur flimmern.
+    float near = smoothstep(uHorizonY, 0.0, suv.y);
+    vec3 warped = texture(uScene, suv + distort * 1.35 * near).rgb;
+    fragColor = vec4(mix(scene, warped, g.a * near), 1.0);
+    return;
+  }
 
   // --- Spiegelung ---------------------------------------------------------
   float dy = suv.y - uHorizonY;                    // negativ (unter Horizont)

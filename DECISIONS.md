@@ -94,3 +94,31 @@ der Fläche in Schwarz. Die Abdunklung ist jetzt auf 72 % begrenzt.
 Projekt, dessen einziges Erfolgskriterium „sieht gut aus" lautet, ist die
 Rückkopplung das Hinsehen, nicht ein grüner Balken. Aufnahmen frieren Kamera
 und Zeit ein, damit zwei Bilder vergleichbar sind.
+
+## Generierte Platten: was sich dadurch ändert
+
+Die Bühne wird von einem Bildmodell übermalt (`tools/gen.mjs`). Der
+prozedurale Render geht als Bildvorlage hinein, nicht als Textprompt — dadurch
+bleiben Horizont, Fluchtpunkt und die Lage jeder Lichtquelle erhalten, und die
+Projektion in `projection.js` gilt weiter.
+
+Drei Dinge folgen daraus:
+
+**Der Bodenpass darf die Straße nicht mehr ersetzen.** Das Modell malt die
+nasse Fahrbahn mit. Würde der Bodenpass wie bisher Albedo und Spiegelung
+selbst berechnen, überdeckte eine glatte Fläche den gemalten Asphalt. Im
+Plattenmodus (`uPlateMode`) kräuselt er deshalb nur noch das vorhandene Bild.
+Die Pfützen leben, aber es wird nichts neu erfunden.
+
+**Die Bildkette braucht eine zweite Abstimmung** (`platePreset`). Ein
+generiertes Bild ist bereits belichtet und durchgezeichnet; HDR-Anhebung,
+kräftiger Bloom, Nebel und Streulicht ein zweites Mal darüber waschen es aus.
+Objektiv-Effekte bleiben stark, denn die stecken nicht in der Platte — aber
+Verzeichnung und Farbsaum sind zurückgenommen, weil die Platte am Bildrand
+endet und ein weiter außen greifendes Objektiv ins Leere tastet.
+
+**Die Stadt ist nicht mehr pro Durchgang neu.** Vorher würfelte jeder Seed
+eine andere Gasse. Mit gemalten Platten liegt die Optik fest, und variabel
+bleibt der Fall — genau das Modell des Blade-Runner-Spiels von 1997. Der
+prozedurale Weg bleibt als Rückfall erhalten: fehlt die Plattendatei, zeichnet
+das Spiel wie zuvor.

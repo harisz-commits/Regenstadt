@@ -1,5 +1,5 @@
 import { Renderer } from './render/renderer.js';
-import { params } from './render/params.js';
+import { params, platePreset } from './render/params.js';
 import { buildAlley } from './scene/alley.js';
 import { createOverlay } from './ui/overlay.js';
 
@@ -49,16 +49,21 @@ async function loadScene() {
   const scene = buildAlley(seed);
 
   const base = import.meta.env.BASE_URL || '/';
-  const img = await loadImage(`${base}plates/${scene.id}-backdrop.png`);
+  // Bildmodelle liefern je nach Größe JPEG oder PNG — beide Endungen prüfen.
+  let img = await loadImage(`${base}plates/${scene.id}-backdrop.jpg`);
+  if (!img) img = await loadImage(`${base}plates/${scene.id}-backdrop.png`);
   if (img) {
     // WebGL nimmt ein Bild genauso entgegen wie ein Canvas — deshalb ist der
     // Tausch hier eine Zuweisung und kein Umbau.
     scene.layers = [{
-      name: 'backdrop', canvas: img, parallax: 0.055,
+      name: 'backdrop', canvas: img, parallax: 0.022,
       fog: 0, fogColor: [0, 0, 0], emissive: 1.0,
     }];
     scene.foreground = [];
     scene.usingPlate = true;
+    // Ein generiertes Bild ist bereits belichtet — die volle Kette noch einmal
+    // darueber wuerde es auswaschen.
+    Object.assign(params, platePreset);
   }
 
   renderer.setScene(scene);

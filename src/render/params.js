@@ -57,6 +57,38 @@ export const params = {
   droplets: 0.28,
 };
 
+/**
+ * Zweite Abstimmung für den Fall, dass eine fertige Platte im Hintergrund
+ * liegt.
+ *
+ * Ein generiertes Bild ist bereits belichtet und durchgezeichnet. Die volle
+ * Kette noch einmal darüberzulegen — HDR-Anhebung, kräftiger Bloom, Nebel,
+ * Streulicht — wäscht es aus. Diese Werte überschreiben die obigen, sobald
+ * eine Platte geladen ist; die Objektiv-Effekte bleiben unangetastet, denn
+ * die stecken nicht in der Platte.
+ */
+export const platePreset = {
+  exposure: 1.0,
+  hdrBoost: 0.22,
+  bloomAmount: 0.16,
+  bloomThreshold: 1.10,
+  scatter: 0.03,
+  haze: 0.10,
+  rays: 0.08,
+  steam: 0.28,
+  rain: 0.85,
+  ripple: 1.15,
+  // Fast kein Schwarzwertanheben: die Platte bringt ihre eigene Tonwertkurve
+  // mit, und ein zweites Aufhellen macht die Schatten milchig.
+  lift: 0.04,
+  saturation: 1.04,
+  // Verzeichnung und Farbsaum zurückgenommen. Die Platte endet am Bildrand;
+  // greift das Objektiv weiter nach außen, tastet es ins Leere und hinterlässt
+  // farbige Streifen an den Kanten.
+  barrel: 0.018,
+  aberration: 0.0014,
+};
+
 /** Schema für das Overlay: [Schlüssel, Beschriftung, min, max, Schritt]. */
 export const SCHEMA = [
   ['— BILD —'],

@@ -226,6 +226,7 @@ export class Renderer {
       gl.uniform1f(p.u('uRipple'), P.ripple);
       gl.uniform1f(p.u('uRainWind'), P.wind);
       gl.uniform1f(p.u('uWander'), this.cam.x + this.cam.mx);
+      gl.uniform1f(p.u('uPlateMode'), this.scene.usingPlate ? 1 : 0);
       bindTextures(gl, p, [['uScene', a.tex], ['uGround', g.tex], ['uWet', g.wetTex]]);
       this.tri.draw();
       cur = b;

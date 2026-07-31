@@ -62,7 +62,7 @@ const body = {
   }],
   generationConfig: {
     responseModalities: ['IMAGE'],
-    imageConfig: { aspectRatio: aspect },
+    imageConfig: { aspectRatio: aspect, imageSize: arg('size', '2K') },
   },
 };
 
@@ -122,9 +122,33 @@ if (!img) {
   process.exit(1);
 }
 
-const data = (img.inlineData || img.inline_data).data;
-mkdirSync(dirname(outPath), { recursive: true });
-writeFileSync(outPath, Buffer.from(data, 'base64'));
+const blob = img.inlineData || img.inline_data;
+const mime = blob.mimeType || blob.mime_type || 'image/png';
+const buf = Buffer.from(blob.data, 'base64');
 
-const kb = (Buffer.from(data, 'base64').length / 1024).toFixed(0);
-console.log(`✓ ${outPath}  (${kb} kB, ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
+// Das Modell liefert je nach Modell und Größe JPEG oder PNG. Die Endung muss
+// dazu passen, sonst laden Werkzeuge und Browser die Datei später falsch.
+let finalPath = outPath;
+const want = mime.includes('jpeg') ? '.jpg' : '.png';
+if (!finalPath.toLowerCase().endsWith(want)) {
+  finalPath = finalPath.replace(/\.(png|jpg|jpeg)$/i, '') + want;
+}
+
+mkdirSync(dirname(finalPath), { recursive: true });
+writeFileSync(finalPath, buf);
+
+// Maße direkt aus den Bytes lesen — zum Prüfen, ob die Perspektive passt.
+let dims = '';
+if (want === '.png') {
+  dims = `${buf.readUInt32BE(16)}x${buf.readUInt32BE(20)}`;
+} else {
+  for (let i = 2; i < buf.length - 9; ) {
+    if (buf[i] !== 0xff) { i++; continue; }
+    const m = buf[i + 1];
+    if (m >= 0xc0 && m <= 0xc3) { dims = `${buf.readUInt16BE(i + 7)}x${buf.readUInt16BE(i + 5)}`; break; }
+    if (m === 0xd8 || m === 0xd9 || (m >= 0xd0 && m <= 0xd7)) { i += 2; continue; }
+    i += 2 + buf.readUInt16BE(i + 2);
+  }
+}
+
+console.log(`✓ ${finalPath}  (${dims}, ${(buf.length / 1024).toFixed(0)} kB, ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
