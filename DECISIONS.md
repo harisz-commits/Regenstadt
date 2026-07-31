@@ -189,3 +189,26 @@ raten, senkt `adaptQuality()` die Rechenauflösung, wenn die Bildrate einbricht,
 und hebt sie wieder an, wenn Luft ist. Eine Animation mit 5 Bildern je Sekunde
 sieht aus, als stünde sie still — lieber etwas weicher und flüssig als scharf
 und ruckelnd. Auf Berührgeräten außerdem höchstens ein Bildpunkt je CSS-Pixel.
+
+## Der Regen fiel nach oben
+
+In WebGL zeigt die Y-Achse nach oben (`gl_FragCoord.y` ist 0 am unteren Rand).
+Im Tropfen-Shader stand `p.y -= t · speed`. Ein Merkmal des Musters sitzt bei
+`p.y = P0`, also bei der Bildhöhe `y = (P0 + t·v)/sy` — die mit der Zeit
+**steigt**. Der Regen fiel also nach oben. Jetzt steht dort ein Plus.
+
+Dazu war die Geschwindigkeit drei- bis zehnmal zu niedrig: `speed` zählt
+Zellen je Sekunde, und die Fallhöhe je Sekunde ist `speed/sy` der Bildhöhe.
+Die alten Werte ergaben rund 30 bis 90 Bildpunkte je Sekunde. Regen liest sich
+erst ab einigen hundert als fallend.
+
+**Warum das dreimal durchgerutscht ist:** Geprüft wurde an Standbildern, in
+denen Kamera und Zeit eingefroren sind. Auf einem Standbild sieht man, DASS
+Striche da sind — nie, in welche Richtung sie sich bewegen. Die Prüfung passte
+nicht zu dem, was zu prüfen war.
+
+Der Nachweis läuft jetzt über eine Messung: zwei Aufnahmen bei exakt gesetzten
+Zeitpunkten, den Regen durch Differenz gegen eine regenfreie Aufnahme
+freigestellt, und die Verschiebung per Kreuzkorrelation bestimmt. Ergebnis
++9 px bei 0,05 s, also nach unten. Ohne das Freistellen misst man nur den
+unbewegten Hintergrund und bekommt immer 0 heraus.

@@ -33,7 +33,13 @@ float band(vec2 uv, float sx, float sy, float speed, float thin,
            float density, float len, float t, float slant) {
   vec2 p = vec2(uv.x * sx, uv.y * sy);
   p.x += p.y * slant;
-  p.y -= t * speed;
+  // PLUS, nicht minus.
+  //
+  // In WebGL zeigt die Y-Achse nach oben (gl_FragCoord.y ist 0 am unteren
+  // Rand). Ein Merkmal des Musters sitzt bei p.y = P0, also bei der
+  // Bildhöhe y = (P0 - t·v)/sy. Mit einem Plus sinkt diese Höhe mit der Zeit,
+  // der Tropfen fällt. Mit einem Minus stieg er auf — genau das war zu sehen.
+  p.y += t * speed;
 
   vec2 id = floor(p);
   vec2 f = fract(p);
@@ -88,15 +94,16 @@ void main() {
   // Strichen — Regen liest man an einzelnen Tropfen, nicht an Menge.
   //
   // Fern: viele feine, kurze Striche
-  // Laengere Striche, etwas langsamer. So zeichnet auch eine echte Kamera
-  // Regen auf — und ein langer Strich bleibt bei niedriger Bildrate lesbar,
-  // waehrend ein kurzer, schneller Punkt von Bild zu Bild springt und dann
-  // aussieht, als bewege sich gar nichts.
-  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 30.0, 0.90, 0.055, 0.040, 0.82, t, slant);
-  // Mitte: die tragende Ebene, klare Striche
-  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 15.0, 1.30, 0.055, 0.045, 0.88, t, slant);
-  // Nah: wenige, dicke, unscharfe Tropfen
-  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 7.0, 1.95, 0.22, 0.024, 0.94, t, slant);
+  // Zur Geschwindigkeit: `speed` zaehlt in ZELLEN je Sekunde, die Bildhoehe
+  // hat `sy` Zellen. Fallhoehe je Sekunde = speed/sy der Bildhoehe. Die Werte
+  // hier ergeben rund 320, 480 und 720 Bildpunkte je Sekunde bei 1080 Zeilen
+  // — die Groessenordnung, in der Regen als fallend gelesen wird. Vorher
+  // stand hier ein Zehntel davon, und das kroch.
+  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 34.0, 10.0, 0.055, 0.045, 0.72, t, slant);
+  // Mitte: die tragende Ebene
+  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 18.0, 8.0, 0.055, 0.050, 0.75, t, slant);
+  // Nah: wenige, dicke, unscharfe Tropfen — die schnellste Ebene
+  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 9.0, 6.0, 0.20, 0.025, 0.72, t, slant);
 
   float rain = far * 0.34 + mid * 0.80 + near * 0.34;
 
