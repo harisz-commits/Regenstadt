@@ -1,0 +1,26 @@
+Repaint this image as a photorealistic cinematic film still. Keep the geometry EXACTLY as given.
+
+ABSOLUTE CONSTRAINTS — do not change any of these:
+- The camera perspective, the horizon line, and the vanishing point stay exactly where they are.
+- The left and right building walls keep their exact silhouette and their exact converging edges.
+- The wet street keeps its exact shape, its edges, and the position of every reflection.
+- Every light source stays at its exact position, size and colour. Do not add, move or remove a single sign or lamp.
+- The two human figures stay at their exact positions and scale.
+- Framing stays identical. Do not crop, zoom, rotate or re-compose.
+
+WHAT TO CHANGE — surface and material only:
+Treat the flat coloured shapes as an underpainting that must become real matter.
+- Walls: weathered concrete, stained brick, rusted steel panels, peeling paint, water streaks, soot, patched repairs. Every wall must read as a physical surface with age, not as a flat plane.
+- Street-level shapes become real objects: fabric awnings with sagging seams, market stalls with goods and crates, steel roller shutters, barred windows, doorways with worn steps, stacked crates, bundled cables, plastic sheeting, puddled kerbs, litter.
+- Signs become real signage: glass neon tubing with visible mounts and conduit, backlit panels with grime, dented metal housings, drips of rain on the surfaces.
+- The two figures become real people in heavy coats seen from behind at a distance, with correct human proportions, limbs, and a rain-slick sheen. One holds an umbrella. Faces are not visible.
+- Asphalt: cracked, patched, oily, with genuine standing water. Reflections stay where they are but gain the broken, rippled quality of real water.
+- Air: dense humid haze, steam from vents, fine rain visible against the light.
+
+LOOK — Blade Runner (1982 and 2049), Ghost in the Shell, Kowloon Walled City at night:
+Anamorphic 35mm film, shallow depth of field on the far end, heavy atmosphere.
+Warm sodium-vapour and tungsten light dominates. Neon is the accent, never the base tone.
+Deep shadows that keep detail. Highlights roll off, never clip to flat white.
+Fine film grain. Subtle chromatic aberration at the frame edges.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters or words of any kind on signs — signage must be abstract glyph shapes only. No new buildings. No sky change. No people other than the two already present. No illustration, no anime, no painterly brushwork, no cartoon outlines.
