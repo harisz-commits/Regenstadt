@@ -23,11 +23,49 @@ try {
 }
 
 let seed = 7;
+let backdropOnly = false;
 
-function loadScene() {
+/** Lädt ein Bild; liefert null, wenn es nicht existiert. */
+function loadImage(url) {
+  return new Promise((res) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => res(null);
+    img.src = url;
+  });
+}
+
+/**
+ * Baut die Szene. Liegt unter `public/plates/<id>-backdrop.png` ein fertiges
+ * Bild, ersetzt es den gesamten gezeichneten Ebenenstapel.
+ *
+ * Boden, Nässemaske, Spiegelung, Regen und Luft bleiben davon unberührt — sie
+ * arbeiten weiter mit derselben Projektion. Genau dafür wird die Vorlage
+ * ohne Boden und ohne Regen exportiert: der Bodenpass braucht dieses Bild als
+ * Spiegelquelle, die nasse Straße darf darin noch nicht enthalten sein.
+ */
+async function loadScene() {
   const t0 = performance.now();
-  renderer.setScene(buildAlley(seed));
-  console.info(`Platten gebaut in ${(performance.now() - t0).toFixed(0)} ms (Seed ${seed})`);
+  const scene = buildAlley(seed);
+
+  const base = import.meta.env.BASE_URL || '/';
+  const img = await loadImage(`${base}plates/${scene.id}-backdrop.png`);
+  if (img) {
+    // WebGL nimmt ein Bild genauso entgegen wie ein Canvas — deshalb ist der
+    // Tausch hier eine Zuweisung und kein Umbau.
+    scene.layers = [{
+      name: 'backdrop', canvas: img, parallax: 0.055,
+      fog: 0, fogColor: [0, 0, 0], emissive: 1.0,
+    }];
+    scene.foreground = [];
+    scene.usingPlate = true;
+  }
+
+  renderer.setScene(scene);
+  console.info(
+    `Szene bereit in ${(performance.now() - t0).toFixed(0)} ms ` +
+    `(Seed ${seed}, ${img ? 'fertige Platte' : 'gezeichnet'})`,
+  );
 }
 
 const overlay = createOverlay(params, {
@@ -65,12 +103,14 @@ function loop(now) {
   renderer.cam.mx += (targetMx * params.mouseLook - renderer.cam.mx) * k;
   renderer.cam.my += (targetMy * params.mouseLook - renderer.cam.my) * k;
 
-  renderer.frame(dt);
+  renderer.frame(dt, backdropOnly);
   overlay.sample(performance.now() - now);
 
   // Erst nach ein paar Frames einblenden: alle Shader sind dann übersetzt,
   // die Render-Targets warm. Kein Ruckler im ersten Bild.
-  if (warmed < 4) {
+  // `renderer.scene` wird abgefragt, weil das Laden einer fertigen Platte
+  // asynchron ist — sonst meldet sich die Seite fertig, bevor etwas da ist.
+  if (warmed < 4 && renderer.scene) {
     warmed++;
     if (warmed === 4) {
       boot?.classList.add('gone');
@@ -85,7 +125,9 @@ requestAnimationFrame(loop);
 window.__regenstadt = {
   renderer,
   params,
-  reseed(s) { seed = s; loadScene(); },
+  reseed(s) { seed = s; return loadScene(); },
   setTime(t) { renderer.time = t; },
   freeze() { params.drift = 0; params.mouseLook = 0; renderer.cam.mx = 0; renderer.cam.my = 0; },
+  /** Vorlage zum Übermalen: nur die Ebenen, ohne Boden, Regen und Luft. */
+  setBackdropOnly(v) { backdropOnly = !!v; },
 };

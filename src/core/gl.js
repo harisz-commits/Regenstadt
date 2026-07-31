@@ -108,7 +108,12 @@ export function createTarget(gl, w, h, { float = false, filter = null, wrap = nu
   };
 }
 
-/** Textur aus einem Canvas (unsere „vorgerenderten" Platten). */
+/**
+ * Textur aus einem Canvas oder einem geladenen Bild.
+ *
+ * Beides ist für WebGL dasselbe — genau deshalb kann eine gezeichnete Platte
+ * ohne jede weitere Änderung durch ein generiertes Bild ersetzt werden.
+ */
 export function textureFromCanvas(gl, canvas, { mips = true } = {}) {
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);

@@ -66,6 +66,11 @@ try {
 
 // Bewegung anhalten und einen festen Zeitpunkt setzen, damit zwei Aufnahmen
 // vergleichbar sind.
+// Vorlage zum Uebermalen: nur die Ebenen, ohne Boden, Regen und Luft.
+if (arg('backdrop', '0') === '1') {
+  await page.evaluate(() => window.__regenstadt?.setBackdropOnly(true));
+}
+
 const seed = arg('seed', null);
 if (seed !== null) {
   await page.evaluate((s) => window.__regenstadt?.reseed(s), parseInt(seed, 10));

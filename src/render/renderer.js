@@ -178,7 +178,14 @@ export class Renderer {
     return [(VP_X / PLATE_W - 0.5 - ox) / sx + 0.5, this.horizonScreenY(parallax)];
   }
 
-  frame(dt) {
+  /**
+   * @param {number} dt
+   * @param {boolean} backdropOnly Nur die Ebenen zeichnen, ohne Boden, Regen
+   *   und Luft. Das ist die Vorlage, die zum Übermalen an ein Bildmodell geht:
+   *   Der Bodenpass braucht genau dieses Bild als Spiegelquelle, deshalb darf
+   *   die nasse Straße darin noch nicht enthalten sein.
+   */
+  frame(dt, backdropOnly = false) {
     const gl = this.gl;
     const P = this.params;
     if (!this.scene || !this.targets) return;
@@ -199,7 +206,7 @@ export class Renderer {
 
     /* --- 2. Nasse Straße ------------------------------------------------ */
     let cur = a;
-    if (this.scene.ground) {
+    if (this.scene.ground && !backdropOnly) {
       const g = this.scene.ground;
       const p = this.pGround;
       p.use();
@@ -229,7 +236,7 @@ export class Renderer {
 
     /* --- 4. Regen ------------------------------------------------------- */
     const dst = cur === a ? b : a;
-    {
+    if (!backdropOnly) {
       const p = this.pRain;
       p.use();
       bindTarget(gl, dst, this.width, this.height);
@@ -243,7 +250,7 @@ export class Renderer {
     }
 
     /* --- 4b. Luft: Lichtschächte, Dunst, Dampf -------------------------- */
-    {
+    if (!backdropOnly) {
       const p = this.pAtmos;
       p.use();
       bindTarget(gl, cur, this.width, this.height);
@@ -260,6 +267,9 @@ export class Renderer {
       bindTextures(gl, p, [['uScene', dst.tex]]);
       this.tri.draw();
     }
+    // Ohne Boden/Regen/Luft bleibt das Ergebnis in `cur` liegen; mit ihnen
+    // schreibt der Regen nach `dst` und die Luft von dort zurück nach `cur`.
+    // In beiden Fällen ist `cur` das fertige Bild.
     const litScene = cur;
 
     /* --- 5. Bloom-Pyramide ---------------------------------------------- */
@@ -311,13 +321,17 @@ export class Renderer {
       gl.uniform1f(p.u('uBloomAmount'), P.bloomAmount);
       gl.uniform1f(p.u('uScatterAmount'), P.scatter);
       gl.uniform3f(p.u('uScatterTint'), P.scatterTint[0], P.scatterTint[1], P.scatterTint[2]);
-      gl.uniform1f(p.u('uAberration'), P.aberration);
-      gl.uniform1f(p.u('uBarrel'), P.barrel);
-      gl.uniform1f(p.u('uVignette'), P.vignette);
-      gl.uniform1f(p.u('uGrain'), P.grain);
+      // Beim Export der Vorlage bleibt das Objektiv aus: Verzeichnung,
+      // Farbsaum, Vignette, Korn und Tropfen gehören in den Strahlengang und
+      // nicht in die Platte. Sonst liegen sie am Ende doppelt im Bild.
+      const lens = backdropOnly ? 0 : 1;
+      gl.uniform1f(p.u('uAberration'), P.aberration * lens);
+      gl.uniform1f(p.u('uBarrel'), P.barrel * lens);
+      gl.uniform1f(p.u('uVignette'), P.vignette * lens);
+      gl.uniform1f(p.u('uGrain'), P.grain * lens);
       gl.uniform1f(p.u('uExposure'), P.exposure);
       gl.uniform1f(p.u('uSaturation'), P.saturation);
-      gl.uniform1f(p.u('uDroplets'), P.droplets);
+      gl.uniform1f(p.u('uDroplets'), P.droplets * lens);
       gl.uniform1f(p.u('uLift'), P.lift);
       bindTextures(gl, p, [
         ['uScene', litScene.tex],
