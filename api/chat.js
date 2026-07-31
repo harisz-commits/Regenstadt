@@ -103,7 +103,10 @@ export default async function handler(req, res) {
   }
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
-    res.status(500).json({ error: 'GEMINI_API_KEY ist auf dem Server nicht gesetzt.' });
+    // Bewusst spielnah formuliert: Dieser Satz steht am Ende im Verhoer vor
+    // dem Spieler, nicht in einem Protokoll. Der Name der Umgebungsvariablen
+    // gehoert dorthin nicht.
+    res.status(500).json({ error: 'Das Archiv antwortet nicht — kein Zugang auf dem Server hinterlegt.' });
     return;
   }
   try {
