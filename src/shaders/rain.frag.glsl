@@ -96,14 +96,13 @@ void main() {
   // Fern: viele feine, kurze Striche
   // Zur Geschwindigkeit: `speed` zaehlt in ZELLEN je Sekunde, die Bildhoehe
   // hat `sy` Zellen. Fallhoehe je Sekunde = speed/sy der Bildhoehe. Die Werte
-  // hier ergeben rund 320, 480 und 720 Bildpunkte je Sekunde bei 1080 Zeilen
-  // — die Groessenordnung, in der Regen als fallend gelesen wird. Vorher
-  // stand hier ein Zehntel davon, und das kroch.
-  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 34.0, 10.0, 0.055, 0.045, 0.72, t, slant);
+  // hier ergeben rund 640, 960 und 1440 Bildpunkte je Sekunde bei 1080 Zeilen.
+  // `density` ist der Anteil der Zellen, der ueberhaupt einen Tropfen traegt.
+  float far  = band(uv + vec2(uWander * 0.02, 0.0), 190.0, 34.0, 20.0, 0.055, 0.090, 0.72, t, slant);
   // Mitte: die tragende Ebene
-  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 18.0, 8.0, 0.055, 0.050, 0.75, t, slant);
-  // Nah: wenige, dicke, unscharfe Tropfen — die schnellste Ebene
-  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 9.0, 6.0, 0.20, 0.025, 0.72, t, slant);
+  float mid  = band(uv + vec2(31.7 + uWander * 0.06, 0.0), 100.0, 18.0, 16.0, 0.055, 0.100, 0.75, t, slant);
+  // Nah: dicke, unscharfe Tropfen — die schnellste Ebene
+  float near = band(uv + vec2(77.1 + uWander * 0.16, 0.0), 36.0, 9.0, 12.0, 0.20, 0.050, 0.72, t, slant);
 
   float rain = far * 0.34 + mid * 0.80 + near * 0.34;
 
