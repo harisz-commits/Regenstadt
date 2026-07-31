@@ -15,8 +15,8 @@ export const params = {
   mouseLook: 0.45,
 
   // Belichtung & Farbe
-  exposure: 0.95,
-  saturation: 1.18,
+  exposure: 1.02,
+  saturation: 1.22,
   lift: 0.45,
 
   // Ebenen
@@ -43,6 +43,11 @@ export const params = {
   // Streulicht im Nebel
   scatter: 0.20,
   scatterTint: [1.0, 0.66, 0.55],
+
+  // Luft
+  rays: 0.42,
+  haze: 0.70,
+  steam: 0.9,
 
   // Objektiv
   aberration: 0.0030,
@@ -76,6 +81,11 @@ export const SCHEMA = [
   ['bloomKnee', 'Bloom-Knie', 0.01, 1.0, 0.01],
   ['bloomRadius', 'Bloom-Radius', 0.5, 3.0, 0.01],
   ['scatter', 'Nebel-Streulicht', 0.0, 1.5, 0.01],
+
+  ['— LUFT —'],
+  ['rays', 'Lichtschächte', 0.0, 3.0, 0.02],
+  ['haze', 'Dunst', 0.0, 3.0, 0.02],
+  ['steam', 'Dampf', 0.0, 3.0, 0.02],
 
   ['— OBJEKTIV —'],
   ['aberration', 'Farbsaum', 0.0, 0.02, 0.0002],

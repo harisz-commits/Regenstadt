@@ -21,6 +21,7 @@ import commonChunk from '../shaders/common.glsl?raw';
 import fsLayer from '../shaders/layer.frag.glsl?raw';
 import fsGround from '../shaders/ground.frag.glsl?raw';
 import fsRain from '../shaders/rain.frag.glsl?raw';
+import fsAtmos from '../shaders/atmos.frag.glsl?raw';
 import fsBloom from '../shaders/bloom.frag.glsl?raw';
 import fsComposite from '../shaders/composite.frag.glsl?raw';
 
@@ -43,6 +44,7 @@ export class Renderer {
     this.pLayer = P(fsLayer, 'layer');
     this.pGround = P(fsGround, 'ground');
     this.pRain = P(fsRain, 'rain');
+    this.pAtmos = P(fsAtmos, 'atmos');
     this.pBloom = P(fsBloom, 'bloom');
     this.pComposite = P(fsComposite, 'composite');
 
@@ -169,6 +171,13 @@ export class Renderer {
     return (plateHorizonUv - 0.5 - oy) / sy + 0.5;
   }
 
+  /** Fluchtpunkt in Bildschirm-UV — Ursprung der Lichtschächte. */
+  vpScreen(parallax) {
+    const [sx] = this.uvScale();
+    const [ox] = this.layerOffset(parallax);
+    return [(VP_X / PLATE_W - 0.5 - ox) / sx + 0.5, this.horizonScreenY(parallax)];
+  }
+
   frame(dt) {
     const gl = this.gl;
     const P = this.params;
@@ -232,7 +241,26 @@ export class Renderer {
       bindTextures(gl, p, [['uScene', cur.tex]]);
       this.tri.draw();
     }
-    const litScene = dst;
+
+    /* --- 4b. Luft: Lichtschächte, Dunst, Dampf -------------------------- */
+    {
+      const p = this.pAtmos;
+      p.use();
+      bindTarget(gl, cur, this.width, this.height);
+      const par = this.scene.ground ? this.scene.ground.parallax : 0.085;
+      const [vx, vy] = this.vpScreen(par);
+      gl.uniform2f(p.u('uResolution'), this.width, this.height);
+      gl.uniform2f(p.u('uVP'), vx, vy);
+      gl.uniform1f(p.u('uHorizonY'), this.horizonScreenY(par));
+      gl.uniform1f(p.u('uTime'), this.time);
+      gl.uniform1f(p.u('uRays'), P.rays);
+      gl.uniform1f(p.u('uHaze'), P.haze);
+      gl.uniform1f(p.u('uSteam'), P.steam);
+      gl.uniform1f(p.u('uWander'), this.cam.x + this.cam.mx);
+      bindTextures(gl, p, [['uScene', dst.tex]]);
+      this.tri.draw();
+    }
+    const litScene = cur;
 
     /* --- 5. Bloom-Pyramide ---------------------------------------------- */
     const pb = this.pBloom;

@@ -66,6 +66,12 @@ try {
 
 // Bewegung anhalten und einen festen Zeitpunkt setzen, damit zwei Aufnahmen
 // vergleichbar sind.
+const seed = arg('seed', null);
+if (seed !== null) {
+  await page.evaluate((s) => window.__regenstadt?.reseed(s), parseInt(seed, 10));
+  await page.waitForTimeout(300);
+}
+
 if (freeze) {
   await page.evaluate((t) => {
     window.__regenstadt?.freeze();

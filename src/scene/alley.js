@@ -133,6 +133,65 @@ function plateFar(rng) {
     x += bw * rr(rng, 0.62, 0.95);
   }
 
+  // Querstraße am Ende der Gasse.
+  //
+  // Durch die Gassenöffnung ist nur ein schmaler Streifen dieser Platte
+  // sichtbar. Ohne Struktur genau dort liest sich das Ende der Gasse als
+  // flacher heller Riegel — der auffälligste Fehler des zweiten Durchlaufs.
+  {
+    const cx = w * 0.5;
+    // Heller Dunstkern, in den hinein die Gasse ausläuft
+    lightDome(ctx, cx, VP_Y - 30, 420, 'rgba(255,180,120,1)', 0.5);
+
+    // Niedrige Bauten und Aufbauten auf Straßenniveau
+    for (let i = 0; i < 26; i++) {
+      const bx = cx + rr(rng, -560, 560);
+      const bw = rr(rng, 26, 110);
+      const bh = rr(rng, 30, 150);
+      ctx.fillStyle = `rgba(${ri(rng, 8, 20)},${ri(rng, 12, 26)},${ri(rng, 22, 42)},1)`;
+      ctx.fillRect(bx, VP_Y - bh, bw, bh + 40);
+      // Beleuchtete Fensterreihen
+      for (let r = 0; r < 4; r++) {
+        if (!chance(rng, 0.5)) continue;
+        ctx.fillStyle = chance(rng, 0.6) ? '#ffb15e' : '#7fe8ff';
+        ctx.globalAlpha = rr(rng, 0.2, 0.7);
+        ctx.fillRect(bx + 3, VP_Y - bh + 8 + r * 11, bw - 6, 4);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // Hochbahn quer über die Querstraße
+    ctx.fillStyle = 'rgba(7,11,20,1)';
+    ctx.fillRect(cx - 620, VP_Y - 122, 1240, 26);
+    for (let i = 0; i < 9; i++) {
+      ctx.fillRect(cx - 600 + i * 150, VP_Y - 100, 13, 100);
+    }
+    // Fahrzeuglichter auf der Hochbahn
+    for (let i = 0; i < 14; i++) {
+      const lx = cx + rr(rng, -600, 600);
+      const c = chance(rng, 0.5) ? '#ff5a4a' : '#ffe0b0';
+      glow(ctx, c, 14);
+      ctx.fillStyle = c;
+      ctx.globalAlpha = rr(rng, 0.4, 1);
+      ctx.fillRect(lx, VP_Y - 128, rr(rng, 5, 16), 3);
+      noGlow(ctx);
+      ctx.globalAlpha = 1;
+    }
+
+    // Vereinzelte senkrechte Leuchtschilder in der Querstraße
+    for (let i = 0; i < 7; i++) {
+      const sx = cx + rr(rng, -540, 540);
+      const sy = VP_Y - rr(rng, 60, 190);
+      const col = pick(rng, PAL.neon);
+      glow(ctx, col, 20);
+      ctx.fillStyle = col;
+      ctx.globalAlpha = rr(rng, 0.5, 0.95);
+      ctx.fillRect(sx, sy, rr(rng, 4, 9), rr(rng, 26, 70));
+      noGlow(ctx);
+      ctx.globalAlpha = 1;
+    }
+  }
+
   // Fernnebel-Schleier über der ganzen Platte: senkt Kontrast, hebt Schwarzwert.
   const fog = ctx.createLinearGradient(0, VP_Y - 700, 0, VP_Y + 20);
   fog.addColorStop(0, 'rgba(40,58,86,0.06)');
@@ -278,6 +337,89 @@ function protrudingSign(ctx, rng, side, d, o = {}) {
   const cx = (face[0][0] + face[2][0]) * 0.5;
   const cy = (face[0][1] + face[2][1]) * 0.5;
   return { x: cx, y: cy, r: Math.max(90, 520 / d), color: col, alpha: 0.34 };
+}
+
+/**
+ * Eine Person in der Gasse. Reine Silhouette mit Lichtsaum — Gesichter und
+ * Details wären auf dieser Größe ohnehin Matsch.
+ *
+ * Wichtig: Figuren stehen in der Straßenplatte, also VOR dem Bodenpass.
+ * Dadurch spiegeln sie sich von selbst in der nassen Fahrbahn.
+ */
+function figure(ctx, rng, X, d, o = {}) {
+  const H = o.height ?? 330;
+  const [fx, fy] = project(X, CAM_H, d);
+  const [, hy] = project(X, CAM_H - H, d);
+  const h = fy - hy;
+  if (h < 12) return;
+  const w = h * 0.24;
+  const headR = h * 0.062;
+  const headCY = hy + headR * 1.15;
+  const shoulderY = hy + h * 0.185;
+  const hipY = hy + h * 0.54;
+  const hemY = hipY + h * 0.17;
+
+  ctx.save();
+  ctx.fillStyle = o.body ?? '#03050b';
+
+  // Beine zuerst, damit der Mantel darüber liegt.
+  const legW = w * 0.21;
+  ctx.fillRect(fx - w * 0.30, hipY, legW, fy - hipY);
+  ctx.fillRect(fx + w * 0.09, hipY, legW, fy - hipY);
+
+  // Mantel: schmale Schultern, nur leicht ausgestellter Saum. Zu viel Flare
+  // und die Silhouette liest sich als Kegel statt als Mensch.
+  ctx.beginPath();
+  ctx.moveTo(fx - w * 0.46, shoulderY);
+  ctx.quadraticCurveTo(fx - w * 0.52, hipY, fx - w * 0.56, hemY);
+  ctx.lineTo(fx + w * 0.56, hemY);
+  ctx.quadraticCurveTo(fx + w * 0.52, hipY, fx + w * 0.46, shoulderY);
+  ctx.quadraticCurveTo(fx, shoulderY - h * 0.05, fx - w * 0.46, shoulderY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Hals und Kopf
+  ctx.fillRect(fx - headR * 0.34, headCY, headR * 0.68, shoulderY - headCY + 2);
+  ctx.beginPath();
+  ctx.arc(fx, headCY, headR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Schirm — dicht über dem Kopf, schmal. Sitzt er zu hoch und zu weit,
+  // schwebt eine Scheibe über der Figur.
+  if (o.umbrella) {
+    const uy = headCY - headR * 2.4;
+    const uw = w * 1.05;
+    ctx.beginPath();
+    ctx.moveTo(fx - uw, uy);
+    ctx.quadraticCurveTo(fx, uy - h * 0.115, fx + uw, uy);
+    ctx.quadraticCurveTo(fx, uy + h * 0.032, fx - uw, uy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = o.body ?? '#03050b';
+    ctx.lineWidth = Math.max(1, h * 0.012);
+    ctx.beginPath();
+    ctx.moveTo(fx, uy);
+    ctx.lineTo(fx, shoulderY + h * 0.06);
+    ctx.stroke();
+  }
+
+  // Lichtsaum von einer Seite — trennt die Figur von der dunklen Wand.
+  const rimCol = o.rim ?? '#2ee6ff';
+  const sgn = o.rimSide ?? 1;
+  glow(ctx, rimCol, h * 0.14);
+  ctx.strokeStyle = rimCol;
+  ctx.globalAlpha = 0.75;
+  ctx.lineWidth = Math.max(1, h * 0.018);
+  ctx.beginPath();
+  ctx.moveTo(fx + sgn * w * 0.46, shoulderY);
+  ctx.quadraticCurveTo(fx + sgn * w * 0.52, hipY, fx + sgn * w * 0.56, hemY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(fx + sgn * headR * 0.2, headCY, headR, -1.2, 0.9);
+  ctx.stroke();
+  noGlow(ctx);
+  ctx.globalAlpha = 1;
+  ctx.restore();
 }
 
 function plateStreet(rng) {
@@ -455,7 +597,13 @@ function plateStreet(rng) {
     }
   }
 
-  grime(ctx, rng, PLATE_W, PLATE_H, 0.05, 22000);
+  // Zwei Gestalten in der Gasse. Sie liefern den Maßstab: ohne eine Figur
+  // im Bild kann das Auge nicht entscheiden, ob die Gasse vier Meter breit
+  // ist oder vierzig.
+  figure(ctx, rng, -480, 1.55, { umbrella: true, rim: '#2ee6ff', rimSide: 1 });
+  figure(ctx, rng, 340, 2.40, { umbrella: false, rim: '#ff8a4a', rimSide: -1, height: 320 });
+
+  grime(ctx, rng, PLATE_W, PLATE_H, 0.05);
   return { canvas, ctx };
 }
 
@@ -541,7 +689,7 @@ function plateGround(rng) {
     }
   }
 
-  grime(ctx, rng, PLATE_W, PLATE_H, 0.08, 30000);
+  grime(ctx, rng, PLATE_W, PLATE_H, 0.08);
   ctx.restore();
   return { canvas, ctx };
 }

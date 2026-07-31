@@ -41,9 +41,11 @@ out vec4 fragColor;
 /* Regentropfen-Ringe auf der Wasseroberfläche, in Weltkoordinaten. */
 vec2 rippleNormal(vec2 wp, float t) {
   vec2 n = vec2(0.0);
-  // Drei Frequenzbänder, damit Ringe unterschiedlich groß einschlagen.
-  for (int k = 0; k < 3; k++) {
-    float sc = 3.0 + float(k) * 5.0;
+  // Zwei Frequenzbänder, damit Ringe unterschiedlich groß einschlagen.
+  // Jedes Band tastet 3x3 Zellen ab — das ist die teuerste Schleife im
+  // ganzen Bild, ein drittes Band war seinen Preis nicht wert.
+  for (int k = 0; k < 2; k++) {
+    float sc = 3.5 + float(k) * 6.0;
     vec2 p = wp * sc;
     vec2 id = floor(p);
     vec2 f = fract(p) - 0.5;
@@ -94,8 +96,8 @@ void main() {
   vec2 rn = rippleNormal(world, uTime) * uRipple;
   // Langsame Grundwelle, damit auch ohne Einschläge etwas lebt.
   rn += vec2(
-    fbm(world * 1.7 + vec2(0.0, uTime * 0.12)) - 0.5,
-    fbm(world * 1.7 + vec2(11.3, uTime * 0.09)) - 0.5
+    fbm3(world * 1.7 + vec2(0.0, uTime * 0.12)) - 0.5,
+    fbm3(world * 1.7 + vec2(11.3, uTime * 0.09)) - 0.5
   ) * 0.28 * uRipple;
 
   // Störung in Bildschirmpixel umrechnen: nah = stark, fern = kaum.

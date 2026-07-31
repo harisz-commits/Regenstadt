@@ -44,6 +44,20 @@ float fbm(vec2 p) {
   return s;
 }
 
+// Drei Oktaven statt fünf. Für weiche Schwaden und Dampf ist der Unterschied
+// im Bild nicht zu sehen, in den Kosten schon — diese Aufrufe liegen in den
+// heißesten Schleifen.
+float fbm3(vec2 p) {
+  float a = 0.5;
+  float s = 0.0;
+  for (int i = 0; i < 3; i++) {
+    s += a * vnoise(p);
+    p = p * 2.03 + 17.1;
+    a *= 0.5;
+  }
+  return s;
+}
+
 // Luminanz nach Rec.709
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 

@@ -422,16 +422,38 @@ export function hangingLamp(ctx, x, y, r, color, coneH) {
 
 /* ------------------------------ Nachbearbeitung -------------------------- */
 
-/** Feines Korn/Schmutz auf die Platte — nimmt den „frisch aus dem Vektor"-Look. */
-export function grime(ctx, rng, w, h, amount = 0.05, dots = 26000) {
+/**
+ * Feines Korn/Schmutz auf die Platte — nimmt den „frisch aus dem Vektor"-Look.
+ *
+ * Erzeugt eine Rauschkachel und legt sie gekachelt auf. Zehntausende einzelne
+ * `fillRect` mit `overlay` waren zuvor teurer als der gesamte Rest der Platte
+ * zusammen.
+ */
+export function grime(ctx, rng, w, h, amount = 0.05) {
+  const S = 256;
+  const tile = document.createElement('canvas');
+  tile.width = S;
+  tile.height = S;
+  const tctx = tile.getContext('2d');
+  const img = tctx.createImageData(S, S);
+  const d = img.data;
+  for (let i = 0; i < S * S; i++) {
+    const r = rng();
+    if (r > 0.34) continue; // die meisten Pixel bleiben unberührt
+    const dark = r < 0.17;
+    const a = Math.round(rng() * amount * 255);
+    const o = i * 4;
+    d[o] = dark ? 0 : 190;
+    d[o + 1] = dark ? 0 : 215;
+    d[o + 2] = dark ? 0 : 255;
+    d[o + 3] = a;
+  }
+  tctx.putImageData(img, 0, 0);
+
   ctx.save();
   ctx.globalCompositeOperation = 'overlay';
-  for (let i = 0; i < dots; i++) {
-    const x = rng() * w;
-    const y = rng() * h;
-    const a = rng() * amount;
-    ctx.fillStyle = rng() < 0.5 ? `rgba(0,0,0,${a})` : `rgba(190,215,255,${a})`;
-    ctx.fillRect(x, y, 1 + (rng() < 0.1 ? 1 : 0), 1);
+  for (let y = 0; y < h; y += S) {
+    for (let x = 0; x < w; x += S) ctx.drawImage(tile, x, y);
   }
   ctx.restore();
 }
