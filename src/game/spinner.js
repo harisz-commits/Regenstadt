@@ -23,19 +23,26 @@
 
 import { DISTRICTS, DISTRICT_IDS } from './districts.js';
 
-/** Futuristischer Wagen, von der Seite. Auch als Zeiger auf der Karte. */
+/**
+ * Der Wagen, von der Seite. Sitzt im Kopf des Bildschirms und auf dem Gerät.
+ *
+ * Bewusst als FLÄCHE gezeichnet, nicht als Strichzeichnung: Die erste Fassung
+ * war eine Kontur aus 1,3 Einheiten breiten Linien und zerfiel bei 22 px zu
+ * einem Gekrissel. Eine geschlossene Silhouette bleibt bei jeder Größe
+ * eindeutig.
+ *
+ * Räder hat er keine — mit Rädern liest er sich als gewöhnliches Auto. Die
+ * zwei Striche darunter sind die Schwebedüsen und sagen in einem Zug, dass
+ * das Ding fliegt.
+ */
 const AUTO_SVG =
-  '<svg viewBox="0 0 32 16" fill="none" xmlns="http://www.w3.org/2000/svg">'
-  + '<path d="M3 10.5 L7.5 6.2 C9 4.7 11 4 13.2 4 H20 C23 4 25.6 5.2 27.4 7.4 L29 9.4 '
-  + 'C29.6 10.1 29.2 11.2 28.3 11.3 L24 11.7" stroke="currentColor" stroke-width="1.3" '
-  + 'stroke-linecap="round" stroke-linejoin="round"/>'
-  + '<path d="M3 10.5 H10.5 M14 11.7 H21.5" stroke="currentColor" stroke-width="1.3" '
-  + 'stroke-linecap="round"/>'
-  + '<circle cx="12.2" cy="11.6" r="1.9" stroke="currentColor" stroke-width="1.3"/>'
-  + '<circle cx="22.8" cy="11.6" r="1.9" stroke="currentColor" stroke-width="1.3"/>'
-  + '<path d="M10 6.6 H18.5" stroke="currentColor" stroke-width="1.1" opacity=".65"/>'
-  + '<path d="M1 7.6 H5.4 M0.4 5.2 H3.6" stroke="currentColor" stroke-width="1.1" '
-  + 'stroke-linecap="round" opacity=".5"/></svg>';
+  '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" '
+  + 'aria-hidden="true" focusable="false">'
+  + '<path d="M3.4 13.9c.2-1.4 1.7-2.5 3.8-2.9l2.6-3C10.5 7.3 11.5 6.9 12.6 6.9h2.7'
+  + 'c1.5 0 2.9.8 3.6 2.1l1.1 2c1.4.4 2.3 1.2 2.4 2.1.1.6-.4 1.1-1 1.1H4.4'
+  + 'c-.7 0-1.1-.5-1-1.1z"/>'
+  + '<path d="M6.2 17.4h4.4M14 17.4h4.2" stroke="currentColor" stroke-width="1.7" '
+  + 'stroke-linecap="round" opacity=".42" fill="none"/></svg>';
 
 const CSS = `
 /* --- Bordgerät ---------------------------------------------------------- */
@@ -207,7 +214,7 @@ export function createSpinner(host) {
   el.innerHTML = `
     <div class="kopf">
       <div class="ico">${AUTO_SVG}</div>
-      <div class="t"><div class="n">Bordgerät · Zielwahl</div><div class="s">Karte</div></div>
+      <div class="t"><div class="n">Bordgerät</div><div class="s">Karte</div></div>
       <button class="zurueck" type="button">Schließen</button>
     </div>
     <div class="rumpf">

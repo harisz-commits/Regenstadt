@@ -151,22 +151,46 @@ const CSS = `
 #topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 16;
   display: flex; justify-content: space-between; align-items: flex-start;
+  /* Der Ortsname links und die Bedienung rechts haben sich um denselben Platz
+     gestritten: Auf schmalen Geraeten stiess "Unterstadt" an den Wagen, und
+     das UI sah kaputt aus. Fester Abstand dazwischen, links darf gekuerzt
+     werden, rechts nie. */
+  gap: clamp(14px, 4vw, 34px);
   padding: calc(16px + env(safe-area-inset-top)) clamp(16px, 4vw, 40px) 16px;
   font: 10px/1.5 ui-monospace, Menlo, monospace; letter-spacing: .26em;
   color: rgba(190,214,235,.62); text-transform: uppercase;
   background: linear-gradient(to bottom, rgba(4,6,10,.66), rgba(4,6,10,0));
   pointer-events: none;
 }
-/* Der Abstand fehlte, solange hier nur zwei Elemente standen —
-   mit dem Karten-Knopf las sich die Zeile als KARTEAKTE. */
-#topbar .actions { display: flex; align-items: center; gap: 18px; }
+#topbar .where { min-width: 0; }
+#topbar .where > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Auf schmalen Geraeten darf der Ortsname umbrechen. „Kanalgasse · Hint…"
+   sagt weniger als zwei volle Zeilen, und der Kopf ist ohnehin nur ein
+   Verlauf ueber dem Bild. */
+@media (max-width: 560px) {
+  #topbar .where .place {
+    white-space: normal; letter-spacing: .12em; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  #topbar .where .sector { letter-spacing: .16em; }
+}
+#topbar .actions { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 #topbar .right { pointer-events: auto; cursor: pointer; color: rgba(190,214,235,.62); }
-#topbar .right.karte { display: inline-flex; align-items: center; gap: 7px; }
-#topbar .right.karte .auto { width: 22px; display: block; color: #7fc9e6; }
-#topbar .right.karte .auto svg { width: 100%; display: block; }
-#topbar .right.karte:hover { color: #dceefb; }
-#topbar .right.karte:hover .auto { color: #b6e8ff; }
 #topbar .right:hover { color: #e8f2ff; }
+
+/* Der Wagen ist der einzige Knopf ohne Wort. Er braucht keins — ein Auto in
+   der Ecke eines Detektivspiels heisst „woanders hin". Dafuer bekommt er eine
+   Flaeche, damit er sich am Finger nicht wie ein Symbol im Nichts anfuehlt. */
+#topbar .karte {
+  display: inline-flex; align-items: center; justify-content: center;
+  /* Rahmenlos wie „Akte" und „?" daneben — ein Kasten waere das dritte
+     Aussehen in einer Zeile mit drei Knoepfen. Die Flaeche fuer den Finger
+     macht der Innenabstand, nicht ein Rahmen. */
+  padding: 3px 2px; margin: -3px 0; color: rgba(150,205,232,.78);
+  transition: color .15s, transform .15s;
+}
+#topbar .karte svg { width: 25px; display: block; filter: drop-shadow(0 1px 4px rgba(0,0,0,.6)); }
+#topbar .karte:hover { color: #bfeaff; transform: translateX(1px); }
 #topbar .sector { color: rgba(255,150,90,.72); }
 #topbar .place { color: #dbe9f7; font-size: 13px; letter-spacing: .2em; margin-top: 5px; }
 #topbar .help {
@@ -226,6 +250,8 @@ const CSS = `
   #panel .body { max-width: none; }
   #panel button, #akte button { padding: 12px 18px; font-size: 12px; }
   #topbar .place { font-size: 12px; }
+  #topbar .actions { gap: 15px; }
+  #topbar .karte svg { width: 23px; }
   #akte { font-size: 14px; }
   #hs-label { font-size: 12px; }
   #hint-bar { letter-spacing: .12em; }
@@ -251,6 +277,7 @@ export function createInteraction(renderer, host) {
   const top = document.createElement('div');
   top.id = 'topbar';
   const where = document.createElement('div');
+  where.className = 'where';
   where.innerHTML = '<div class="sector"></div><div class="place"></div>';
   const actions = document.createElement('div');
   actions.className = 'actions';
@@ -262,8 +289,7 @@ export function createInteraction(renderer, host) {
   helpBtn.setAttribute('role', 'button');
   helpBtn.setAttribute('aria-label', 'Steuerung anzeigen');
   const spinnerBtn = document.createElement('div');
-  spinnerBtn.className = 'right';
-  spinnerBtn.classList.add('karte');
+  spinnerBtn.className = 'right karte';
   spinnerBtn.setAttribute('role', 'button');
   spinnerBtn.setAttribute('aria-label', 'Karte öffnen');
   actions.append(spinnerBtn, akteBtn, helpBtn);
@@ -447,7 +473,7 @@ export function createInteraction(renderer, host) {
     getScene: () => currentScene,
     notify: toast,
   });
-  spinnerBtn.innerHTML = `<span class="auto">${spinner.icon}</span>Karte`;
+  spinnerBtn.innerHTML = spinner.icon;
   spinnerBtn.onclick = () => { close(); spinner.open(); };
 
   function say(spot) {
