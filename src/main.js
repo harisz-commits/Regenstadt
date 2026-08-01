@@ -1,9 +1,10 @@
 import { Renderer } from './render/renderer.js';
-import { params, platePreset } from './render/params.js';
+import { params, platePreset, interiorPreset } from './render/params.js';
 import { buildAlley } from './scene/alley.js';
 import { createOverlay } from './ui/overlay.js';
 import { createInteraction } from './game/interaction.js';
-import { SCENES } from './game/scenes.js';
+import { SCENES, START } from './game/scenes.js';
+import { createWorld } from './game/world.js';
 import { guardViewport, isTouch } from './ui/viewport.js';
 
 // Zoom-Sperren und Geraeteraender setzen, bevor irgendetwas gezeichnet wird.
@@ -86,6 +87,11 @@ async function loadLocation(id) {
     Object.assign(params, platePreset);
   }
 
+  // Drinnen regnet es nicht — und zwar unabhängig davon, ob für den Raum
+  // schon eine Platte existiert. Stünde das im Zweig oben, behielte ein noch
+  // gezeichneter Innenraum die Regeneinstellung des vorherigen Ortes.
+  if (def.kind === 'interior') Object.assign(params, interiorPreset);
+
   renderer.setScene(scene);
   current = def;
   interaction?.setScene(def);
@@ -95,20 +101,34 @@ async function loadLocation(id) {
   );
 }
 
+/**
+ * Der Zustand der Ermittlung: was getragen wird, was im Labor liegt, was
+ * schon bekannt ist. Siehe game/world.js.
+ */
+const world = createWorld();
+
 /** Ortswechsel mit kurzer Schwarzblende, damit das Bild nicht springt. */
 async function goTo(id) {
   if (!id || id === current?.id) return;
   await interaction.fadeOut();
   await loadLocation(id);
+  // Erst NACH dem Laden zaehlen: Ein Befund, der waehrend der Blende fertig
+  // wird, soll am neuen Ort schon bereitliegen.
+  const fertig = world.step();
   interaction.fadeIn();
+  if (fertig) interaction.notify(
+    fertig === 1
+      ? 'Ein Befund liegt am Laborschalter bereit.'
+      : `${fertig} Befunde liegen am Laborschalter bereit.`,
+  );
 }
 
 const overlay = createOverlay(params, {
   onChange: (key) => { if (key === 'renderScale') fit(true); },
-  onReseed: () => { seed = (Math.random() * 1e9) | 0; loadLocation(current?.id || 'alley'); },
+  onReseed: () => { seed = (Math.random() * 1e9) | 0; loadLocation(current?.id || START); },
 });
 
-interaction = createInteraction(renderer, { getScene: () => current, goTo });
+interaction = createInteraction(renderer, { getScene: () => current, goTo, world });
 
 const stage = document.getElementById('stage');
 
@@ -155,7 +175,7 @@ addEventListener('pointermove', (e) => {
   targetMy = (e.clientY / window.innerHeight - 0.5) * 2;
 });
 
-loadLocation('alley');
+loadLocation(START);
 fit();
 
 let last = performance.now();
@@ -229,7 +249,7 @@ requestAnimationFrame(loop);
 window.__regenstadt = {
   renderer,
   params,
-  reseed(s) { seed = s; return loadLocation(current?.id || 'alley'); },
+  reseed(s) { seed = s; return loadLocation(current?.id || START); },
   goTo,
   setTime(t) { renderer.time = t; renderer.timeFrozen = true; },
   freeze() { params.drift = 0; params.mouseLook = 0; renderer.cam.mx = 0; renderer.cam.my = 0; },

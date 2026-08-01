@@ -92,6 +92,31 @@ export const platePreset = {
   aberration: 0.0014,
 };
 
+/**
+ * Innenräume.
+ *
+ * Drinnen regnet es nicht — und daran hängt mehr als der Regen selbst: Ohne
+ * Regen gibt es keine nasse Fahrbahn, keine Spiegelung und keine Kräuselung.
+ * Der Bodenpass würde sonst mitten im Zimmer eine Pfütze suchen.
+ *
+ * Was bleibt, ist die Kamera: Dunst, Bloom, Korn, Objektiv. Das hält den
+ * Innenraum im selben Bild wie die Straße, statt ihn wie einen Fremdkörper
+ * aussehen zu lassen.
+ */
+export const interiorPreset = {
+  ...platePreset,
+  rain: 0.0,
+  ripple: 0.0,
+  reflect: 0.0,
+  droplets: 0.0,
+  // Etwas mehr Dunst und Streuung: Innenräume leben von Licht in der Luft,
+  // nicht von nassen Flächen.
+  haze: 0.16,
+  scatter: 0.06,
+  rays: 0.10,
+  bloomAmount: 0.20,
+};
+
 /** Schema für das Overlay: [Schlüssel, Beschriftung, min, max, Schritt]. */
 export const SCHEMA = [
   ['— BILD —'],

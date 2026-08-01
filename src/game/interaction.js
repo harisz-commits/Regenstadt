@@ -53,9 +53,34 @@ const CSS = `
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v15M6 13l6 6 6-6'/%3E%3C/svg%3E");
   animation-name: nudgeDown;
 }
+#hs-layer .hs.exit.left .mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 12H5M11 6l-6 6 6 6'/%3E%3C/svg%3E");
+  animation-name: nudgeLeft;
+}
+#hs-layer .hs.exit.right .mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6'/%3E%3C/svg%3E");
+  animation-name: nudgeRight;
+}
+/* Hinein und hinaus: eine Tuer, kein Pfeil. Eine Richtung waere hier gelogen —
+   die Tuer liegt in der Bildtiefe, nicht links oder rechts. */
+#hs-layer .hs.exit.in .mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H5v18h9M10 12h10M16 8l4 4-4 4'/%3E%3C/svg%3E");
+}
+#hs-layer .hs.exit.out .mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 3h9v18h-9M14 12H4M8 8l-4 4 4 4'/%3E%3C/svg%3E");
+  animation-name: nudgeDown;
+}
+/* Verschlossen: sichtbar, aber matt und ohne Zappeln. Man soll sehen, dass es
+   dort weitergeht, und dass es jetzt noch nicht geht. */
+#hs-layer .hs.exit.locked .mark {
+  opacity: .26; animation: none; filter: grayscale(1) drop-shadow(0 2px 6px rgba(0,0,0,.9));
+}
+#hs-layer .hs.exit.locked:hover .mark { opacity: .5; }
 #hs-layer .hs.exit:hover .mark { opacity: 1; }
-@keyframes nudge     { 0%,100% { transform: translateY(3px);  } 50% { transform: translateY(-3px); } }
-@keyframes nudgeDown { 0%,100% { transform: translateY(-3px); } 50% { transform: translateY(3px);  } }
+@keyframes nudge      { 0%,100% { transform: translateY(3px);  } 50% { transform: translateY(-3px); } }
+@keyframes nudgeDown  { 0%,100% { transform: translateY(-3px); } 50% { transform: translateY(3px);  } }
+@keyframes nudgeLeft  { 0%,100% { transform: translateX(3px);  } 50% { transform: translateX(-3px); } }
+@keyframes nudgeRight { 0%,100% { transform: translateX(-3px); } 50% { transform: translateX(3px);  } }
 
 #hs-layer.reveal .hs .mark, #hs-layer .hs:focus-visible .mark { opacity: .8; }
 #hs-layer.touch .hs:not(.exit) .mark { opacity: .32; }
@@ -95,7 +120,22 @@ const CSS = `
 #panel:not(.has-shot) .act { grid-column: 1 / -1; }
 #panel .ttl { font-size: 10px; letter-spacing: .3em; color: #7fb4d8; margin-bottom: 11px; text-transform: uppercase; }
 #panel .body { max-width: 62ch; margin: 0; min-height: 3.6em; }
-#panel .act { margin-top: 17px; display: flex; gap: 10px; flex-wrap: wrap; }
+#panel .act { margin-top: 17px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+#panel .act .wartet {
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255,190,116,.75); padding: 4px 0;
+}
+
+/* Kurzmeldung, wenn etwas passiert, das die Tafel nicht zeigt. */
+#toast {
+  position: fixed; z-index: 30; left: 50%; transform: translate(-50%, 14px);
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  padding: 11px 18px; max-width: min(92vw, 60ch);
+  background: rgba(8,12,18,.94); border: 1px solid rgba(255,190,116,.34);
+  color: #ffd9a8; font-size: 12.5px; letter-spacing: .04em; text-align: center;
+  opacity: 0; pointer-events: none; transition: opacity .22s, transform .22s;
+}
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
 #panel button, #akte button {
   font: inherit; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
   padding: 10px 17px; cursor: pointer; color: #9ec8e4;
@@ -140,6 +180,16 @@ const CSS = `
 #akte .item .h { color: #ffd7a4; letter-spacing: .1em; font-size: 12px; }
 #akte .item .t { opacity: .72; margin-top: 5px; }
 #akte .empty { opacity: .4; }
+#akte h3 {
+  font-size: 10px; letter-spacing: .3em; color: #7fb4d8; font-weight: 400;
+  text-transform: uppercase; margin: 8px 0 18px;
+  padding-top: 20px; border-top: 1px solid rgba(126,190,230,.16);
+}
+/* Was noch laeuft, ist blasser; was fertig ist, leuchtet. Der Unterschied muss
+   im Vorbeischauen lesbar sein, ohne den Text zu lesen. */
+#akte .item.wartet { border-left-color: rgba(159,180,204,.32); opacity: .6; }
+#akte .item.bereit { border-left-color: rgba(120,240,180,.75); }
+#akte .item.bereit .h { color: #9df3c8; }
 #akte button { align-self: flex-start; margin-top: 24px; }
 
 #hint-bar {
@@ -248,6 +298,19 @@ export function createInteraction(renderer, host) {
   const notes = [];
   const seen = new Set();
   let currentScene = null;
+  const world = host.world;
+
+  /** Kurze Rueckmeldung, wenn etwas passiert, das die Tafel nicht zeigt. */
+  let toastTimer = null;
+  const toastEl = document.createElement('div');
+  toastEl.id = 'toast';
+  document.body.appendChild(toastEl);
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('on'), 3400);
+  }
 
   /** Eine Spur in die Akte legen. Doppelte werden verworfen. */
   function addNote(label, text) {
@@ -259,7 +322,13 @@ export function createInteraction(renderer, host) {
   // Das Verhoer traegt seine eigenen Spuren ein und liest die Akte, um
   // Vorhalten anbieten zu koennen.
   const talk = createTalk({
-    getNotes: () => notes,
+    // Auch die getragenen Gegenstaende: Jemandem das blutige Tuch hinzuhalten
+    // ist der staerkste Vorhalt, den das Spiel hat — er gehoert in dieselbe
+    // Liste wie eine Notiz.
+    getNotes: () => [
+      ...notes,
+      ...world.items().map((i) => ({ label: i.name, text: i.text })),
+    ],
     addNote,
     getPlace: () => currentScene?.name || 'Kanalgasse',
   });
@@ -280,14 +349,62 @@ export function createInteraction(renderer, host) {
       d.querySelector('.t').textContent = n.text;
       akte.appendChild(d);
     }
+    // Asservate und laufende Untersuchungen stehen in derselben Akte. Ein
+    // zweiter Beutel-Knopf waere eine zweite Stelle zum Nachsehen.
+    const getragen = world.items();
+    const laufend = world.pending();
+    const fertig = world.ready();
+    if (getragen.length || laufend.length || fertig.length) {
+      const h = document.createElement('h3');
+      h.textContent = 'Asservate';
+      akte.appendChild(h);
+      for (const it of getragen) {
+        const d = document.createElement('div');
+        d.className = 'item';
+        d.innerHTML = '<div class="h"></div><div class="t"></div>';
+        d.querySelector('.h').textContent = it.name;
+        d.querySelector('.t').textContent = it.text;
+        akte.appendChild(d);
+      }
+      for (const a of laufend) {
+        const d = document.createElement('div');
+        d.className = 'item wartet';
+        d.innerHTML = '<div class="h"></div><div class="t"></div>';
+        d.querySelector('.h').textContent = `${a.item.name} — im Labor`;
+        d.querySelector('.t').textContent =
+          `Der Befund ist nicht fertig. Noch ${a.restBewegungen} `
+          + `${a.restBewegungen === 1 ? 'Ortswechsel' : 'Ortswechsel'}, dann liegt er am Schalter bereit.`;
+        akte.appendChild(d);
+      }
+      for (const a of fertig) {
+        const d = document.createElement('div');
+        d.className = 'item bereit';
+        d.innerHTML = '<div class="h"></div><div class="t"></div>';
+        d.querySelector('.h').textContent = `${a.item.name} — Befund liegt bereit`;
+        d.querySelector('.t').textContent = 'Abzuholen am Laborschalter im Präsidium.';
+        akte.appendChild(d);
+      }
+    }
+
     const b = document.createElement('button');
     b.textContent = 'Schließen';
     b.onclick = () => akte.classList.remove('on');
     akte.appendChild(b);
   }
-  const updateAkteBtn = () => { akteBtn.textContent = `Akte · ${notes.length}`; };
+  const updateAkteBtn = () => {
+    const n = notes.length + world.items().length;
+    akteBtn.textContent = `Akte · ${n}`;
+  };
   updateAkteBtn();
   akteBtn.onclick = () => { renderAkte(); akte.classList.add('on'); };
+
+  // Aendert sich der Weltzustand, muessen die Punkte neu gebaut werden: Wer
+  // die Schluesselkarte aufhebt, soll die Stahltuer SOFORT offen sehen und
+  // nicht erst, wenn er den Ort einmal verlassen hat.
+  world.onChange(() => {
+    updateAkteBtn();
+    if (currentScene) buildSpots(currentScene.spots);
+  });
 
   /* --- Steuerungshilfe ---------------------------------------------------- */
   let hintTimer = null;
@@ -326,7 +443,10 @@ export function createInteraction(renderer, host) {
       pShot.removeAttribute('src');
     }
 
-    const full = spot.text || '';
+    // Verschlossen: Der Grund gehoert in denselben Text. Ein Ausgang, der
+    // stumm bleibt, liest sich als Fehler im Spiel.
+    const gesperrt = spot.goto && !world.meets(spot.requires);
+    const full = (spot.text || '') + (gesperrt && spot.lockText ? `\n\n${spot.lockText}` : '');
     if (reduced || full.length === 0) {
       pBody.textContent = full;
     } else {
@@ -347,11 +467,79 @@ export function createInteraction(renderer, host) {
       pAct.appendChild(t);
     }
 
+    /**
+     * Der Laborschalter.
+     *
+     * Abgeben kostet keine Zeit, aber das Ergebnis braucht Wege: Die Wartezeit
+     * laeuft in ORTSWECHSELN (world.step), nicht in Sekunden. Wer vor dem
+     * Schalter stehen bleibt, wartet ewig; wer weiterermittelt, bekommt den
+     * Befund. Genau so soll sich das anfuehlen.
+     */
+    function labButtons() {
+      for (const a of world.ready()) {
+        const b = document.createElement('button');
+        b.className = 'mark-clue';
+        b.textContent = `Befund abholen: ${a.item.name}`;
+        b.onclick = () => {
+          const got = world.collect(a.id);
+          if (!got) return;
+          addNote(got.ergebnis.label, got.ergebnis.text);
+          close();
+          toast('Befund in der Akte.');
+        };
+        pAct.appendChild(b);
+      }
+
+      for (const item of world.items()) {
+        if (!item.analysis) continue;
+        const b = document.createElement('button');
+        b.textContent = `Abgeben: ${item.name}`;
+        b.onclick = () => {
+          world.submit(item);
+          close();
+          toast('Abgegeben. Der Befund braucht seine Zeit — geh weiter.');
+        };
+        pAct.appendChild(b);
+      }
+
+      const offen = world.pending();
+      if (offen.length) {
+        const w = document.createElement('div');
+        w.className = 'wartet';
+        w.textContent = offen
+          .map((a) => `${a.item.name}: noch ${a.restBewegungen} ${a.restBewegungen === 1 ? 'Weg' : 'Wege'}`)
+          .join(' · ');
+        pAct.appendChild(w);
+      }
+    }
+
+    // Gegenstand mitnehmen. Erst dadurch wird aus dem Untersuchen eine
+    // Ermittlung: Was man in der Hand hat, oeffnet anderswo eine Tuer.
+    if (spot.item && !world.wasTaken(spot.item.id)) {
+      const m = document.createElement('button');
+      m.className = 'mark-clue';
+      m.textContent = `Mitnehmen: ${spot.item.name}`;
+      m.onclick = () => {
+        // Kein addNote: Der Gegenstand steht schon unter „Asservate" in der
+        // Akte. Zweimal dieselbe Zeile liest sich wie ein Fehler.
+        world.take(spot.item);
+        m.remove();
+        toast(`${spot.item.name} — in die Asservate.`);
+      };
+      pAct.appendChild(m);
+    }
+
+    if (spot.kind === 'lab') labButtons();
+
     if (spot.goto) {
+      const frei = world.meets(spot.requires);
       const g = document.createElement('button');
       g.className = 'go';
-      g.textContent = spot.dir === 'back' ? 'Zurückgehen' : 'Hingehen';
-      g.onclick = () => { close(); host.goTo(spot.goto); };
+      g.textContent = frei
+        ? ({ back: 'Zurückgehen', in: 'Hineingehen', out: 'Hinausgehen' }[spot.dir] || 'Hingehen')
+        : 'Verschlossen';
+      g.disabled = !frei;
+      if (frei) g.onclick = () => { close(); host.goTo(spot.goto); };
       pAct.appendChild(g);
     }
 
@@ -398,7 +586,8 @@ export function createInteraction(renderer, host) {
     renderer.hover[3] = 0;
     nodes = spots.map((s) => {
       const b = document.createElement('button');
-      b.className = 'hs' + (s.kind ? ' ' + s.kind : '') + (s.dir ? ' ' + s.dir : '');
+      b.className = 'hs' + (s.kind ? ' ' + s.kind : '') + (s.dir ? ' ' + s.dir : '')
+                  + (s.goto && !world.meets(s.requires) ? ' locked' : '');
       b.type = 'button';
       b.setAttribute('aria-label', s.label);
       b.innerHTML = '<span class="mark"></span>';
@@ -410,7 +599,9 @@ export function createInteraction(renderer, host) {
         // Wer quer gezogen hat, wollte sich umsehen und nicht untersuchen.
         if (wasDrag()) return;
         // Ein Pfeil ohne weiteren Text führt sofort weiter — dafür ist er da.
-        if (s.goto && !s.text) { close(); host.goTo(s.goto); return; }
+        // Es sei denn, er ist verschlossen: dann muss die Tafel den Grund
+        // nennen, statt dass der Klick ins Leere geht.
+        if (s.goto && !s.text && world.meets(s.requires)) { close(); host.goTo(s.goto); return; }
         if (touch) {
           for (const n of nodes) n.el.classList.remove('active');
           b.classList.add('active');
@@ -472,6 +663,9 @@ export function createInteraction(renderer, host) {
   });
 
   return {
+    /** Kurzmeldung einblenden — etwa, wenn ein Laborbefund fertig wird. */
+    notify: toast,
+
     /** Ort wechseln: Punkte neu setzen, Kopfzeile beschriften. */
     setScene(scene) {
       currentScene = scene;
