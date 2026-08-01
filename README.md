@@ -136,11 +136,34 @@ Das Geheimnis ist der eigentliche Kniff. Wer etwas zu verbergen hat, weicht
 aus — auch als Unschuldiger. Damit laesst sich aus Nervositaet allein nicht auf
 den Taeter schliessen, und Verhoere werden mehr als eine Ja/Nein-Abfrage.
 
-Was in der Akte steht, wird der Figur als Kenntnisstand mitgegeben und
-erscheint als **Vorhalten**-Knopf. Erst dann gibt Doran Vey zu, dass die
-Frachtkisten ihm gehoeren. Gibt eine Figur etwas wirklich Neues preis, haengt
-sie eine Zeile `[SPUR] …` an; die wandert in die Akte und steht ab dann selbst
-zum Vorhalten bereit.
+Was in der Akte steht, wird der Figur als Kenntnisstand mitgegeben. Erst dann
+gibt Doran Vey zu, dass die Frachtkisten ihm gehoeren. Gibt eine Figur etwas
+wirklich Neues preis, haengt sie eine Zeile `[SPUR] …` an; die wandert in die
+Akte und faerbt ab da alle weiteren Gespraeche.
+
+### Die Vorschlagsfragen schreibt das Modell
+
+Der erste Versuch hat sie aus Bausteinen gesetzt: „Vorhalten: " plus die
+Ueberschrift einer Aktennotiz. Bei einem Fundstueck ging das gerade noch, bei
+einem Ort kam **„Ich halte Ihnen vor — Bar"** heraus. Das ist kein Satz, den
+ein Mensch sagt, und es hat jedes Gespraech kaputt gemacht.
+
+Jetzt schreibt dieselbe Instanz, die auch antwortet, vor jedem Zug vier Fragen
+— sie kennt Figur, Ort, Akte und den bisherigen Verlauf. Vorgegeben sind nur
+Laenge (hoechstens zwoelf Woerter, sie stehen auf Schaltflaechen) und vier
+Tonlagen: beilaeufig, sachlich, auf einen Fund gezielt, unangenehm. Die letzte
+ist im Bild orange.
+
+Heraus kommen Saetze wie „Woher haben Sie einen so guten Schirm fuer diese
+Kanalgasse?" oder — aus einem Nebensatz in der Beschreibung des Marktstands —
+„Warum ist die Sitzflaeche des Hockers da drueben noch trocken?"
+
+Eine Regel musste nachgereicht werden: **nichts erfinden**. Der erste Durchlauf
+fragte nach einem „Zollsiegel aus Sektor Vier" — den Sektor gibt es nicht, und
+die Figur kann darauf nur Unsinn antworten.
+
+Die Fragen werden NEBENHER geholt: Die Antwort der Figur steht schon da,
+waehrend die naechsten Fragen noch gesucht werden.
 
 Der Schluessel darf **nicht** ins Browser-Buendel — was dort landet, kann jeder
 auslesen, und die Rechnung zahlt der Kontoinhaber. Deshalb kennt der Browser nur

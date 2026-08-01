@@ -9,7 +9,7 @@
  * liegt dort auf der Serverseite — siehe `api/chat.js`.
  */
 
-import { CHARACTERS, buildSystem } from './characters.js';
+import { CHARACTERS, buildSystem, buildFragen } from './characters.js';
 
 const CSS = `
 #talk {
@@ -49,6 +49,10 @@ const CSS = `
   display: grid; gap: 9px;
 }
 #talk .ask .sug { display: grid; gap: 8px; }
+#talk .ask .sucht {
+  font-size: 10px; letter-spacing: .26em; text-transform: uppercase;
+  color: rgba(159,180,204,.5); padding: 11px 0;
+}
 #talk .ask .row { display: flex; gap: 9px; }
 #talk .ask input {
   flex: 1; min-width: 0; background: rgba(255,255,255,.045);
@@ -64,6 +68,15 @@ const CSS = `
   /* Notizen aus dem Verhoer sind unterschiedlich lang. Lieber sauber
      abschneiden als den Knopf sprengen oder mitten im Wort enden. */
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Die Vorschläge sind seit dem Umbau ganze Fragen, keine Etiketten mehr.
+   Versalien und eine abgeschnittene Zeile wären hier beides falsch: Ein Satz
+   in Grossbuchstaben liest sich schlecht, und „Warum haben Sie die Rekla…"
+   ist keine Frage. Also normale Schreibung und Umbruch. */
+#talk .ask .sug button {
+  white-space: normal; overflow: visible; text-overflow: clip;
+  text-transform: none; letter-spacing: .02em; font-size: 13px; line-height: 1.55;
+  padding: 12px 15px;
 }
 #talk button:hover:not(:disabled) { background: rgba(126,190,230,.16); border-color: rgba(126,190,230,.6); }
 #talk button:disabled { opacity: .35; cursor: wait; }
@@ -149,29 +162,62 @@ export function createTalk(host) {
     return a;
   }
 
-  /** Vorschläge neu bauen: drei feste plus alles, was in der Akte steht. */
-  function buildSuggestions() {
+  /**
+   * Wenn das Archiv nicht antwortet, muss trotzdem etwas dastehen. Bewusst
+   * allgemein gehalten — konkret kann nur das Modell werden, weil nur es
+   * weiß, was in der Akte steht.
+   */
+  const NOTFALL = [
+    'Wie lange stehen Sie hier schon?',
+    'Wer war heute Abend noch hier?',
+    'Was verschweigen Sie mir?',
+  ];
+
+  function zeigeFragen(fragen) {
     sug.innerHTML = '';
-    const fixed = [
-      'Was machen Sie hier draußen im Regen?',
-      'Wer geht hier sonst noch durch?',
-      'Sie verschweigen mir etwas. Was?',
-    ];
-    for (const q of fixed) {
+    fragen.forEach((q, i) => {
       const b = document.createElement('button');
       b.type = 'button';
+      // Die letzte ist laut Anweisung die unangenehme — sie bekommt die
+      // warme Farbe, damit man sieht, dass sie etwas kostet.
+      if (i === fragen.length - 1 && fragen.length > 2) b.className = 'hold';
       b.textContent = q;
       b.onclick = () => ask(q);
+      b.disabled = busy;
       sug.appendChild(b);
-    }
-    for (const n of host.getNotes().slice(0, 4)) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'hold';
-      b.textContent = `Vorhalten: ${n.label}`;
-      b.onclick = () => ask(`Ich halte Ihnen etwas vor — ${n.label}: ${n.text}`);
-      sug.appendChild(b);
-    }
+    });
+  }
+
+  /**
+   * Vorschlagsfragen holen.
+   *
+   * Läuft absichtlich NEBENHER und blockiert nichts: Die Antwort der Figur
+   * steht schon da, während die nächsten Fragen noch gesucht werden.
+   */
+  let fragenLauf = 0;
+  async function ladeFragen() {
+    const lauf = ++fragenLauf;
+    sug.innerHTML = '<div class="sucht">Fragen …</div>';
+    let fragen = NOTFALL;
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: buildFragen(char, host.getNotes(), host.getPlace(), history),
+          messages: [{ role: 'user', text: 'Schreib die vier Fragen.' }],
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      const roh = String(data.text || '')
+        .split('\n')
+        .map((z) => z.replace(/^\s*(?:[-–—•*]|\d+[.)])\s*/, '').replace(/^["„»]|["“«]$/g, '').trim())
+        .filter((z) => z.length > 8 && z.length < 130 && /[?？]$/.test(z));
+      if (roh.length >= 2) fragen = roh.slice(0, 4);
+    } catch { /* NOTFALL bleibt stehen */ }
+    // Ein späterer Lauf hat inzwischen übernommen: dieses Ergebnis verwerfen.
+    if (lauf !== fragenLauf) return;
+    zeigeFragen(fragen);
   }
 
   async function ask(question) {
@@ -202,6 +248,9 @@ export function createTalk(host) {
       slot.textContent = clean;
       history.push({ role: 'model', text: clean });
 
+      // Neue Fragen zum neuen Stand — nebenher, damit die Antwort sofort steht.
+      ladeFragen();
+
       if (m) {
         const spur = m[1].trim();
         // Die Spur steht in der dritten Person und beginnt oft mit dem Namen
@@ -209,7 +258,6 @@ export function createTalk(host) {
         const doppelt = spur.toLowerCase().startsWith(char.name.toLowerCase());
         const label = doppelt ? kurz(spur, 46) : `${char.name}: ${kurz(spur, 38)}`;
         host.addNote(label, spur);
-        buildSuggestions();
       }
     } catch (e) {
       slot.classList.add('err');
@@ -262,9 +310,9 @@ export function createTalk(host) {
       nEl.textContent = c.name;
       rEl.textContent = c.role;
       aEl.textContent = c.appearance;
-      buildSuggestions();
       setBusy(false);
       el.classList.add('on');
+      ladeFragen();
     },
 
     close,

@@ -94,6 +94,66 @@ export const NOIR_VOICE =
   + 'Erklärungen, keine Meta-Kommentare, kein Ausstieg aus der Rolle.';
 
 /**
+ * Baut die Anweisung, die dem Spieler VORSCHLAGSFRAGEN schreibt.
+ *
+ * Der erste Versuch hat die Fragen aus Bausteinen gesetzt: „Vorhalten: " plus
+ * die Überschrift einer Aktennotiz. Bei einem Fundstück ging das gerade noch,
+ * bei einem Ort kam „Ich halte Ihnen vor — Bar" heraus. Das ist kein Satz,
+ * den ein Mensch sagt.
+ *
+ * Deshalb schreibt sie jetzt dasselbe Modell, das auch antwortet: Es kennt die
+ * Figur, den Ort und den Akteninhalt und kann daraus fragen, was ein Ermittler
+ * fragen würde — „Warum haben Sie die Reklame draußen nie reparieren lassen?"
+ * statt einer Schablone.
+ *
+ * @param {object} c Figur
+ * @param {{label: string, text: string}[]} notes Akte
+ * @param {string} place Ort
+ * @param {{role: string, text: string}[]} verlauf bisheriges Gespräch
+ */
+export function buildFragen(c, notes, place, verlauf) {
+  const wissen = notes.length
+    ? notes.map((n) => `- ${n.label}: ${n.text}`).join('\n')
+    : '- noch nichts';
+
+  const bisher = verlauf.length
+    ? verlauf.slice(-8).map((m) => (m.role === 'user' ? 'ERMITTLER: ' : `${c.name.toUpperCase()}: `) + m.text).join('\n')
+    : '(noch nichts gesagt)';
+
+  return `Du schreibst Dialogzeilen für ein deutschsprachiges Neo-Noir-Detektivspiel.
+
+DER ERMITTLER STEHT VOR: ${c.name}, ${c.role}.
+AUSSEHEN: ${c.appearance}
+ORT: ${place}.
+
+WAS DER ERMITTLER BISHER WEISS:
+${wissen}
+
+BISHERIGES GESPRÄCH:
+${bisher}
+
+Schreibe VIER Fragen, die der Ermittler dieser Person JETZT stellen könnte.
+
+REGELN:
+- Ganze deutsche Sätze in direkter Rede, so wie ein Mensch fragt. Sie-Form.
+- Höchstens zwölf Wörter pro Frage. Sie stehen auf Schaltflächen.
+- Benenne konkrete Dinge: die Reklame, den Schirm, die Kisten, den Namen aus
+  der Akte. Keine Platzhalter, keine allgemeinen Floskeln.
+- Vier verschiedene Tonlagen, in dieser Reihenfolge:
+  1. beiläufig, fast Small Talk, etwas Sichtbares am Ort oder an der Person
+  2. sachlich, nach einer Person, einer Uhrzeit oder einem Ablauf
+  3. etwas aus der Liste oben — aber als Frage formuliert, nicht als Vorwurf
+  4. unangenehm: die Frage, die diese Person nicht hören will
+- Stelle keine Frage, die im Gespräch oben schon gestellt wurde.
+- Erfinde NICHTS: keine Sektornummern, Namen, Firmen, Uhrzeiten oder Orte, die
+  nicht oben stehen. Beim Prüfen fragte der Ermittler nach einem „Zollsiegel
+  aus Sektor Vier" — den Sektor gibt es nicht, und die Figur kann darauf nur
+  Unsinn antworten. Bleib bei dem, was in der Liste und am Ort wirklich steht.
+- Keine Nummerierung, keine Anführungszeichen, keine Erklärungen.
+- Eine Frage pro Zeile, jede Zeile beginnt mit "- ".`;
+}
+
+/**
  * Baut die Anweisung für eine Figur.
  * @param {object} c Figur aus CHARACTERS
  * @param {{label: string, text: string}[]} notes Was in der Akte steht
