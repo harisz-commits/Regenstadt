@@ -176,7 +176,7 @@ export const SCENES = {
     backdrop: 'backroom-backdrop',
     spots: [
       {
-        id: 'workbench', u: 0.300, v: 0.640, r: 0.100,
+        id: 'workbench', u: 0.225, v: 0.545, r: 0.100,
         label: 'Werkbank',
         text: 'Öl, Metallspäne, ein Schraubstock. Und dazwischen etwas, das hier '
             + 'nicht hingehört: ein sauber gefaltetes Tuch.',
@@ -198,20 +198,20 @@ export const SCENES = {
         },
       },
       {
-        id: 'shelves', u: 0.590, v: 0.500, r: 0.110,
+        id: 'shelves', u: 0.570, v: 0.470, r: 0.110,
         label: 'Regalwand',
         text: 'Kanister, Kabeltrommeln, Ersatzteile in Kisten mit demselben '
             + 'Zollsiegel wie draußen in der Gasse. Eine Reihe ist frisch '
             + 'ausgeräumt — der Staub zeigt, was dort gestanden hat.',
       },
       {
-        id: 'cot', u: 0.815, v: 0.700, r: 0.090,
+        id: 'cot', u: 0.635, v: 0.630, r: 0.090,
         label: 'Feldbett',
         text: 'Jemand schläft hier. Die Decke ist zurückgeschlagen, darunter liegt '
             + 'ein Mantelknopf, der zu keinem Mantel im Raum gehört.',
       },
       {
-        id: 'lamp-int', u: 0.470, v: 0.185, r: 0.075,
+        id: 'lamp-int', u: 0.500, v: 0.160, r: 0.075,
         label: 'Deckenlampe',
         text: 'Eine einzelne Leuchtröhre an zwei Drähten. Sie flackert im selben '
             + 'Takt wie das Ding, das unter der Gasse läuft.',
@@ -234,31 +234,31 @@ export const SCENES = {
     backdrop: 'crossing-backdrop',
     spots: [
       {
-        id: 'traffic', u: 0.500, v: 0.560, r: 0.090,
+        id: 'traffic', u: 0.480, v: 0.550, r: 0.090,
         label: 'Verkehr',
         text: 'Wagen ziehen durch das Wasser, ohne langsamer zu werden. Niemand '
             + 'sieht hierher. In dieser Stadt ist das eine Dienstleistung.',
       },
       {
-        id: 'kiosk', u: 0.230, v: 0.700, r: 0.085,
+        id: 'kiosk', u: 0.270, v: 0.560, r: 0.085,
         label: 'Kiosk',
         text: 'Hinter der Scheibe stapeln sich Waren aus drei Sektoren. Der Mann '
             + 'darin sieht dich an, als hätte er dich erwartet, und sagt nichts.',
       },
       {
-        id: 'board', u: 0.780, v: 0.330, r: 0.085,
+        id: 'board', u: 0.928, v: 0.410, r: 0.085,
         label: 'Anzeigetafel',
         text: 'Fahndungen und Vermisste, übereinandergeklebt. Das oberste Blatt '
             + 'ist zwei Tage alt und zeigt kein Gesicht, nur eine Nummer.',
       },
       {
-        id: 'to-precinct', u: 0.075, v: 0.640, r: 0.085,
+        id: 'to-precinct', u: 0.062, v: 0.500, r: 0.085,
         kind: 'exit', dir: 'left', goto: 'precinct',
         label: 'Zum Präsidium',
         text: 'Die Wache liegt einen Block westlich. Blaues Licht, auch bei Tag.',
       },
       {
-        id: 'to-bar', u: 0.925, v: 0.640, r: 0.085,
+        id: 'to-bar', u: 0.810, v: 0.500, r: 0.085,
         kind: 'exit', dir: 'right', goto: 'bar',
         label: 'Zur Bar',
         text: 'Eine Tür unter einer Reklame, die seit Jahren dasselbe verspricht.',
@@ -281,26 +281,26 @@ export const SCENES = {
     backdrop: 'precinct-backdrop',
     spots: [
       {
-        id: 'lab-counter', u: 0.500, v: 0.600, r: 0.110, kind: 'lab',
+        id: 'lab-counter', u: 0.490, v: 0.400, r: 0.110, kind: 'lab',
         label: 'Laborschalter',
         text: 'Eine Klappe aus Panzerglas, dahinter eine Frau, die nicht aufsieht. '
             + 'Daneben ein Tablett für das, was untersucht werden soll. Über der '
             + 'Klappe hängt ein Schild: ERGEBNISSE NUR PERSÖNLICH.',
       },
       {
-        id: 'files', u: 0.180, v: 0.560, r: 0.095,
+        id: 'files', u: 0.160, v: 0.580, r: 0.095,
         label: 'Aktenschrank',
         text: 'Papier, in einer Stadt, die alles speichert. Was hier liegt, soll '
             + 'nirgends auftauchen. Die oberste Schublade lässt sich nicht öffnen.',
       },
       {
-        id: 'bench', u: 0.790, v: 0.700, r: 0.090,
+        id: 'bench', u: 0.775, v: 0.630, r: 0.090,
         label: 'Wartebank',
         text: 'Zwei Leute warten. Beide nass, beide still. Einer hat seit einer '
             + 'Stunde dieselbe Nummer in der Hand.',
       },
       {
-        id: 'notice', u: 0.680, v: 0.330, r: 0.080,
+        id: 'notice', u: 0.900, v: 0.240, r: 0.080,
         label: 'Aushang',
         text: 'Dienstanweisungen und ein handgeschriebener Zettel: Sektor 7, '
             + 'Nachtstreife bis auf Weiteres ausgesetzt. Kein Grund angegeben.',
@@ -323,27 +323,27 @@ export const SCENES = {
     backdrop: 'bar-backdrop',
     spots: [
       {
-        id: 'counter', u: 0.380, v: 0.620, r: 0.105,
+        id: 'counter', u: 0.475, v: 0.610, r: 0.105,
         label: 'Tresen',
         text: 'Zinkblech, blank gewetzt an zwei Stellen — dort, wo immer dieselben '
             + 'Leute stehen. Hinter dem Tresen fehlt eine Flasche in einer Reihe, '
             + 'die sonst lückenlos ist.',
       },
       {
-        id: 'booth', u: 0.740, v: 0.640, r: 0.100,
+        id: 'booth', u: 0.825, v: 0.610, r: 0.100,
         label: 'Nische',
         text: 'Die hinterste Sitzbank hat den besten Blick auf die Tür und ist die '
             + 'einzige, die nass ist. Jemand ist hier aufgestanden, ohne zu '
             + 'trocknen, und in Eile gegangen.',
       },
       {
-        id: 'jukebox', u: 0.155, v: 0.600, r: 0.085,
+        id: 'jukebox', u: 0.115, v: 0.630, r: 0.085,
         label: 'Musikautomat',
         text: 'Er läuft, aber der Ton ist abgedreht. Die Scheibe dreht sich für '
             + 'niemanden. Auf dem Glas liegt Staub — außer an einer Stelle.',
       },
       {
-        id: 'backdoor', u: 0.900, v: 0.520, r: 0.080,
+        id: 'backdoor', u: 0.878, v: 0.335, r: 0.080,
         label: 'Hintertür',
         text: 'Sie steht einen Spalt offen und führt auf denselben Hinterhof wie '
             + 'die Stahltür. Der Riegel ist von innen aufgebogen.',

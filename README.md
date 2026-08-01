@@ -46,6 +46,53 @@ Sichtbar ist normalerweise nichts. Beim Ueberfahren geht ein Lichtsaum **im
 Bild** auf (`uHover` im Endbild-Shader), nicht als Marke davor. **TAB** gedrueckt
 halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
+## Die Welt
+
+Sechs Orte, und man geht nicht nur geradeaus. Ausgaenge kennen sechs
+Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`) mit je eigener
+Marke; die **Querstrasse** ist der erste Ort, an dem man waehlen muss — links
+das Praesidium, rechts die Bar.
+
+```
+        Lagerraum ──in── Kanalgasse hinten ──forward── Querstrasse
+      (Innenraum)              │                       ╱        ╲
+                            back│                  left          right
+                                │                    ╱              ╲
+                           Kanalgasse           Praesidium          Bar
+                                                (Innenraum)     (Innenraum)
+```
+
+Innenraeume (`kind: 'interior'`) schalten Regen, nasse Fahrbahn und
+Spiegelung ab. Drinnen regnet es nicht — und der Bodenpass wuerde sonst
+mitten im Zimmer eine Pfuetze suchen.
+
+### Die Beweiskette
+
+Damit eine Ermittlung nicht nach zwei Minuten durch ist, muss etwas von etwas
+anderem abhaengen:
+
+```
+Muellcontainer → Schluesselkarte → oeffnet die Stahltuer
+                                 → Lagerraum → Tuch mit dunklen Flecken
+                                             → Laborschalter im Praesidium
+                                             → vier Ortswechsel
+                                             → Befund: fremdes Blut
+```
+
+Die Wartezeit laeuft in **Ortswechseln**, nicht in Sekunden. Eine Uhr zwingt
+zum Warten, ein Zaehler zwingt zum Weitergehen — und wer das Spiel weglegt,
+verliert nichts.
+
+Bedingungen sind Daten (`requires: { item: 'keycard' }`), keine Funktionen.
+Das ist Absicht: Der spaeter generierte Fall muss sie ausgeben koennen, und
+das kann ein Sprachmodell zuverlaessig nur als Daten. Ein verschlossener
+Ausgang bleibt sichtbar, aber matt, und nennt in der Tafel den Grund — ein
+Klick, der nichts tut, liest sich als Fehler.
+
+`node tools/welt-pruefen.mjs` prueft die Kette ohne Browser: Sperren, Abgabe,
+Wartezeit, Abholung und ob jeder Ort erreichbar ist. Das sind Logikfehler,
+und ein Screenshot zeigt sie nicht.
+
 ## Verhoere
 
 Figuren antworten nicht aus einem Antwortbaum, sondern von einem Sprachmodell.
@@ -114,11 +161,14 @@ src/
   shaders/*.glsl        ein Shader pro Pass
   ui/overlay.js         Regler + Frame-Zeit-Kurve (F1)
   ui/viewport.js        Zoom-Sperren und Geraeteraender fuer Mobilgeraete
-  game/scenes.js        Orte und Untersuchungspunkte, in Bildkoordinaten
+  game/scenes.js        Orte, Ausgaenge und Untersuchungspunkte, in Bildkoordinaten
+  game/world.js         Zustand der Ermittlung: Asservate, Analysen, Freischaltungen
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
   game/characters.js    Figuren: Wesen, Wissen, Geheimnis — und die Anweisung daraus
   game/talk.js          Verhoer: Vollbildansicht, Vorhalten, Spuren in die Akte
 api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt serverseitig)
+tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen
+tools/beschneiden.mjs   eingebrannte schwarze Balken von einer Platte schneiden
 tools/shot.mjs          Standbilder aufnehmen (--backdrop, --reveal, --hotspot, --touch, --pan)
 tools/gen.mjs           Platten von einem Bildmodell uebermalen lassen
 prompts/                Bildanweisungen, getrennt vom Code
