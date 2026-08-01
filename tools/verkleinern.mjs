@@ -23,6 +23,10 @@ const argv = process.argv.slice(2);
 const ordner = argv.find((a) => !a.startsWith('--')) || 'public/details';
 const arg = (n, d) => { const i = argv.indexOf('--' + n); return i === -1 ? d : argv[i + 1]; };
 const breite = Number(arg('breite', 1400));
+/* Auch schon passend breite Bilder neu packen, wenn die Datei zu dick ist:
+   Das Bildmodell liefert sehr hoch komprimierte JPEGs — 1K kommt mit 771 kB
+   heraus, dieselbe Größe neu gepackt wiegt rund 200 kB. */
+const maxKb = Number(arg('maxkb', 320));
 const guete = Number(arg('q', 0.88));
 
 const dateien = readdirSync(ordner).filter((f) => /\.jpe?g$/i.test(f));
@@ -35,17 +39,27 @@ for (const name of dateien) {
   const roh = readFileSync(pfad);
   vorher += roh.length;
 
+  // Passt Breite UND Dateigröße schon, gar nicht erst anfassen.
+  if (roh.length <= maxKb * 1024) {
+    const massOk = await page.evaluate(async ({ url, breite }) => {
+      const img = new Image();
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+      return img.naturalWidth <= breite;
+    }, { url: `data:image/jpeg;base64,${roh.toString('base64')}`, breite });
+    if (massOk) { nachher += roh.length; continue; }
+  }
+
   const out = await page.evaluate(async ({ url, breite, guete }) => {
     const img = new Image();
     await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
-    if (img.naturalWidth <= breite) return null;
-    const h = Math.round((img.naturalHeight / img.naturalWidth) * breite);
+    const zielB = Math.min(breite, img.naturalWidth);
+    const h = Math.round((img.naturalHeight / img.naturalWidth) * zielB);
     const c = document.createElement('canvas');
-    c.width = breite; c.height = h;
+    c.width = zielB; c.height = h;
     const g = c.getContext('2d');
     g.imageSmoothingQuality = 'high';
-    g.drawImage(img, 0, 0, breite, h);
-    return { daten: c.toDataURL('image/jpeg', guete), w: breite, h, vorherW: img.naturalWidth };
+    g.drawImage(img, 0, 0, zielB, h);
+    return { daten: c.toDataURL('image/jpeg', guete), w: zielB, h, vorherW: img.naturalWidth };
   }, { url: `data:image/jpeg;base64,${roh.toString('base64')}`, breite, guete });
 
   if (!out) { nachher += roh.length; continue; }

@@ -268,6 +268,27 @@ Damit die Spiegelung weiter passt, muss das Bild denselben Horizont und
 Fluchtpunkt verwenden wie `projection.js` (Horizont bei 61 % der Bildhöhe,
 Fluchtpunkt mittig).
 
+## Bildgroessen
+
+Gemessen, weil es nicht offensichtlich ist: Ein Bild in **1K kostet genauso
+viel wie in 2K** — 1235 gegen 1228 Ausgabe-Token. Die Abrechnung haengt daran,
+DASS ein Bild entsteht, nicht an seiner Aufloesung.
+
+Trotzdem ist die Groesse nicht egal:
+
+| | Masse | Datei | Dauer |
+|---|---|---|---|
+| `--size 1K` | 1200×896 | 771 kB | 18 s |
+| `--size 2K` | 2400×1792 | 3009 kB | 23 s |
+
+Deshalb: **Platten in 2K** (sie fuellen den Schirm), **Nahaufnahmen in 1K**
+(sie erscheinen hoechstens 420 CSS-Pixel breit, bei dreifacher Pixeldichte
+also rund 1260 echte Punkte).
+
+Die JPEGs des Modells sind sehr schwach komprimiert. `tools/verkleinern.mjs`
+packt sie nach — dasselbe 1200-px-Bild wiegt danach 222 statt 771 kB. Ueber
+alle Nahaufnahmen: 157 MB → 13 MB.
+
 ## Standbilder aufnehmen
 
 ```

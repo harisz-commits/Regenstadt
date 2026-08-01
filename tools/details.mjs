@@ -16,6 +16,14 @@
  *   node tools/details.mjs --max 6         # höchstens sechs Stück
  *
  * Ausgänge bekommen keine — dort ist der neue Blickwinkel der nächste Ort.
+ *
+ * WARUM 1K UND NICHT 2K:
+ * Gemessen kostet beides gleich viel — 1235 gegen 1228 Ausgabe-Token. Die
+ * Abrechnung hängt daran, DASS ein Bild entsteht, nicht an seiner Größe. 1K
+ * ist trotzdem richtig: 1200 px reichen für eine Nahaufnahme, die im Spiel
+ * höchstens 420 CSS-Pixel breit erscheint (bei dreifacher Pixeldichte rund
+ * 1260 echte Punkte), es geht ein Fünftel schneller, und die Datei ist ein
+ * Viertel so groß. Die PLATTEN bleiben bei 2K — die füllen den Schirm.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -106,7 +114,7 @@ for (const s of stellen) {
   process.stdout.write(`\n→ ${s.ortId} · ${s.spot.label} … `);
   try {
     execFileSync('node', ['tools/gen.mjs', '--in', vorlage, '--out', `public/${s.datei.replace(/\.jpg$/, '.png')}`,
-      '--prompt', tmp, '--aspect', '4:3'], { stdio: 'inherit' });
+      '--prompt', tmp, '--aspect', '4:3', '--size', '1K'], { stdio: 'inherit' });
     gemacht += 1;
   } catch {
     console.log('  FEHLGESCHLAGEN');
