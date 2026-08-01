@@ -29,6 +29,7 @@ export const SCENES = {
   /* ====================================================================== */
   alley: {
     id: 'alley',
+    district: 'sektor-7',
     name: 'Kanalgasse',
     sector: 'Sektor 7 · Unterstadt',
     kind: 'street',
@@ -61,6 +62,9 @@ export const SCENES = {
       {
         id: 'crates-right', u: 0.636, v: 0.718, r: 0.080,
         label: 'Kistenstapel',
+        // In die Akte gelegt, oeffnet dieser Fund die Hafenspange auf der
+        // Spinner-Karte. Siehe districts.js.
+        clue: 'zollsiegel',
         detail: 'details/fracht.jpg',
         text: 'Frachtkisten, dreimal umgepackt. Das Holz ist aufgequollen, die '
             + 'Bänder rosten. Auf der obersten steht ein Zollsiegel, das in diesem '
@@ -104,6 +108,7 @@ export const SCENES = {
   /* ====================================================================== */
   alley2: {
     id: 'alley2',
+    district: 'sektor-7',
     name: 'Kanalgasse · Hinterer Abschnitt',
     sector: 'Sektor 7 · Unterstadt',
     kind: 'street',
@@ -170,6 +175,7 @@ export const SCENES = {
   /* ====================================================================== */
   backroom: {
     id: 'backroom',
+    district: 'sektor-7',
     name: 'Lagerraum',
     sector: 'Sektor 7 · hinter der Stahltür',
     kind: 'interior',
@@ -228,6 +234,7 @@ export const SCENES = {
   /* ====================================================================== */
   crossing: {
     id: 'crossing',
+    district: 'sektor-7',
     name: 'Querstraße',
     sector: 'Sektor 7 · Unterstadt',
     kind: 'street',
@@ -275,6 +282,7 @@ export const SCENES = {
   /* ====================================================================== */
   precinct: {
     id: 'precinct',
+    district: 'sektor-7',
     name: 'Präsidium · Wache',
     sector: 'Sektor 7 · Revier West',
     kind: 'interior',
@@ -317,33 +325,41 @@ export const SCENES = {
   /* ====================================================================== */
   bar: {
     id: 'bar',
+    district: 'sektor-7',
     name: 'Bar ohne Namen',
     sector: 'Sektor 7 · Querstraße',
     kind: 'interior',
     backdrop: 'bar-backdrop',
     spots: [
       {
-        id: 'counter', u: 0.475, v: 0.610, r: 0.105,
+        id: 'p-wirtin', u: 0.395, v: 0.470, r: 0.075, kind: 'person',
+        label: 'Wirtin',
+        detail: 'details/wirtin.jpg',
+        text: 'Sie steht am hellsten gewetzten Stück des Tresens und hat beide '
+            + 'Unterarme darauf gelegt. Sie füllt nichts nach. Sie wartet.',
+      },
+      {
+        id: 'counter', u: 0.525, v: 0.730, r: 0.105,
         label: 'Tresen',
         text: 'Zinkblech, blank gewetzt an zwei Stellen — dort, wo immer dieselben '
             + 'Leute stehen. Hinter dem Tresen fehlt eine Flasche in einer Reihe, '
             + 'die sonst lückenlos ist.',
       },
       {
-        id: 'booth', u: 0.825, v: 0.610, r: 0.100,
+        id: 'booth', u: 0.750, v: 0.620, r: 0.100,
         label: 'Nische',
         text: 'Die hinterste Sitzbank hat den besten Blick auf die Tür und ist die '
             + 'einzige, die nass ist. Jemand ist hier aufgestanden, ohne zu '
             + 'trocknen, und in Eile gegangen.',
       },
       {
-        id: 'jukebox', u: 0.115, v: 0.630, r: 0.085,
+        id: 'jukebox', u: 0.115, v: 0.620, r: 0.085,
         label: 'Musikautomat',
         text: 'Er läuft, aber der Ton ist abgedreht. Die Scheibe dreht sich für '
             + 'niemanden. Auf dem Glas liegt Staub — außer an einer Stelle.',
       },
       {
-        id: 'backdoor', u: 0.878, v: 0.335, r: 0.080,
+        id: 'backdoor', u: 0.632, v: 0.458, r: 0.080,
         label: 'Hintertür',
         text: 'Sie steht einen Spalt offen und führt auf denselben Hinterhof wie '
             + 'die Stahltür. Der Riegel ist von innen aufgebogen.',
@@ -352,6 +368,119 @@ export const SCENES = {
         id: 'bar-out', u: 0.500, v: 0.930, r: 0.080,
         kind: 'exit', dir: 'out', goto: 'crossing',
         label: 'Hinaus',
+        text: '',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  terminal: {
+    id: 'terminal',
+    district: 'sektor-3',
+    name: 'Frachtterminal',
+    sector: 'Sektor 3 · Hafenspange',
+    kind: 'street',
+    backdrop: 'terminal-backdrop',
+    spots: [
+      {
+        id: 'crane', u: 0.490, v: 0.430, r: 0.080,
+        label: 'Portalkran',
+        text: 'Er steht still, aber die Katze hängt auf halber Höhe — mitten in '
+            + 'einer Bewegung abgestellt. Wer hier arbeitet, hat aufgehört, ohne '
+            + 'fertig zu werden.',
+      },
+      {
+        id: 'booth', u: 0.905, v: 0.460, r: 0.080,
+        label: 'Zollkabine',
+        text: 'Leer, das Licht brennt. Auf dem Pult liegt ein aufgeschlagenes '
+            + 'Buch und daneben ein Becher, aus dem noch Dampf käme, wenn es '
+            + 'wärmer wäre. Die Schranke ist unten.',
+      },
+      {
+        id: 'barrier', u: 0.810, v: 0.596, r: 0.070,
+        label: 'Schranke',
+        text: 'Unten und verriegelt. Der Lack ist an einer Stelle bis aufs Metall '
+            + 'abgeschürft, in Höhe einer Stoßstange. Frisch.',
+      },
+      {
+        id: 'pallets', u: 0.090, v: 0.790, r: 0.090,
+        label: 'Paletten unter Plane',
+        text: 'Die Folie ist aufgerissen und liegt lose. Darunter Kisten mit '
+            + 'demselben Zollsiegel wie in der Kanalgasse — und eine Lücke, wo '
+            + 'zwei weitere gestanden haben.',
+      },
+      {
+        id: 'quay-puddle', u: 0.560, v: 0.840, r: 0.090,
+        label: 'Wasserlache',
+        text: 'Regen und etwas anderes. Am Rand hat sich ein dunkler Film '
+            + 'abgesetzt, den das Wasser nicht mitnimmt.',
+      },
+      {
+        id: 'to-customs', u: 0.155, v: 0.500, r: 0.085,
+        kind: 'exit', dir: 'in', goto: 'customs',
+        label: 'Zollhalle',
+        text: 'Das Tor der Abfertigungshalle steht offen. Drinnen brennt Licht.',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  customs: {
+    id: 'customs',
+    district: 'sektor-3',
+    name: 'Zollhalle',
+    sector: 'Sektor 3 · Hafenspange',
+    kind: 'interior',
+    backdrop: 'customs-backdrop',
+    spots: [
+      {
+        id: 'clipboards', u: 0.073, v: 0.376, r: 0.085,
+        label: 'Klemmbretter',
+        text: 'Eine Reihe Frachtbriefe an Haken, nach Tagen sortiert. Bei '
+            + 'vorgestern hängt einer schief, als hätte ihn jemand zurückgehängt '
+            + 'und dabei nicht hingesehen.',
+        clue: 'frachtbrief',
+        item: {
+          id: 'manifest',
+          name: 'Frachtbrief',
+          text: 'Eingegangen vorgestern, 23:40. Vier Kisten, Zollsiegel Sektor 3. '
+              + 'Die Spalte für den Ausgang ist leer — die Ware ist angekommen '
+              + 'und nie wieder herausgegangen. Unterschrieben hat jemand, dessen '
+              + 'Kürzel zweimal durchgestrichen und einmal neu geschrieben wurde.',
+        },
+      },
+      {
+        id: 'table-left', u: 0.200, v: 0.575, r: 0.100,
+        label: 'Prüftisch',
+        text: 'Zwei Kisten aufgebrochen, das Stroh liegt daneben auf dem Boden. '
+            + 'Der Deckel der vorderen wurde von INNEN aufgedrückt — die Nägel '
+            + 'stehen nach außen.',
+      },
+      {
+        id: 'arch', u: 0.835, v: 0.520, r: 0.090,
+        label: 'Scanbogen',
+        text: 'Abgeschaltet und aus der Spur gerollt. Das Kabel liegt quer über '
+            + 'die Fahrbahn — hier ist etwas durchgefahren, das nicht durch den '
+            + 'Bogen sollte.',
+      },
+      {
+        id: 'shutter', u: 0.500, v: 0.450, r: 0.080,
+        label: 'Rolltor',
+        text: 'Geschlossen bis auf einen Spalt am Boden, durch den orangefarbenes '
+            + 'Licht fällt. Dahinter der Kai. Von unten kommt Zugluft und der '
+            + 'Geruch von Wasser.',
+      },
+      {
+        id: 'straw', u: 0.350, v: 0.810, r: 0.090,
+        label: 'Stroh und Bänder',
+        text: 'Verpackungsmaterial über den ganzen Boden verteilt, nicht gefegt. '
+            + 'Zwischen den Halmen liegt ein abgerissenes Stück Klebeband mit '
+            + 'einem Abdruck darin, der zu keinem Handschuh gehört.',
+      },
+      {
+        id: 'customs-out', u: 0.500, v: 0.930, r: 0.080,
+        kind: 'exit', dir: 'out', goto: 'terminal',
+        label: 'Hinaus auf den Kai',
         text: '',
       },
     ],

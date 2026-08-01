@@ -1,0 +1,23 @@
+This is a wide shot of a run-down police station front office with an armoured
+glass service hatch. Produce a CLOSE-UP of the person working behind that glass,
+as if the same camera moved nearer to the hatch.
+
+SUBJECT: a woman in her fifties seen THROUGH the thick armoured glass, in a worn
+lab coat, half turned away, working at something out of frame. The glass is
+slightly scratched and reflects the waiting room faintly, so she is never
+entirely sharp. She is not looking at the camera.
+
+FRAMING: medium close-up through the hatch opening. The metal frame of the hatch
+visible at the edges. Shallow depth of field.
+
+CONTINUITY — must match the wide shot exactly:
+- Same lighting: cold blue fluorescent from her side, sickly green-grey from the
+  waiting room, no warm tones at all.
+- Same palette: institutional green, steel grey, cold blue.
+- Same tired, unhelpful atmosphere.
+
+LOOK: photorealistic cinematic film still, anamorphic 35mm, Blade Runner 2049.
+Fine film grain. Highlights roll off, never clip to white.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters anywhere.
+Not an illustration, not anime, no painterly brushwork.

@@ -47,6 +47,43 @@ export const CHARACTERS = {
     opener: 'Er steht im Regen, als wäre das eine Verabredung. Als du näher '
           + 'kommst, sieht er dich an und wartet ab, wer zuerst spricht.',
   },
+
+  'p-wirtin': {
+    id: 'p-wirtin',
+    name: 'Vesna Kruse',
+    role: 'Wirtin',
+    portrait: 'details/wirtin.jpg',
+    appearance: 'Ärmelloses Schwarz, Unterarme auf dem Zink, ein Blick, der '
+              + 'schon oft befragt wurde und es nie mochte.',
+    voice: 'kurz angebunden, trocken, antwortet mit Gegenfragen, nie unhöflich',
+    secret: 'Sie ist dafür bezahlt worden zu vergessen, wer in der hinteren '
+          + 'Nische saß. Das Geld liegt noch unangerührt da. Sie gibt es nur zu, '
+          + 'wenn ihr jemand die nasse Sitzbank vorhält.',
+    knows: 'Sie hat gesehen, wer vorgestern in Eile durch die Hintertür ist — '
+         + 'jemand, der offiziell seit über einem Jahr tot ist. Sie sagt es erst, '
+         + 'wenn ihr der Laborbefund vorgehalten wird.',
+    opener: 'Sie füllt nichts nach und wischt nichts weg. Sie sieht dich den '
+          + 'ganzen Weg vom Eingang bis zum Tresen an und sagt nichts.',
+  },
+
+  // Sitzt hinter dem Panzerglas im Praesidium. Derselbe Punkt ist auch der
+  // Laborschalter — die Tafel zeigt dann beides: Ansprechen und Abgeben.
+  'lab-counter': {
+    id: 'lab-counter',
+    name: 'Halina Ferz',
+    role: 'Laborantin',
+    portrait: 'details/laborantin.jpg',
+    appearance: 'Abgetragener Kittel hinter zerkratztem Panzerglas, halb '
+              + 'abgewandt. Sie sieht nicht auf, wenn sie spricht.',
+    voice: 'sachlich bis zur Unhöflichkeit, redet in Befunden, keine Floskeln',
+    secret: 'Ihr wurde untersagt, bestimmte Melderegister-Einträge gegenzuprüfen. '
+          + 'Sie hat es einmal trotzdem getan und hat seitdem Angst. Sie sagt es '
+          + 'nur, wenn ihr der Laborbefund vorgehalten wird.',
+    knows: 'Sie weiß, dass in diesem Sektor seit vierzehn Monaten Tote gemeldet '
+         + 'werden, deren Akten danach nie wieder angefasst wurden.',
+    opener: 'Die Klappe bleibt zu. Sie arbeitet weiter, als hätte sie dich nicht '
+          + 'bemerkt, und redet in Richtung ihrer Hände.',
+  },
 };
 
 /** Grundhaltung für alle Figuren. */

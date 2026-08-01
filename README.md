@@ -2,8 +2,9 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Dieses Repository enthält aktuell **die Bühne**, noch nicht das Spiel: eine
-Szene, deren Standbild für sich stehen muss, bevor Inhalt dazukommt.
+Acht Orte in zwei Sektoren, vier Figuren, die von einem Sprachmodell
+antworten, eine Beweiskette mit Laborbefund — und ein Spinner, um zwischen
+den Sektoren zu fliegen.
 
 ```
 npm install
@@ -37,7 +38,7 @@ richtig kräuseln.
 ## Point-and-Click
 
 Untersuchungspunkte sind in **Bildkoordinaten der Hintergrundplatte** verankert
-(`src/game/hotspots.js`), nicht in Bildschirmprozenten. `plateUvToScreen()`
+(`src/game/scenes.js`), nicht in Bildschirmprozenten. `plateUvToScreen()`
 rechnet sie jeden Frame in Pixel um — inklusive Naeherungsumkehr der
 Objektivverzeichnung. Dadurch wandern sie bei jeder Kamerabewegung mit dem Bild
 mit und bleiben auch bei anderem Fensterformat auf ihrem Gegenstand.
@@ -48,7 +49,7 @@ halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
 ## Die Welt
 
-Sechs Orte, und man geht nicht nur geradeaus. Ausgaenge kennen sechs
+Acht Orte in zwei Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen sechs
 Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`) mit je eigener
 Marke; die **Querstrasse** ist der erste Ort, an dem man waehlen muss — links
 das Praesidium, rechts die Bar.
@@ -65,6 +66,23 @@ das Praesidium, rechts die Bar.
 Innenraeume (`kind: 'interior'`) schalten Regen, nasse Fahrbahn und
 Spiegelung ab. Drinnen regnet es nicht — und der Bodenpass wuerde sonst
 mitten im Zimmer eine Pfuetze suchen.
+
+### Der Spinner
+
+Gelaufen wird INNERHALB eines Sektors, geflogen ZWISCHEN ihnen. Mit sechs
+Orten reicht Laufen; mit zwanzig nicht mehr — wer vom Kuehlhaus zurueck in die
+Kanalgasse will, klickt sich sonst durch sieben Pfeile, und das ist keine
+Ermittlung, das ist Verwaltung.
+
+Der Spinner ist aber nicht nur Abkuerzung. Er ist auch der Ort, an dem die
+Stadt ihre Groesse zeigt: Ein Sektor, von dem man noch nichts weiss, steht als
+**gesperrte Zeile** auf der Karte, mit dem Hinweis, was fehlt. Der Spieler
+sieht, dass es weitergeht — eine Tuer, die man nie gesehen hat, motiviert
+niemanden.
+
+Und ein Flug kostet zwei Ortswechsel statt einem. Weil Laborbefunde in
+Ortswechseln reifen, ist Herumfliegen kein Leerlauf, sondern bringt die
+Ermittlung voran.
 
 ### Die Beweiskette
 
@@ -162,6 +180,8 @@ src/
   ui/overlay.js         Regler + Frame-Zeit-Kurve (F1)
   ui/viewport.js        Zoom-Sperren und Geraeteraender fuer Mobilgeraete
   game/scenes.js        Orte, Ausgaenge und Untersuchungspunkte, in Bildkoordinaten
+  game/districts.js     Sektoren: Ankunftsort und was sie freischaltet
+  game/spinner.js       Flugauto: Zielkarte zwischen den Sektoren
   game/world.js         Zustand der Ermittlung: Asservate, Analysen, Freischaltungen
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
   game/characters.js    Figuren: Wesen, Wissen, Geheimnis — und die Anweisung daraus

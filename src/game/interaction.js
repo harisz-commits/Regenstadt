@@ -15,6 +15,7 @@
 
 import { isTouch } from '../ui/viewport.js';
 import { createTalk } from './talk.js';
+import { createSpinner } from './spinner.js';
 
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
@@ -253,7 +254,12 @@ export function createInteraction(renderer, host) {
   helpBtn.textContent = '?';
   helpBtn.setAttribute('role', 'button');
   helpBtn.setAttribute('aria-label', 'Steuerung anzeigen');
-  actions.append(akteBtn, helpBtn);
+  const spinnerBtn = document.createElement('div');
+  spinnerBtn.className = 'right';
+  spinnerBtn.textContent = 'Spinner';
+  spinnerBtn.setAttribute('role', 'button');
+  spinnerBtn.setAttribute('aria-label', 'Spinner rufen');
+  actions.append(spinnerBtn, akteBtn, helpBtn);
   top.append(where, actions);
   document.body.appendChild(top);
 
@@ -426,6 +432,16 @@ export function createInteraction(renderer, host) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const base = import.meta.env.BASE_URL || '/';
 
+  // Reisen zwischen den Sektoren. Siehe spinner.js — gelaufen wird
+  // innerhalb eines Sektors, geflogen zwischen ihnen.
+  const spinner = createSpinner({
+    world,
+    goTo: (id) => host.goTo(id),
+    getScene: () => currentScene,
+    notify: toast,
+  });
+  spinnerBtn.onclick = () => { close(); spinner.open(); };
+
   function say(spot) {
     clearInterval(typer);
     pTtl.textContent = spot.label;
@@ -550,6 +566,8 @@ export function createInteraction(renderer, host) {
       b.onclick = () => {
         seen.add(spot.id);
         addNote(spot.label, full);
+        // Manche Funde oeffnen einen Sektor auf der Spinner-Karte.
+        if (spot.clue) world.addClue(spot.clue);
         b.remove();
       };
       pAct.appendChild(b);
@@ -653,7 +671,7 @@ export function createInteraction(renderer, host) {
   addEventListener('keydown', (e) => {
     if (e.key === 'Tab') { e.preventDefault(); layer.classList.add('reveal'); }
     if (e.key === 'Escape') {
-      if (talk.isOpen()) return;   // das Verhoer schliesst sich selbst
+      if (talk.isOpen() || spinner.isOpen()) return;   // die schliessen sich selbst
       close();
       akte.classList.remove('on');
     }
@@ -670,6 +688,7 @@ export function createInteraction(renderer, host) {
     setScene(scene) {
       currentScene = scene;
       talk.close();
+      spinner.close();
       buildSpots(scene.spots);
       where.querySelector('.sector').textContent = scene.sector;
       where.querySelector('.place').textContent = scene.name;

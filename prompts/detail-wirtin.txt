@@ -1,0 +1,22 @@
+This is a wide shot of a dark neo-noir bar interior. Produce a CLOSE-UP of the
+woman behind the bar from this exact scene, as if the same camera moved nearer.
+
+SUBJECT: the woman standing behind the zinc counter, mid-forties, dark
+sleeveless top, forearms resting on the bar. Head and shoulders, slightly from
+the side, her eyes towards the camera. Her expression is level and unimpressed —
+someone who has been asked questions before and did not enjoy it.
+
+FRAMING: medium close-up, shallow depth of field. The lit bottle shelf behind
+her reduced to warm soft glowing shapes.
+
+CONTINUITY — must match the wide shot exactly:
+- Same lighting: warm amber from below and behind, cold blue-green spill from
+  the far left, everything else in shadow.
+- Same palette: amber, dark leather brown, zinc grey, restrained cold accents.
+- Same haze hanging in the light.
+
+LOOK: photorealistic cinematic film still, anamorphic 35mm, Blade Runner 2049.
+Fine film grain. Highlights roll off, never clip to white.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters anywhere.
+Not an illustration, not anime, no painterly brushwork.

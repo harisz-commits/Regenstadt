@@ -6,6 +6,7 @@
  */
 import { createWorld } from '../src/game/world.js';
 import { SCENES } from '../src/game/scenes.js';
+import { DISTRICTS, DISTRICT_IDS } from '../src/game/districts.js';
 
 const w = createWorld();
 const spot = (ort, id) => SCENES[ort].spots.find((s) => s.id === id);
@@ -43,10 +44,13 @@ ok(w.hasClue('blut-fremd'), 'Erkenntnis blut-fremd gesetzt');
 ok(w.ready().length === 0, 'Befund nach Abholen weg');
 ok(w.collect('cloth') === null, 'Befund nicht zweimal abholbar');
 
-// 6. Erreichbarkeit: kommt man von jedem Ort irgendwohin und zurück?
+// 6. Erreichbarkeit — ZU FUSS innerhalb eines Sektors, per Spinner zwischen
+//    ihnen. Ein Ort im Hafen ist von der Kanalgasse aus nicht erlaufbar, und
+//    das ist Absicht.
 const alle = Object.keys(SCENES);
-const gesehen = new Set(['alley']);
-const rand = ['alley'];
+const start = DISTRICT_IDS.map((d) => DISTRICTS[d].arrival);
+const gesehen = new Set(start);
+const rand = [...start];
 while (rand.length) {
   const o = rand.pop();
   for (const s of SCENES[o].spots) {
@@ -54,8 +58,29 @@ while (rand.length) {
   }
 }
 ok(gesehen.size === alle.length, `Alle ${alle.length} Orte erreichbar (${gesehen.size})`);
+
 for (const id of alle) {
   const raus = SCENES[id].spots.filter((s) => s.goto);
   ok(raus.length > 0, `${id}: hat einen Ausgang (${raus.map((s) => s.dir).join(',')})`);
   for (const s of raus) ok(Boolean(SCENES[s.goto]), `${id} → ${s.goto} existiert`);
+  ok(Boolean(SCENES[id].district), `${id}: gehört zu einem Sektor`);
+  ok(Boolean(DISTRICTS[SCENES[id].district]), `${id}: Sektor ${SCENES[id].district} existiert`);
+}
+
+// 7. Sektoren: jeder hat einen Ankunftsort, und jeder ausser dem ersten ist
+//    gesperrt, bis ein Hinweis ihn oeffnet.
+for (const d of DISTRICT_IDS) {
+  const D = DISTRICTS[d];
+  ok(Boolean(SCENES[D.arrival]), `${d}: Ankunftsort ${D.arrival} existiert`);
+  ok(D.offen || Boolean(D.requires), `${d}: entweder offen oder mit Bedingung`);
+  if (D.requires) ok(Boolean(D.hint), `${d}: gesperrter Sektor nennt einen Hinweis`);
+}
+
+// 8. Jede Bedingung muss irgendwo im Spiel erfuellbar sein — sonst ist ein
+//    Sektor fuer immer zu, und das merkt niemand beim Durchspielen.
+const erreichbareHinweise = new Set();
+for (const id of alle) for (const s of SCENES[id].spots) if (s.clue) erreichbareHinweise.add(s.clue);
+for (const d of DISTRICT_IDS) {
+  const c = DISTRICTS[d].requires?.clue;
+  if (c) ok(erreichbareHinweise.has(c), `${d}: Hinweis "${c}" ist im Spiel auffindbar`);
 }
