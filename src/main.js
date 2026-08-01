@@ -38,7 +38,7 @@ let current = null;
 // keinen Zeiger, dem die Kamera folgen koennte.
 const TOUCH = isTouch();
 if (TOUCH) {
-  params.renderScale = 0.62;
+  params.renderScale = 0.85;
   params.mouseLook = 0;
 }
 
@@ -188,7 +188,7 @@ let warmed = 0;
    einbricht — und wieder angehoben, wenn wieder Luft ist. Eine Animation, die
    mit 5 Bildern je Sekunde laeuft, sieht aus, als stuende sie still; lieber
    etwas weicher und fluessig als scharf und ruckelnd. */
-const QUALITY_MIN = 0.38;
+const QUALITY_MIN = 0.30;
 let qualityBase = params.renderScale;
 let slowFrames = 0;
 let fastFrames = 0;

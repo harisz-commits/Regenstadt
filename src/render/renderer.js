@@ -109,11 +109,20 @@ export class Renderer {
     const gl = this.gl;
     this.cssWidth = cssW;
     this.cssHeight = cssH;
-    // Auf Beruehrgeraeten hoechstens 1 Bildpunkt je CSS-Pixel. Neun
-    // Vollbild-Durchgaenge bei dreifacher Pixeldichte sind fuer ein Telefon
-    // zu viel — und was zu langsam laeuft, sieht aus, als bewege es sich gar
-    // nicht.
-    const maxDpr = matchMedia('(hover: none), (pointer: coarse)').matches ? 1.0 : 1.5;
+    // Obergrenze der Pixeldichte.
+    //
+    // Stand vorher auf 1.0 fuer Beruehrgeraete. Zusammen mit renderScale 0.62
+    // hiess das: Auf einem Telefon mit Pixeldichte 3 entstand das Bild mit
+    // rund einem Fuenftel der physischen Aufloesung und wurde fast fuenffach
+    // hochskaliert. Danebengelegt sah jedes Detailbild — ein schlichtes <img>
+    // in Originalgroesse — gestochen scharf aus, und das Spielbild weich.
+    //
+    // Jetzt 2.0 als DECKE, nicht als Vorgabe: Die Bildratenregelung in
+    // main.js nimmt renderScale zurueck, wenn das Geraet nicht mitkommt. Der
+    // Boden liegt bei 2.0 x 0.30 = 0.60 CSS-Pixeln, also dort, wo die alte
+    // Einstellung fest stand — ein langsames Geraet wird dadurch nicht
+    // langsamer als vorher, ein schnelles aber deutlich schaerfer.
+    const maxDpr = matchMedia('(hover: none), (pointer: coarse)').matches ? 2.0 : 1.75;
     const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
     const scale = this.params.renderScale;
     const w = Math.max(2, Math.round(cssW * dpr * scale));

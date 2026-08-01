@@ -56,6 +56,11 @@ const CSS = `
 /* Waehrend neue Fragen geholt werden, bleiben die alten stehen und bleiben
    anklickbar — nur matt. Vorher wurde die Zeile geleert, und der Spieler sass
    zehn Sekunden vor einem Verhoer ohne jede Schaltflaeche. */
+#talk .ask .sug .aus {
+  border-left: 2px solid rgba(255,190,116,.4); padding: 10px 0 10px 14px;
+  font-size: 13px; line-height: 1.65; color: rgba(255,214,168,.72); font-style: italic;
+  max-width: 62ch;
+}
 #talk .ask .sug.laedt button { opacity: .5; }
 #talk .ask .sug.laedt::after {
   content: 'Weitere Fragen …';
@@ -153,8 +158,12 @@ export function createTalk(host) {
 
   function setBusy(v) {
     busy = v;
-    sendBtn.disabled = v;
-    input.disabled = v;
+    // Ist das Gespräch ausgereizt, bleibt die Eingabe zu — sonst gäbe
+    // `setBusy(false)` nach der letzten Antwort alles wieder frei, direkt
+    // unter dem Satz, dass hier nichts mehr zu holen ist.
+    const aus = char ? istErschoepft(char) : false;
+    sendBtn.disabled = v || aus;
+    input.disabled = v || aus;
     for (const b of sug.querySelectorAll('button')) b.disabled = v;
   }
 
@@ -181,6 +190,48 @@ export function createTalk(host) {
     'Wer war heute Abend noch hier?',
     'Was verschweigen Sie mir?',
   ];
+
+  /**
+   * Wann ein Gespräch ausgereizt ist.
+   *
+   * Irgendwann dreht man sich im Kreis, und das Modell erfindet lieber etwas,
+   * als nichts zu sagen. Nach neun Fragen ohne Fortschritt sagt der Ermittler
+   * selbst, dass hier nichts mehr kommt.
+   *
+   * „Fortschritt" heißt: eine [SPUR] aus dem Gespräch — oder eine neue Notiz,
+   * die anderswo dazugekommen ist. Genau deshalb ist die Sperre nicht
+   * endgültig: Wer draußen etwas findet, hat wieder etwas zu fragen.
+   */
+  const MAX_OHNE_FORTSCHRITT = 9;
+  /** @type {Map<string, {ohne: number, standNotizen: number}>} */
+  const stand = new Map();
+
+  function zustand(c) {
+    if (!stand.has(c.id)) stand.set(c.id, { ohne: 0, standNotizen: host.getNotes().length });
+    const z = stand.get(c.id);
+    // Neues in der Akte macht das Gespräch wieder sinnvoll.
+    if (host.getNotes().length > z.standNotizen) {
+      z.ohne = 0;
+      z.standNotizen = host.getNotes().length;
+    }
+    return z;
+  }
+  const istErschoepft = (c) => zustand(c).ohne >= MAX_OHNE_FORTSCHRITT;
+
+  function zeigeErschoepft() {
+    sug.classList.remove('laedt');
+    sug.innerHTML = '';
+    const d = document.createElement('div');
+    d.className = 'aus';
+    // Bewusst ohne Fürwort — das Spiel kennt zu den Figuren kein Geschlecht,
+    // und „von der" wäre bei der nächsten Figur schon falsch.
+    d.textContent = `Aus ${char.name} ist gerade nichts mehr herauszuholen. `
+                  + 'Nicht mit dem, was ich in der Hand habe.';
+    sug.appendChild(d);
+    input.disabled = true;
+    sendBtn.disabled = true;
+    input.placeholder = 'Erst mit etwas Neuem …';
+  }
 
   function zeigeFragen(fragen) {
     sug.innerHTML = '';
@@ -254,6 +305,8 @@ export function createTalk(host) {
   let fragenLauf = 0;
   async function ladeFragen() {
     const lauf = ++fragenLauf;
+    // Ausgereizt: gar nicht erst fragen. Spart nebenbei den Aufruf.
+    if (istErschoepft(char)) { zeigeErschoepft(); return; }
     // Was schon gefragt wurde, fliegt raus — sonst kann man eine Frage
     // zweimal stellen, waehrend die neuen noch unterwegs sind.
     const gestellt = new Set(history.filter((m) => m.role === 'user').map((m) => m.text));
@@ -307,6 +360,10 @@ export function createTalk(host) {
 
       slot.textContent = clean;
       history.push({ role: 'model', text: clean });
+
+      // Fortschritt zaehlen, BEVOR die naechsten Fragen geholt werden.
+      const z = zustand(char);
+      if (m) { z.ohne = 0; } else { z.ohne += 1; }
 
       // Neue Fragen zum neuen Stand — nebenher, damit die Antwort sofort steht.
       ladeFragen();
@@ -373,6 +430,9 @@ export function createTalk(host) {
       nEl.textContent = c.name;
       rEl.textContent = c.role;
       aEl.textContent = c.appearance;
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.placeholder = 'Eigene Frage…';
       setBusy(false);
       el.classList.add('on');
       ladeFragen();

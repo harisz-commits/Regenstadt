@@ -28,6 +28,21 @@ html, body {
   user-select: none;
   -webkit-user-select: none;
 }
+/* Die Bildflaeche gehoert dem Spiel, nicht dem Browser.
+ *
+ * "manipulation" oben schaltet nur das Doppeltippen ab; Wischgesten wertet
+ * Chrome auf Android weiter selbst aus. Sobald er eine davon als Seitenlauf
+ * einstuft, uebernimmt er sie und schickt pointercancel — und das Ziehen
+ * bricht mitten in der Bewegung ab. Unter iOS faellt das nicht auf, weil die
+ * Seite dort ohnehin nicht laufen kann.
+ *
+ * ACHTUNG beim Bearbeiten: Dieser Block steht in einer Template-Zeichenkette.
+ * Ein Backtick im Kommentar beendet sie und der Build bricht ab.
+ *
+ * "none" sagt dem Browser: Hier gibt es nichts zu entscheiden. Bewusst nur
+ * auf Bild und Punktebene — Tafel, Verhoer und Karte muessen scrollen. */
+#stage, #hs-layer { touch-action: none; }
+
 /* Eingabefelder: 16 px verhindern den Zoom beim Antippen unter iOS. */
 input, textarea, select {
   font-size: 16px !important;
