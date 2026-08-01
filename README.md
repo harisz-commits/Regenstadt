@@ -2,9 +2,9 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Siebzehn Orte in fuenf Sektoren, sechs Figuren, die von einem Sprachmodell
-antworten, eine Beweiskette mit Laborbefund — und ein Flugauto, um zwischen
-den Sektoren zu reisen.
+Zwanzig Orte in sechs Sektoren, acht Figuren, die von einem Sprachmodell
+antworten, eine Beweiskette mit Laborbefund, ein Flugauto, um zwischen den
+Sektoren zu reisen — und ein Ende, das man erreichen kann.
 
 ```
 npm install
@@ -49,7 +49,7 @@ halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
 ## Die Welt
 
-Siebzehn Orte in fuenf Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen acht
+Zwanzig Orte in sechs Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen acht
 Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`, `up`, `down`) mit je eigener
 Marke; die **Querstrasse** ist der erste Ort, an dem man waehlen muss — links
 das Praesidium, rechts die Bar.
@@ -121,7 +121,41 @@ Kanalebene → Patientenkarte → Labor → Registerluecke → oeffnet das Archi
 Am Ende steht der Sachbearbeiter, der elf Totenscheine unterschrieben hat.
 Fachmarke und Karteikarte belegen, dass es nie eine Leiche gab und dass er es
 vor der Vermisstenmeldung wusste — der Punkt, an dem aus Mitwissen
-Beteiligung wird.
+Beteiligung wird. Von dort laeuft die Kette in den Abschluss:
+
+```
+Fachmarke → Labor → „ohne Leiche" → oeffnet das KUEHLHAUS im Hafen
+                                  → der Vermisste lebt → oeffnet die DIREKTION
+Bretterbude → Liste mit elf Namen → Labor → sie ist ein Terminkalender
+Schreibtisch → Unterschriftenmappe → die zwoelfte Urkunde, fertig ausser Datum
+```
+
+### Der Abschluss
+
+Bis zuletzt konnte das Spiel nicht **enden**. Man konnte alles finden und stand
+danach genauso da wie vorher — und eine Ermittlung, die nicht abgeschlossen
+werden kann, ist keine Ermittlung, sondern ein Rundgang.
+
+Abgeschlossen wird sie an der Pinnwand in der **eigenen Wohnung**. Sie ist von
+Anfang an offen, hat einen eigenen Punkt auf der Karte und ist der einzige Ort,
+an dem man nichts ermittelt: Der letzte Zug des Spiels darf nicht der laengste
+Fussweg des Spiels sein.
+
+Der Spieler benennt eine Person und legt vor, was er hat. Daraus fallen drei
+Enden — und keines davon ist „verloren", denn auch das falsche ist ein Ende:
+
+| | |
+|---|---|
+| **Anklage** | richtige Person, alle drei Belege. Sie haelt. |
+| **Verdacht** | richtige Person, aber Belege fehlen. Sie geht, das Programm heisst kuenftig anders. |
+| **Irrtum** | falsche Person. Jemand steht dafuer gerade, der es nicht war. |
+
+Den Nachspann schreibt dasselbe Modell, das auch die Figuren spricht, und zwar
+aus dem **tatsaechlichen** Akteninhalt: Nur es weiss, was dieser Spieler
+gefunden und was er ausgelassen hat. Faellt das Archiv aus, steht je Ausgang
+ein fest geschriebener Text bereit — ein Ende darf nicht an einer Leitung
+haengen. Die Loesung liegt als Daten in `src/game/anklage.js`, damit ein
+generierter Fall spaeter eine eigene mitliefern kann.
 
 Die Wartezeit laeuft in **Ortswechseln**, nicht in Sekunden. Eine Uhr zwingt
 zum Warten, ein Zaehler zwingt zum Weitergehen — und wer das Spiel weglegt,
@@ -255,9 +289,11 @@ src/
   game/world.js         Zustand der Ermittlung: Asservate, Analysen, Freischaltungen
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
   game/characters.js    Figuren: Wesen, Wissen, Geheimnis — und die Anweisung daraus
+  game/anklage.js       Der Abschluss: Loesung, Beweislage, drei Enden, Nachspann
   game/talk.js          Verhoer: Vollbildansicht, Vorhalten, Spuren in die Akte
 api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt serverseitig)
-tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen
+tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen (166 Zusicherungen)
+tools/abschluss-pruefen.mjs  den Abschluss im echten Browser durchspielen
 tools/beschneiden.mjs   eingebrannte schwarze Balken von einer Platte schneiden
 tools/details.mjs       Nahaufnahmen fuer Untersuchungspunkte erzeugen
 tools/verkleinern.mjs   Bilder auf die Groesse bringen, in der sie gezeigt werden

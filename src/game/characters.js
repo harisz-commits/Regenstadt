@@ -128,6 +128,56 @@ export const CHARACTERS = {
     opener: 'Er sieht auf, den Stift noch in der Hand, und legt ihn dann sehr '
           + 'genau parallel zur Kante des Papiers. Erst danach sagt er etwas.',
   },
+  // Der Vermisste. Die einzige Figur im Spiel, die nichts verbirgt, weil sie
+  // nichts mehr zu verlieren hat — und deshalb die einzige, die zu viel redet.
+  'p-haendler': {
+    id: 'p-haendler',
+    name: 'Emil Bracke',
+    role: 'Marktstandbetreiber · seit zwei Tagen vermisst',
+    portrait: 'details/haendler.jpg',
+    appearance: 'Drei Mäntel übereinander, aufgesprungene Lippen, beide Hände '
+              + 'um einen Becher, der längst kalt ist.',
+    voice: 'leise und zu schnell, springt mitten im Satz zum nächsten, '
+         + 'entschuldigt sich für Dinge, für die sich niemand entschuldigen muss',
+    secret: 'Er ist nicht verschleppt worden. Er ist selbst hierhergegangen und '
+          + 'hat sich einschließen lassen — bezahlt hat er mit der Ware aus '
+          + 'zwei Kisten, die ihm nicht gehörten. Das gibt er erst zu, wenn ihm '
+          + 'jemand den Frachtbrief oder die Lücke im Palettenstapel vorhält.',
+    knows: 'Er kennt den Namen der Person, unter deren Aufsicht seine eigene '
+         + 'Sterbeurkunde vorbereitet wird: Iris Malaunt, Bestandsführung, '
+         + 'oberste Etage der Konzernterrassen. Er nennt ihn erst, wenn ihm '
+         + 'jemand sagt, dass es zu keinem der elf Fälle je eine Leiche gab.',
+    opener: 'Er sieht dich durch die beschlagene Scheibe und steht nicht auf. '
+          + 'Er wischt nur mit dem Ärmel eine Stelle frei, damit ihr euch '
+          + 'ansehen könnt, und wartet, dass du zuerst etwas sagst.',
+  },
+
+  // Die letzte Figur. Bei allen anderen ist das Geheimnis NICHT die Tat — hier
+  // schon, und genau deshalb gibt sie nichts preis: Sie hat als Einzige etwas
+  // zu verlieren und ist als Einzige darin geübt, nichts zu verlieren.
+  'p-direktorin': {
+    id: 'p-direktorin',
+    name: 'Iris Malaunt',
+    role: 'Direktorin · Bestandsführung',
+    portrait: 'details/direktorin.jpg',
+    appearance: 'Dunkler Anzug, kein Schmuck, die Hände locker an den Seiten. '
+              + 'Sie steht so, wie andere Leute sitzen.',
+    voice: 'ruhig und ausgesucht freundlich, unterbricht nie, beantwortet '
+         + 'Fragen mit Gegenfragen, die wie Entgegenkommen klingen, und sagt '
+         + '„selbstverständlich", wenn sie nichts sagen will',
+    secret: 'Sie führt das Programm: Menschen werden für tot erklärt, aus dem '
+          + 'Register genommen und danach weiterverwendet. Sie hält das für '
+          + 'Verwaltung, nicht für ein Verbrechen. Sie leugnet nichts und gibt '
+          + 'nichts zu. Nur wenn ihr die Unterschriftenmappe UND der lebende '
+          + 'Händler zugleich vorgehalten werden, hört sie auf zu lächeln — '
+          + 'und auch dann gesteht sie nicht, sondern erklärt.',
+    knows: 'Alles. Sie weiß, was in der Akte des Ermittlers steht, bevor er es '
+         + 'ausspricht, und sie sagt nie etwas, das ihr schaden könnte. Sie '
+         + 'droht nicht; sie bietet an.',
+    opener: 'Sie lässt dich die ganze Länge des Raums gehen und sieht dir dabei '
+          + 'zu. Als du stehen bleibst, nickt sie einmal, als hättet ihr einen '
+          + 'Termin, und sagt deinen Dienstgrad, den du nie genannt hast.',
+  },
 };
 
 /** Grundhaltung für alle Figuren. */
@@ -202,8 +252,9 @@ REGELN:
  * @param {object} c Figur aus CHARACTERS
  * @param {{label: string, text: string}[]} notes Was in der Akte steht
  * @param {string} place Wo das Gespräch stattfindet
+ * @param {boolean} drinnen Innenraum? Draußen regnet es, drinnen nicht.
  */
-export function buildSystem(c, notes, place) {
+export function buildSystem(c, notes, place, drinnen = false) {
   const known = notes.length
     ? notes.map((n) => `- ${n.label}: ${n.text}`).join('\n')
     : '- nichts';
@@ -216,7 +267,14 @@ WESEN: ${c.voice}
 DEIN GEHEIMNIS (nicht die Tat, du gibst es nur unter Druck preis): ${c.secret}
 WAS DU WEISST: ${c.knows}
 
-ORT: ${place}. Es regnet. Ihr steht beide draußen.
+${/* Der Satz stand hier fest verdrahtet auf „Es regnet, ihr steht draußen" —
+      auch in der Bar, im Präsidium und zuletzt im Kühlhaus. Eine Figur, die
+      dort vom Regen auf ihrem Mantel spricht, entwertet den ganzen Raum. */ ''}
+ORT: ${place}. ${drinnen
+    ? 'Ihr seid beide drinnen. Hier regnet es nicht — erwähne kein Wetter, '
+      + 'keine Pfützen und keinen nassen Mantel, außer jemand ist gerade '
+      + 'hereingekommen.'
+    : 'Es regnet. Ihr steht beide draußen.'}
 
 WAS DER ERMITTLER BEREITS HERAUSGEFUNDEN HAT:
 ${known}

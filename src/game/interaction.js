@@ -16,6 +16,7 @@
 import { isTouch } from '../ui/viewport.js';
 import { createTalk } from './talk.js';
 import { createSpinner } from './spinner.js';
+import { createAnklage } from './anklage.js';
 
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
@@ -38,6 +39,14 @@ const CSS = `
      Ohne Uebergang schaltet sie sofort, und das genuegt hier voellig. */
 }
 #hs-layer .hs.person .mark { border-color: rgba(255,178,110,.62); box-shadow: 0 0 16px rgba(255,178,110,.32); }
+/* Die Pinnwand ist der einzige Punkt, an dem das Spiel endet. Sie sieht
+   deshalb auch als Einzige anders aus: dauerhaft schwach sichtbar, in Grün,
+   damit man in der eigenen Wohnung nicht danach sucht. */
+#hs-layer .hs.anklage .mark {
+  border-color: rgba(120,240,180,.6); box-shadow: 0 0 18px rgba(120,240,180,.28);
+  opacity: .45;
+}
+#hs-layer .hs.anklage:hover .mark { opacity: 1; }
 
 /* Ausgänge: Pfeil statt Kreis, und dauerhaft sichtbar. Wohin man gehen kann,
    soll man sehen, ohne danach zu suchen. */
@@ -380,6 +389,19 @@ export function createInteraction(renderer, host) {
     ],
     addNote,
     getPlace: () => currentScene?.name || 'Kanalgasse',
+    // Drinnen regnet es nicht. Ohne diese Auskunft erzaehlte jede Figur vom
+    // Regen auf ihrem Mantel — auch im Kuehlhaus und im obersten Stock.
+    getInnen: () => currentScene?.kind === 'interior',
+  });
+
+  // Der Abschluss. Liest dieselbe Akte wie das Verhoer, damit der Nachspann
+  // von dem erzaehlt, was der Spieler wirklich gefunden hat.
+  const anklage = createAnklage({
+    world,
+    getNotes: () => [
+      ...notes,
+      ...world.items().map((i) => ({ label: i.name, text: i.text })),
+    ],
   });
 
   function renderAkte() {
@@ -608,6 +630,16 @@ export function createInteraction(renderer, host) {
 
     if (spot.kind === 'lab') labButtons();
 
+    // Die Pinnwand: der einzige Punkt im Spiel, an dem der Fall geschlossen
+    // wird. Siehe anklage.js.
+    if (spot.kind === 'anklage') {
+      const b = document.createElement('button');
+      b.className = 'mark-clue';
+      b.textContent = anklage.istVorbei() ? 'Bericht ansehen' : 'Den Fall abschließen';
+      b.onclick = () => { close(); anklage.open(); };
+      pAct.appendChild(b);
+    }
+
     if (spot.goto) {
       const frei = world.meets(spot.requires);
       const g = document.createElement('button');
@@ -732,7 +764,8 @@ export function createInteraction(renderer, host) {
   addEventListener('keydown', (e) => {
     if (e.key === 'Tab') { e.preventDefault(); layer.classList.add('reveal'); }
     if (e.key === 'Escape') {
-      if (talk.isOpen() || spinner.isOpen()) return;   // die schliessen sich selbst
+      // Die schliessen sich selbst.
+      if (talk.isOpen() || spinner.isOpen() || anklage.isOpen()) return;
       close();
       akte.classList.remove('on');
     }

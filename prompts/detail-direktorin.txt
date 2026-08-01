@@ -1,0 +1,27 @@
+This is a wide shot of a top-floor executive office at night, rain on the glass
+walls, the city far below. Produce a CLOSE-UP of the woman standing at the
+desk, as if the same camera moved much nearer to her.
+
+SUBJECT: a woman in her fifties in a dark tailored suit, no jewellery. Head and
+shoulders, slightly from the front, standing — not seated. Her hands are
+relaxed at her sides. She is looking directly at the camera with an expression
+that is polite, unhurried and completely closed: a person who has already
+decided how this conversation ends and is being courteous about it. Not a
+sneer, not a threat — hospitality with nothing behind it.
+
+FRAMING: medium close-up. The rain-streaked window wall behind her, the city
+lights reduced to soft bokeh. Shallow depth of field. The desk lamp is out of
+frame but lights one side of her face from below.
+
+CONTINUITY — must match the wide shot exactly:
+- Same lighting: cold blue window light as the key, one small warm lamp from
+  the desk on the other side, no ceiling light.
+- Same palette: near-monochrome blue-grey, a single warm accent.
+- Indoors: the rain is on the far side of the glass. She is dry, the room is
+  dry, no weather inside.
+
+LOOK: photorealistic cinematic film still, anamorphic 35mm, Blade Runner 2049.
+Fine film grain. Highlights roll off, never clip to white.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters or numbers
+anywhere. Not an illustration, not anime.

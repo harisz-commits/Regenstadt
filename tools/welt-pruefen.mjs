@@ -7,6 +7,8 @@
 import { createWorld } from '../src/game/world.js';
 import { SCENES } from '../src/game/scenes.js';
 import { DISTRICTS, DISTRICT_IDS } from '../src/game/districts.js';
+import { CHARACTERS } from '../src/game/characters.js';
+import { LOESUNG } from '../src/game/anklage.js';
 
 const w = createWorld();
 const spot = (ort, id) => SCENES[ort].spots.find((s) => s.id === id);
@@ -112,3 +114,87 @@ for (const d of DISTRICT_IDS) {
   const c = DISTRICTS[d].requires?.clue;
   if (c) ok(erreichbareHinweise.has(c), `${d}: Hinweis "${c}" ist im Spiel auffindbar`);
 }
+
+// Dasselbe fuer die Ausgaenge: Eine Tuer, deren Bedingung nirgends erfuellbar
+// ist, macht einen Ort unerreichbar, ohne dass die Erreichbarkeitspruefung
+// oben etwas merkt — die laeuft ja ueber `goto`, nicht ueber `requires`.
+for (const id of alle) for (const s of SCENES[id].spots) {
+  const c = s.requires?.clue;
+  if (c) ok(erreichbareHinweise.has(c), `${id}.${s.id}: Bedingung "${c}" ist erfuellbar`);
+  if (s.requires) ok(Boolean(s.lockText), `${id}.${s.id}: gesperrter Punkt nennt einen Grund`);
+}
+
+/* ======================================================================== */
+/* 9. Der Abschluss.                                                         */
+/*                                                                           */
+/* Das Spiel muss durchspielbar SEIN, nicht nur begehbar. Diese Pruefung      */
+/* spielt die ganze Kette in der Reihenfolge durch, in der ein Spieler sie    */
+/* gehen muss, und schaut am Ende nach, ob die Anklage traegt.               */
+/* ======================================================================== */
+
+// Genau ein Ort, an dem angeklagt wird — sonst waere das Ende zufaellig.
+const anklagePunkte = alle.flatMap((id) =>
+  SCENES[id].spots.filter((s) => s.kind === 'anklage').map((s) => `${id}.${s.id}`));
+ok(anklagePunkte.length === 1, `Genau ein Anklagepunkt (${anklagePunkte.join(', ') || 'keiner'})`);
+
+ok(Boolean(CHARACTERS[LOESUNG.taeter]), `Der Taeter "${LOESUNG.taeter}" ist eine Figur`);
+
+// Jede Figur muss auch irgendwo stehen — sonst kann man jemanden anklagen,
+// den man nie treffen konnte.
+const personenPunkte = new Set(alle.flatMap((id) =>
+  SCENES[id].spots.filter((s) => s.kind === 'person' || s.kind === 'lab').map((s) => s.id)));
+for (const cid of Object.keys(CHARACTERS)) {
+  ok(personenPunkte.has(cid), `Figur ${cid} steht an einem Ort`);
+}
+
+// Ein vollstaendiger Durchlauf: alles finden, alles abgeben, alles abholen.
+const p = createWorld();
+/** Einen Punkt „anklicken": Hinweis eintragen, Gegenstand nehmen. */
+function untersuche(ort, punkt) {
+  const s = spot(ort, punkt);
+  if (s.clue) p.addClue(s.clue);
+  if (s.item) p.take(s.item);
+  return s;
+}
+/** Einen Gegenstand ins Labor geben und den Befund abholen. */
+function labor(id, wait) {
+  const it = p.items().find((i) => i.id === id);
+  p.submit(it);
+  for (let i = 0; i < wait; i++) p.step();
+  return Boolean(p.collect(id));
+}
+
+untersuche('alley', 'crates-right');                // zollsiegel  -> Sektor 3
+ok(p.hasClue('zollsiegel'), 'Durchlauf: Zollsiegel gefunden');
+untersuche('alley2', 'dumpster');                   // Schluesselkarte
+untersuche('backroom', 'workbench');                // Tuch
+ok(labor('cloth', 4), 'Durchlauf: Blutbefund abgeholt');
+ok(p.hasClue('blut-fremd'), 'Durchlauf: Sektor 9 offen');
+untersuche('customs', 'clipboards');                // frachtbrief -> Sektor 1
+untersuche('klinik', 'instrumente');                // Patientenkarte
+ok(labor('patientenkarte', 3), 'Durchlauf: Registerbefund abgeholt');
+untersuche('archiv', 'wagen');                      // Personalakte
+ok(labor('personalakte', 3), 'Durchlauf: Konzernprogramm belegt');
+ok(p.meets(DISTRICTS['sektor-4'].requires), 'Durchlauf: Sektor 4 offen');
+untersuche('leichenhalle', 'fach-offen');           // Fachmarke
+ok(labor('zehenmarke', 3), 'Durchlauf: Fachmarke geprueft');
+ok(p.hasClue('ohne-leiche'), 'Durchlauf: „ohne Leiche" belegt');
+
+const kuehltuer = spot('customs', 'zum-kuehlhaus');
+ok(p.meets(kuehltuer.requires), 'Durchlauf: Kuehlhaus offen');
+untersuche('kuehlhaus', 'p-haendler');              // haendler-lebt
+untersuche('kuehlhaus', 'buero');                   // Namensliste
+ok(labor('namensliste', 2), 'Durchlauf: Namensliste abgeglichen');
+ok(p.hasClue('elf-namen'), 'Durchlauf: Liste als Terminkalender erkannt');
+
+const lift = spot('empfang', 'direktionsaufzug');
+ok(p.meets(lift.requires), 'Durchlauf: Direktion erreichbar');
+untersuche('direktion', 'schreibtisch');            // letzte-unterschrift
+ok(p.hasClue('letzte-unterschrift'), 'Durchlauf: zwoelfte Urkunde in der Akte');
+
+ok(p.hasClue(LOESUNG.voraussetzung.clue), 'Durchlauf: Anklage ueberhaupt moeglich');
+for (const b of LOESUNG.beweise) ok(p.hasClue(b.clue), `Durchlauf: Beleg "${b.clue}" liegt vor`);
+
+// Und die Gegenprobe: ohne den Durchlauf traegt gar nichts.
+const leer = createWorld();
+ok(!leer.hasClue(LOESUNG.voraussetzung.clue), 'Ohne Ermittlung keine Anklage');

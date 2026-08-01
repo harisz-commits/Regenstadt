@@ -109,7 +109,8 @@ const CSS = `
 /**
  * @param {{ getNotes: () => {label:string,text:string}[],
  *           addNote: (label: string, text: string) => void,
- *           getPlace: () => string }} host
+ *           getPlace: () => string,
+ *           getInnen: () => boolean }} host
  */
 export function createTalk(host) {
   const style = document.createElement('style');
@@ -346,7 +347,7 @@ export function createTalk(host) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: buildSystem(char, host.getNotes(), host.getPlace()),
+          system: buildSystem(char, host.getNotes(), host.getPlace(), host.getInnen?.()),
           messages: history,
         }),
       });

@@ -249,6 +249,10 @@ requestAnimationFrame(loop);
 window.__regenstadt = {
   renderer,
   params,
+  // Der Weltzustand, damit ein Werkzeug einen Spielstand herstellen kann, ohne
+  // die halbe Stadt durchzuklicken — siehe tools/abschluss-pruefen.mjs. Es ist
+  // dasselbe Objekt, mit dem das Spiel laeuft; hier liegt nichts Geheimes.
+  world,
   reseed(s) { seed = s; return loadLocation(current?.id || START); },
   goTo,
   setTime(t) { renderer.time = t; renderer.timeFrozen = true; },

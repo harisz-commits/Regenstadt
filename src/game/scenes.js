@@ -288,6 +288,14 @@ export const SCENES = {
         text: 'Eine Tür unter einer Reklame, die seit Jahren dasselbe verspricht.',
       },
       {
+        id: 'nach-hause', u: 0.352, v: 0.470, r: 0.075,
+        kind: 'exit', dir: 'in', goto: 'wohnung',
+        label: 'Hauseingang',
+        text: 'Vier Stockwerke über dem Kiosk, zweite Tür von links. Deine. Der '
+            + 'Aufgang riecht nach nassem Stein, und die Zeitschaltung im Licht '
+            + 'reicht seit Jahren nur bis zum dritten Stock.',
+      },
+      {
         id: 'cross-back', u: 0.500, v: 0.930, r: 0.075,
         kind: 'exit', dir: 'back', goto: 'alley2',
         label: 'Zurück in die Gasse',
@@ -511,6 +519,17 @@ export const SCENES = {
         text: 'Verpackungsmaterial über den ganzen Boden verteilt, nicht gefegt. '
             + 'Zwischen den Halmen liegt ein abgerissenes Stück Klebeband mit '
             + 'einem Abdruck darin, der zu keinem Handschuh gehört.',
+      },
+      {
+        id: 'zum-kuehlhaus', u: 0.925, v: 0.545, r: 0.075,
+        kind: 'exit', dir: 'right', goto: 'kuehlhaus',
+        requires: { clue: 'ohne-leiche' },
+        lockText: 'Ein Kühlhaus. Bis eben war das eine Halle wie jede andere im '
+                + 'Hafen — es gab ja eine Leiche, und die lag im Meldeamt.',
+        label: 'Tür zum Kühlhaus',
+        text: 'Eine schmale Tür in der Wellblechwand, rechts hinter dem '
+            + 'Scanbogen. Der Rahmen ist von innen vereist, und unter der '
+            + 'Schwelle steht eine Pfütze, die nicht vom Regen kommt.',
       },
       {
         id: 'customs-out', u: 0.500, v: 0.930, r: 0.080,
@@ -763,6 +782,18 @@ export const SCENES = {
         label: 'Seitengang',
         text: 'Schmaler, niedriger, schlechter beleuchtet als die Halle. Hier '
             + 'gehen die hin, die hier arbeiten.',
+      },
+      {
+        id: 'direktionsaufzug', u: 0.240, v: 0.470, r: 0.080,
+        kind: 'exit', dir: 'up', goto: 'direktion',
+        requires: { clue: 'haendler-lebt' },
+        lockText: 'Ohne einen Namen ist das eine Aufzugtür. Mit einem Namen wäre '
+                + 'es eine Adresse — und du hast noch keinen, den du hier oben '
+                + 'nennen könntest.',
+        label: 'Aufzug ohne Etagenanzeige',
+        text: 'Der letzte in der Reihe, schmaler als die anderen, ohne Anzeige '
+            + 'über der Tür. Er hat einen Ruftaster und sonst nichts. Wer ihn '
+            + 'benutzt, weiß bereits, wohin er fährt.',
       },
     ],
   },
@@ -1101,6 +1132,261 @@ export const SCENES = {
         id: 'kartei-raus', u: 0.500, v: 0.930, r: 0.080,
         kind: 'exit', dir: 'out', goto: 'registratur',
         label: 'Zurück zur Registratur',
+        text: '',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  /* Der Abschluss.                                                          */
+  /*                                                                         */
+  /* Drei Orte, und jeder beantwortet eine Frage, die das Spiel bis hierher   */
+  /* offengelassen hat:                                                      */
+  /*   Kühlhaus  — wo ist der Händler? (Er lebt.)                             */
+  /*   Direktion — wer lässt unterschreiben?                                  */
+  /*   Wohnung   — und was machst du jetzt damit?                             */
+  /*                                                                         */
+  /* Die Wohnung ist von Anfang an offen. Sie ist kein Belohnungsraum, den    */
+  /* man freischaltet, sondern der Ort, an dem man zwischendurch nachsieht,   */
+  /* was man eigentlich hat — und am Ende der einzige Ort, an dem der Fall    */
+  /* geschlossen werden kann.                                                 */
+  /* ====================================================================== */
+  kuehlhaus: {
+    id: 'kuehlhaus',
+    district: 'sektor-3',
+    name: 'Kühlhaus 9',
+    sector: 'Sektor 3 · Hafenspange',
+    kind: 'interior',
+    backdrop: 'kuehlhaus-backdrop',
+    spots: [
+      {
+        id: 'p-haendler', u: 0.283, v: 0.382, r: 0.058, kind: 'person',
+        label: 'Mann hinter der Scheibe',
+        detail: 'details/haendler.jpg',
+        clue: 'haendler-lebt',
+        text: 'In der Bretterbude zwischen den Paletten brennt Licht, und darin '
+            + 'sitzt jemand: drei Mäntel übereinander, beide Hände um einen '
+            + 'Becher. Das Gesicht kennst du von der Anzeigetafel an der '
+            + 'Querstraße. Dort hängt es unter „vermisst". Hier atmet es.',
+      },
+      {
+        id: 'buero', u: 0.372, v: 0.545, r: 0.070,
+        label: 'Bretterbude',
+        detail: 'details/kuehlhaus-buero.jpg',
+        text: 'Sperrholz, in eine Ecke des Kühlraums gestellt, mit einem Ofen '
+            + 'darin, der zu klein ist für den Raum und zu groß für die Bude. '
+            + 'Innen liegt ein Bogen Papier auf der Kiste, die als Tisch dient. '
+            + 'Elf Zeilen, zehn davon durchgestrichen.',
+        item: {
+          id: 'namensliste',
+          name: 'Liste mit elf Namen',
+          text: 'Elf Namen in einer Handschrift, die dir inzwischen vertraut ist. '
+              + 'Zehn sind mit einem waagrechten Strich erledigt. Der elfte ist '
+              + 'der des Händlers, und hinter ihm steht kein Strich, sondern ein '
+              + 'Datum: übermorgen.',
+          analysis: {
+            wait: 2,
+            label: 'Abgleich · Liste mit elf Namen',
+            clue: 'elf-namen',
+            text: 'Die zehn durchgestrichenen Namen sind zehn der elf '
+                + 'Totenscheine, die im Meldeamt liegen. Der elfte Name ist der '
+                + 'des Händlers — dieselbe Nummer wie auf der Patientenkarte, '
+                + 'dieselbe wie an dem leeren Fach. Diese Liste ist kein '
+                + 'Verzeichnis von Toten. Sie ist ein Terminkalender.',
+          },
+        },
+      },
+      {
+        id: 'klappstuhl', u: 0.400, v: 0.680, r: 0.068,
+        label: 'Klappstuhl',
+        detail: 'details/kuehlhaus-klappstuhl.jpg',
+        text: 'Er steht vor der Bude, nicht darin, und zeigt zur Tür. Daneben '
+            + 'eine Thermoskanne im Reif. Wer hier gesessen hat, hat sich nicht '
+            + 'gewärmt, sondern aufgepasst — und zwar von außen.',
+      },
+      {
+        id: 'paletten-luecke', u: 0.108, v: 0.450, r: 0.090,
+        label: 'Palettenstapel',
+        detail: 'details/kuehlhaus-paletten-luecke.jpg',
+        text: 'Bis unter die Decke, alles unter einer Schicht Reif. Auf halber '
+            + 'Höhe fehlen zwei Kisten, und an dieser Stelle ist der Reif '
+            + 'abgeplatzt statt gewachsen. Die Lücke ist frisch.',
+      },
+      {
+        id: 'stapel-rechts', u: 0.800, v: 0.400, r: 0.090,
+        label: 'Gegenüberliegende Reihe',
+        detail: 'details/kuehlhaus-stapel-rechts.jpg',
+        text: 'Dieselben Kisten, dasselbe Zollsiegel wie in der Kanalgasse. Eine '
+            + 'davon ist geöffnet und wieder verschlossen worden; die Nägel '
+            + 'sitzen schief. Ihr Inhalt ist Stroh und sonst nichts.',
+      },
+      {
+        id: 'gitterrost', u: 0.500, v: 0.850, r: 0.085,
+        label: 'Gitterrost',
+        detail: 'details/kuehlhaus-gitterrost.jpg',
+        text: 'Der Boden ist ein Rost, darunter eine Rinne für das Tauwasser. In '
+            + 'der Rinne liegt eine Kette mit einer Blechmarke, blank gescheuert '
+            + 'und ohne Nummer. Jemand hat sie durchs Gitter fallen lassen, und '
+            + 'zwar mit Absicht — sie liegt genau in der Mitte.',
+      },
+      {
+        id: 'kuehl-raus', u: 0.500, v: 0.450, r: 0.085,
+        kind: 'exit', dir: 'out', goto: 'customs',
+        label: 'Kühlhaustür',
+        text: '',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  direktion: {
+    id: 'direktion',
+    district: 'sektor-1',
+    name: 'Direktion',
+    sector: 'Sektor 1 · Konzernterrassen',
+    kind: 'interior',
+    backdrop: 'direktion-backdrop',
+    spots: [
+      {
+        id: 'p-direktorin', u: 0.500, v: 0.450, r: 0.060, kind: 'person',
+        label: 'Frau am Schreibtisch',
+        detail: 'details/direktorin.jpg',
+        text: 'Sie steht, obwohl ein Stuhl da ist, und sie stand schon, bevor du '
+            + 'hereingekommen bist. Der Aufzug braucht vierzig Sekunden nach '
+            + 'oben. Vierzig Sekunden haben gereicht, um alles wegzuräumen bis '
+            + 'auf das, was sie dich sehen lassen will.',
+      },
+      {
+        id: 'schreibtisch', u: 0.418, v: 0.588, r: 0.085,
+        label: 'Schreibtisch',
+        detail: 'details/direktion-schreibtisch.jpg',
+        clue: 'letzte-unterschrift',
+        text: 'Schwarzer Stein, leer bis auf eine Ledermappe und eine Lampe. Die '
+            + 'Mappe liegt aufgeschlagen — nicht vergessen, sondern hingelegt.',
+        item: {
+          id: 'mappe',
+          name: 'Unterschriftenmappe',
+          text: 'Eine Sterbeurkunde, fertig ausgefüllt bis auf zwei Felder: das '
+              + 'Datum und die Unterschrift des Sachbearbeiters. Der Name darauf '
+              + 'ist der des Händlers, der zwei Sektoren weiter in einem '
+              + 'Kühlhaus sitzt und atmet. Die Nummer ist dieselbe wie an dem '
+              + 'leeren Fach.',
+        },
+      },
+      {
+        id: 'lampe', u: 0.582, v: 0.512, r: 0.055,
+        label: 'Schreiblampe',
+        detail: 'details/direktion-lampe.jpg',
+        text: 'Die einzige Lampe, die brennt, in einem Raum mit drei Wänden aus '
+            + 'Glas. Sie ist nicht auf die Mappe gerichtet, sondern auf den '
+            + 'Platz davor — auf den, der unterschreiben soll.',
+      },
+      {
+        id: 'sideboard', u: 0.058, v: 0.575, r: 0.085,
+        label: 'Sideboard',
+        detail: 'details/direktion-sideboard.jpg',
+        text: 'Drei Ordner, gleich breit, gleich beschriftet, und daneben eine '
+            + 'Lücke von genau derselben Breite. In dieser Etage verschwindet '
+            + 'nichts unbemerkt — außer, es soll verschwinden.',
+      },
+      {
+        id: 'fensterfront', u: 0.780, v: 0.280, r: 0.090,
+        label: 'Fensterfront',
+        detail: 'details/direktion-fensterfront.jpg',
+        text: 'Von hier oben ist der Regen kein Wetter, sondern eine Schicht '
+            + 'zwischen dieser Etage und allem anderen. Unten leuchten die '
+            + 'Sektoren, in denen die Leute wohnen, deren Namen auf der Liste '
+            + 'stehen. Von hier sieht man sie alle auf einmal.',
+      },
+      {
+        id: 'sitzgruppe', u: 0.855, v: 0.700, r: 0.085,
+        label: 'Sitzgruppe',
+        detail: 'details/direktion-sitzgruppe.jpg',
+        text: 'Zwei Sessel und ein Glastisch, beide Sessel exakt gleich weit vom '
+            + 'Tisch entfernt. Auf dem Glas steht der Ring eines Glases, das '
+            + 'nicht mehr da ist. Hier hat vor Kurzem jemand gesessen, der nicht '
+            + 'hierhergehört.',
+      },
+      {
+        id: 'direktion-raus', u: 0.500, v: 0.935, r: 0.080,
+        kind: 'exit', dir: 'out', goto: 'empfang',
+        label: 'Zurück zum Aufzug',
+        text: '',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  wohnung: {
+    id: 'wohnung',
+    district: 'wohnung',
+    name: 'Deine Wohnung',
+    sector: 'Sektor 7 · Zuhause',
+    kind: 'interior',
+    backdrop: 'wohnung-backdrop',
+    spots: [
+      {
+        id: 'pinnwand', u: 0.148, v: 0.390, r: 0.115, kind: 'anklage',
+        label: 'Pinnwand',
+        detail: 'details/wohnung-pinnwand.jpg',
+        text: 'Kork, halb so lang wie die Wand, und darauf steckt außer einem '
+            + 'Foto nichts. Die Nadeln sind da. Was fehlt, ist die Reihenfolge, '
+            + 'in der das alles zusammengehört — und ein Name, der am Ende '
+            + 'dieser Reihenfolge steht.',
+      },
+      {
+        id: 'foto', u: 0.243, v: 0.345, r: 0.050,
+        label: 'Foto',
+        detail: 'details/wohnung-foto.jpg',
+        text: 'Das einzige Blatt an der Wand. Zwei Leute unter einem Schirm, '
+            + 'unscharf, das Papier an den Ecken wellig. Du hängst es seit '
+            + 'Jahren um, ohne es je abzunehmen.',
+      },
+      {
+        id: 'fenster-w', u: 0.498, v: 0.410, r: 0.100,
+        label: 'Fenster',
+        detail: 'details/wohnung-fenster-w.jpg',
+        text: 'Drei Bahnen Glas und dahinter die Gasse, von oben. Der Kanal, die '
+            + 'Reklame, die seit Jahren dasselbe verspricht. Von hier ist das '
+            + 'ein Bild. Unten ist es ein Arbeitsweg.',
+      },
+      {
+        id: 'sessel', u: 0.648, v: 0.760, r: 0.085,
+        label: 'Sessel',
+        detail: 'details/wohnung-sessel.jpg',
+        text: 'Leder, an einer Stelle durchgesessen, und zur Pinnwand gedreht '
+            + 'statt zum Fenster. Wer hier sitzt, sieht sich nicht die Stadt an, '
+            + 'sondern das, was er über sie weiß.',
+      },
+      {
+        id: 'papiere', u: 0.530, v: 0.865, r: 0.075,
+        label: 'Papiere am Boden',
+        detail: 'details/wohnung-papiere.jpg',
+        text: 'Kopien, Durchschläge, ein halber Meldebogen. Sie liegen so, wie '
+            + 'sie hingefallen sind, in einem Bogen um den Sessel — jemand hat '
+            + 'sie im Sitzen gelesen und einzeln fallen lassen.',
+      },
+      {
+        id: 'kueche', u: 0.878, v: 0.420, r: 0.085,
+        label: 'Küchennische',
+        detail: 'details/wohnung-kueche.jpg',
+        text: 'Eine Glühbirne ohne Schirm, eine Pfanne, ein Wasserhahn, der '
+            + 'tropft. Das einzige warme Licht in dieser Wohnung kommt aus dem '
+            + 'Raum, in dem du am wenigsten bist.',
+      },
+      {
+        id: 'tisch', u: 0.880, v: 0.900, r: 0.080,
+        label: 'Tisch',
+        detail: 'details/wohnung-tisch.jpg',
+        text: 'Ein Glas mit einem Rest darin und ein Aschenbecher, der seit '
+            + 'gestern nicht geleert wurde. Daneben Zettel mit deiner eigenen '
+            + 'Schrift, und auf dem obersten steht eine Uhrzeit, die noch nicht '
+            + 'vorbei ist.',
+      },
+      {
+        id: 'wohnung-raus', u: 0.310, v: 0.420, r: 0.070,
+        kind: 'exit', dir: 'out', goto: 'crossing',
+        label: 'Hinaus',
         text: '',
       },
     ],

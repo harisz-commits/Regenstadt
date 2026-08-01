@@ -82,6 +82,23 @@ export const DISTRICTS = {
     requires: { clue: 'konzern-programm' },
     hint: 'Elf Totenscheine von derselben Hand führen zu der Hand.',
   },
+
+  // Die eigene Wohnung ist ein eigener Punkt auf der Karte, kein Zimmer
+  // hinter drei Pfeilen. Zwei Gruende:
+  //   1. Dort wird der Fall abgeschlossen. Der letzte Zug des Spiels darf
+  //      nicht der laengste Fussweg des Spiels sein.
+  //   2. Sie ist von Anfang an offen und der einzige Ort, an dem man nichts
+  //      ermittelt. Ein Heimknopf auf der Karte sagt genau das.
+  wohnung: {
+    id: 'wohnung',
+    name: 'Sektor 7 · Zuhause',
+    kurz: 'Wohnung',
+    arrival: 'wohnung',
+    mx: 26, my: 44,
+    blurb: 'Vier Wände, eine Pinnwand und alles, was du bisher hast. Hier wird '
+         + 'entschieden, wer es gewesen ist.',
+    offen: true,
+  },
 };
 
 /** Reihenfolge auf der Karte. */
