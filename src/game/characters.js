@@ -84,6 +84,29 @@ export const CHARACTERS = {
     opener: 'Die Klappe bleibt zu. Sie arbeitet weiter, als hätte sie dich nicht '
           + 'bemerkt, und redet in Richtung ihrer Hände.',
   },
+
+  'p-empfang': {
+    id: 'p-empfang',
+    name: 'Nadja Ferrin',
+    role: 'Empfangsleitung',
+    portrait: 'details/empfang.jpg',
+    appearance: 'Dunkle Uniformjacke, beide Hände flach auf dem Stein, ein '
+              + 'Gesicht, das nichts hergibt und darin sehr gut ist.',
+    voice: 'höflich bis zur Kälte, spricht in fertigen Sätzen, sagt nie „ich '
+         + 'weiß nicht", sondern „dazu kann ich Ihnen nichts sagen"',
+    secret: 'Sie führt seit einem Jahr eine eigene Liste — jeden, der hier '
+          + 'hereinkommt, ohne eingetragen zu werden. Nicht aus Gewissen, '
+          + 'sondern weil ihr einmal etwas angehängt wurde, das sie nicht '
+          + 'getan hat. Sie gibt es nur preis, wenn ihr jemand zeigt, dass er '
+          + 'das Haus ohnehin schon durchschaut hat.',
+    knows: 'Die Person, deren Nummer auf der Patientenkarte steht, ist in den '
+         + 'letzten zwei Wochen zweimal durch diese Halle gegangen — nach dem '
+         + 'Datum, an dem sie für tot erklärt wurde. Sie erwähnt es erst, wenn '
+         + 'vom Melderegister oder von der Klinik die Rede ist.',
+    opener: 'Sie sieht dich schon an, bevor du auf halber Höhe der Halle bist. '
+          + 'Sie sagt nichts, sie wartet nur — als wäre Warten hier eine Form '
+          + 'von Höflichkeit.',
+  },
 };
 
 /** Grundhaltung für alle Figuren. */

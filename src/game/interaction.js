@@ -62,6 +62,16 @@ const CSS = `
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6'/%3E%3C/svg%3E");
   animation-name: nudgeRight;
 }
+/* Aufwaerts und abwaerts: fuer Aufzuege und Treppen. Ein Pfeil nach oben waere
+   mit „vorwaerts" verwechselbar — deshalb bekommt er einen Balken darueber,
+   wie in einem Aufzug. */
+#hs-layer .hs.exit.up .mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 3h14M12 21V8M6 14l6-6 6 6'/%3E%3C/svg%3E");
+}
+#hs-layer .hs.exit.down .mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcecff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21h14M12 3v13M6 10l6 6 6-6'/%3E%3C/svg%3E");
+  animation-name: nudgeDown;
+}
 /* Hinein und hinaus: eine Tuer, kein Pfeil. Eine Richtung waere hier gelogen —
    die Tuer liegt in der Bildtiefe, nicht links oder rechts. */
 #hs-layer .hs.exit.in .mark {
@@ -461,6 +471,8 @@ export function createInteraction(renderer, host) {
   setTimeout(() => showHint(), 900);
 
   /* --- Tafel -------------------------------------------------------------- */
+  /** Zeichen je Sekunde im Schreibmaschineneffekt. */
+  const TYPE_CPS = 140;
   let typer = null;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const base = import.meta.env.BASE_URL || '/';
@@ -501,12 +513,23 @@ export function createInteraction(renderer, host) {
       pBody.textContent = full;
     } else {
       pBody.textContent = '';
-      let i = 0;
+      // Aus der WANDUHR rechnen, nicht Ticks zaehlen.
+      //
+      // Die erste Fassung addierte je Intervall zwei Zeichen. Das setzt
+      // voraus, dass setInterval(14) auch wirklich 71-mal je Sekunde feuert —
+      // und genau das tut es nicht, wenn der Renderer den Hauptthread
+      // auslastet. Gemessen: rund ZWEI Zeichen je Sekunde statt 140, der Text
+      // stand nach zehn Sekunden immer noch bei "Schmaler, niedriger,".
+      //
+      // Derselbe Fehler wie seinerzeit beim Regen, der aus demselben Grund in
+      // Zeitlupe lief. Zeitbasiert bleibt die Dauer gleich; auf einem langsamen
+      // Geraet kommen die Zeichen nur in groesseren Schueben.
+      const start = performance.now();
       typer = setInterval(() => {
-        i += 2;
-        pBody.textContent = full.slice(0, i);
-        if (i >= full.length) { clearInterval(typer); typer = null; }
-      }, 14);
+        const n = Math.floor(((performance.now() - start) / 1000) * TYPE_CPS);
+        pBody.textContent = full.slice(0, n);
+        if (n >= full.length) { clearInterval(typer); typer = null; }
+      }, 16);
     }
 
     if (talk.has(spot.id)) {

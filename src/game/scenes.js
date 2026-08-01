@@ -662,6 +662,180 @@ export const SCENES = {
       },
     ],
   },
+
+  /* ====================================================================== */
+  empfang: {
+    id: 'empfang',
+    district: 'sektor-1',
+    name: 'Empfangshalle',
+    sector: 'Sektor 1 · Konzernterrassen',
+    kind: 'interior',
+    backdrop: 'empfang-backdrop',
+    spots: [
+      {
+        id: 'p-empfang', u: 0.498, v: 0.487, r: 0.060, kind: 'person',
+        label: 'Empfangsleitung',
+        detail: 'details/empfang.jpg',
+        text: 'Sie steht hinter dem Tresen, beide Hände flach auf dem Stein, und '
+            + 'sieht dir entgegen, seit die Tür hinter dir zugegangen ist. Sie '
+            + 'hat sich nicht bewegt.',
+      },
+      {
+        id: 'tresen', u: 0.680, v: 0.600, r: 0.085,
+        label: 'Empfangstresen',
+        text: 'Hinterleuchteter Stein, makellos, und darauf liegt nichts — kein '
+            + 'Besucherbuch, kein Terminal, nichts. Wer hier hereinkommt, wird '
+            + 'nicht eingetragen. Der Stein hat an einer Stelle einen matten '
+            + 'Abdruck, als hätte dort lange etwas gestanden.',
+      },
+      {
+        id: 'sitzinsel', u: 0.860, v: 0.700, r: 0.090,
+        label: 'Sitzinsel',
+        text: 'Schwarzes Leder, eine Pflanze, die zu gesund ist für ein Haus ohne '
+            + 'Tageslicht. Auf einem der Sitze ein feuchter Abdruck in der Form '
+            + 'eines Mantelsaums. Jemand hat hier vor Kurzem im Nassen gewartet.',
+      },
+      {
+        id: 'aufzug', u: 0.125, v: 0.440, r: 0.095,
+        kind: 'exit', dir: 'up', goto: 'dach',
+        label: 'Aufzüge',
+        text: 'Vier Türen, eine mit brennender Ruftafel. Auf der Anzeige steht '
+            + 'nur eine erreichbare Ebene: ganz oben.',
+      },
+      {
+        id: 'gang', u: 0.725, v: 0.484, r: 0.080,
+        kind: 'exit', dir: 'right', goto: 'archiv',
+        requires: { clue: 'register-luecke' },
+        lockText: 'Der Gang führt in die Verwaltung. Ohne einen Grund, den man '
+                + 'hier vorbringen kann, ist das ein Gang wie jeder andere — und '
+                + 'du hast noch keinen.',
+        label: 'Seitengang',
+        text: 'Schmaler, niedriger, schlechter beleuchtet als die Halle. Hier '
+            + 'gehen die hin, die hier arbeiten.',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  dach: {
+    id: 'dach',
+    district: 'sektor-1',
+    name: 'Dachterrasse',
+    sector: 'Sektor 1 · Konzernterrassen',
+    kind: 'street',
+    backdrop: 'dach-backdrop',
+    spots: [
+      {
+        id: 'bruestung', u: 0.483, v: 0.573, r: 0.100,
+        label: 'Brüstung',
+        text: 'Von hier sieht man den Regen von oben, als Decke aus Licht über '
+            + 'der Unterstadt. Irgendwo da unten liegt die Kanalgasse. Von hier '
+            + 'wirkt sie wie eine Naht im Asphalt.',
+      },
+      {
+        id: 'unterstand', u: 0.825, v: 0.376, r: 0.085,
+        label: 'Unterstand',
+        text: 'Ein Heizstrahler brennt für niemanden. Unter dem Dach ist der '
+            + 'Boden trocken bis auf zwei Stellen — dort hat jemand gestanden, '
+            + 'lange genug, dass es von seinem Mantel getropft hat.',
+      },
+      {
+        id: 'tisch', u: 0.800, v: 0.627, r: 0.080,
+        label: 'Tisch',
+        text: 'Nasses Metall. Am Rand ein ausgedrückter Zigarettenstummel, '
+            + 'gebogen, nicht ausgetreten — jemand hat ihn eilig abgelegt und '
+            + 'ist gegangen. Er ist noch nicht durchgeweicht.',
+        clue: 'eiliger-abgang',
+      },
+      {
+        id: 'kuebel', u: 0.060, v: 0.583, r: 0.075,
+        label: 'Pflanzkübel',
+        text: 'Hartes schwarzes Blattwerk, das den Regen aushält. In der Erde '
+            + 'steckt etwas Kantiges, halb eingedrückt, als hätte man es im '
+            + 'Vorbeigehen hineingeschoben.',
+        item: {
+          id: 'chipkarte',
+          name: 'Ausweiskarte',
+          text: 'Eine Konzernkarte mit abgebrochener Ecke. Das Lichtbild ist '
+              + 'herausgelöst, die Nummer darunter nicht. Es ist dieselbe, die '
+              + 'auf der Patientenkarte unten in der Klinik stand.',
+        },
+      },
+      {
+        id: 'dach-runter', u: 0.170, v: 0.490, r: 0.090,
+        kind: 'exit', dir: 'down', goto: 'empfang',
+        label: 'Zurück nach unten',
+        text: 'Die Aufzugtür steht offen und wartet. Sie ist die einzige Art, '
+            + 'hier wieder wegzukommen.',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  archiv: {
+    id: 'archiv',
+    district: 'sektor-1',
+    name: 'Archiv',
+    sector: 'Sektor 1 · Konzernterrassen',
+    kind: 'interior',
+    backdrop: 'archiv-backdrop',
+    spots: [
+      {
+        id: 'gasse-offen', u: 0.360, v: 0.448, r: 0.095,
+        label: 'Offene Regalgasse',
+        text: 'Eine einzige Gasse ist aufgekurbelt, alle anderen stehen dicht. '
+            + 'Drinnen ist es dunkel, und in der zweiten Reihe fehlen vier '
+            + 'Ordner nebeneinander. Der Staub zeigt, wie lange sie dort standen.',
+      },
+      {
+        id: 'terminal', u: 0.498, v: 0.506, r: 0.080,
+        label: 'Leseterminal',
+        text: 'Es läuft und ist nicht abgemeldet. Die letzte Abfrage steht noch '
+            + 'auf dem Schirm: eine Personalnummer, ohne Namen dazu. Wer sie '
+            + 'eingegeben hat, ist mitten im Vorgang aufgestanden.',
+      },
+      {
+        id: 'wagen', u: 0.675, v: 0.735, r: 0.095,
+        label: 'Rollwagen',
+        text: 'Vier Archivkisten, schief gestapelt, in einem Raum, in dem sonst '
+            + 'nichts schief steht. Die oberste ist nicht verschlossen. Darin '
+            + 'liegt eine Akte, die dorthin gehört, wo die Gasse eine Lücke hat.',
+        item: {
+          id: 'personalakte',
+          name: 'Personalakte',
+          text: 'Kein Name auf dem Deckel, nur die Nummer von der Ausweiskarte. '
+              + 'Innen ein Vermerk vor vierzehn Monaten: Übertritt in ein '
+              + 'internes Programm, Zeile für Zeile geschwärzt. Der letzte '
+              + 'Eintrag ist zwei Tage alt und trägt dieselbe Unterschrift wie '
+              + 'die elf Totenscheine — die eines Sachbearbeiters im Meldeamt.',
+          analysis: {
+            wait: 3,
+            label: 'Abgleich · Personalakte',
+            clue: 'konzern-programm',
+            text: 'Die geschwärzten Zeilen sind unter Durchlicht lesbar. Das '
+                + 'Programm führt Personen, die amtlich für tot erklärt wurden, '
+                + 'als weiterbeschäftigt — bezahlt über denselben Kostenträger, '
+                + 'der auch die Klinik unter der Stadt trägt. Elf Namen. Der '
+                + 'vermisste Händler ist der zwölfte, und sein Eintrag wurde '
+                + 'vorgestern nachts angelegt.',
+          },
+        },
+      },
+      {
+        id: 'handrad', u: 0.092, v: 0.457, r: 0.075,
+        label: 'Handrad',
+        text: 'Die Kurbel der vordersten Gasse. Der Griff ist kalt, aber blank — '
+            + 'anders als die daneben, auf denen Staub liegt. Diese Gasse wird '
+            + 'benutzt, die anderen nicht.',
+      },
+      {
+        id: 'archiv-raus', u: 0.870, v: 0.900, r: 0.080,
+        kind: 'exit', dir: 'out', goto: 'empfang',
+        label: 'Zurück in die Halle',
+        text: '',
+      },
+    ],
+  },
 };
 
 /** Reihenfolge fürs Vorabladen der Hintergründe. */

@@ -58,6 +58,18 @@ export const DISTRICTS = {
     requires: { clue: 'blut-fremd' },
     hint: 'Ein Blutbefund, der auf einen Toten zeigt, führt unter die Stadt.',
   },
+
+  'sektor-1': {
+    id: 'sektor-1',
+    name: 'Sektor 1 · Konzernterrassen',
+    kurz: 'Konzernterrassen',
+    arrival: 'empfang',
+    mx: 58, my: 24,
+    blurb: 'Oben. Wo die Fracht bezahlt wird, die unten ankommt, und wo man '
+         + 'den Regen von der anderen Seite sieht.',
+    requires: { clue: 'frachtbrief' },
+    hint: 'Ein Frachtbrief mit zweimal durchgestrichenem Kürzel führt nach oben.',
+  },
 };
 
 /** Reihenfolge auf der Karte. */

@@ -2,7 +2,7 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Elf Orte in drei Sektoren, vier Figuren, die von einem Sprachmodell
+Vierzehn Orte in vier Sektoren, fuenf Figuren, die von einem Sprachmodell
 antworten, eine Beweiskette mit Laborbefund — und ein Flugauto, um zwischen
 den Sektoren zu reisen.
 
@@ -49,8 +49,8 @@ halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
 ## Die Welt
 
-Elf Orte in drei Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen sechs
-Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`) mit je eigener
+Vierzehn Orte in vier Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen acht
+Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`, `up`, `down`) mit je eigener
 Marke; die **Querstrasse** ist der erste Ort, an dem man waehlen muss — links
 das Praesidium, rechts die Bar.
 

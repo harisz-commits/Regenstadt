@@ -44,6 +44,28 @@ ok(w.hasClue('blut-fremd'), 'Erkenntnis blut-fremd gesetzt');
 ok(w.ready().length === 0, 'Befund nach Abholen weg');
 ok(w.collect('cloth') === null, 'Befund nicht zweimal abholbar');
 
+// 5b. Zweite Kette: Patientenkarte -> Labor -> Archiv -> Personalakte.
+//     Das Archiv haengt an einem LABORBEFUND, nicht an einem Fund — die
+//     einzige Sperre dieser Art im Spiel, und deshalb pruefenswert.
+const w2 = createWorld();
+const gang = spot('empfang', 'gang');
+ok(!w2.meets(gang.requires), 'Seitengang zu ohne Registerbefund');
+const patKarte = spot('klinik', 'instrumente').item;
+w2.take(patKarte);
+w2.submit(patKarte);
+for (let i = 0; i < patKarte.analysis.wait; i++) w2.step();
+w2.collect(patKarte.id);
+ok(w2.hasClue('register-luecke'), 'Registerbefund abgeholt');
+ok(w2.meets(gang.requires), 'Seitengang offen mit Registerbefund');
+
+const persAkte = spot('archiv', 'wagen').item;
+ok(Boolean(persAkte.analysis), 'Personalakte ist untersuchbar');
+w2.take(persAkte);
+w2.submit(persAkte);
+for (let i = 0; i < persAkte.analysis.wait; i++) w2.step();
+ok(Boolean(w2.collect(persAkte.id)), 'Abgleich der Personalakte abgeholt');
+ok(w2.hasClue('konzern-programm'), 'Erkenntnis konzern-programm gesetzt');
+
 // 6. Erreichbarkeit — ZU FUSS innerhalb eines Sektors, per Spinner zwischen
 //    ihnen. Ein Ort im Hafen ist von der Kanalgasse aus nicht erlaufbar, und
 //    das ist Absicht.
