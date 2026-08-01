@@ -79,7 +79,13 @@ for (const d of DISTRICT_IDS) {
 // 8. Jede Bedingung muss irgendwo im Spiel erfuellbar sein — sonst ist ein
 //    Sektor fuer immer zu, und das merkt niemand beim Durchspielen.
 const erreichbareHinweise = new Set();
-for (const id of alle) for (const s of SCENES[id].spots) if (s.clue) erreichbareHinweise.add(s.clue);
+for (const id of alle) for (const s of SCENES[id].spots) {
+  if (s.clue) erreichbareHinweise.add(s.clue);
+  // Auch Hinweise, die erst aus einem Laborbefund fallen, zaehlen als
+  // auffindbar — sonst schlaegt die Pruefung bei jeder Kette an, die ueber
+  // das Labor laeuft.
+  if (s.item?.analysis?.clue) erreichbareHinweise.add(s.item.analysis.clue);
+}
 for (const d of DISTRICT_IDS) {
   const c = DISTRICTS[d].requires?.clue;
   if (c) ok(erreichbareHinweise.has(c), `${d}: Hinweis "${c}" ist im Spiel auffindbar`);

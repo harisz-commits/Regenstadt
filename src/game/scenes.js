@@ -485,6 +485,183 @@ export const SCENES = {
       },
     ],
   },
+
+  /* ====================================================================== */
+  pumpwerk: {
+    id: 'pumpwerk',
+    district: 'sektor-9',
+    name: 'Pumpwerk',
+    sector: 'Sektor 9 · Kanalebene',
+    kind: 'interior',
+    backdrop: 'pumpwerk-backdrop',
+    spots: [
+      {
+        id: 'pumpe', u: 0.245, v: 0.540, r: 0.105,
+        label: 'Pumpengehäuse',
+        text: 'Gusseisen, vernietet, so alt wie die Stadt darüber. Es läuft. Der '
+            + 'Boden zittert im Takt, und niemand ist hier, der es abstellen '
+            + 'könnte, wenn es aufhören müsste.',
+      },
+      {
+        id: 'pult', u: 0.895, v: 0.710, r: 0.090,
+        label: 'Schaltpult',
+        text: 'Die meisten Zeiger stehen auf Null, weil sie tot sind. Einer nicht. '
+            + 'Daneben liegt ein Schichtbuch, aufgeschlagen — der letzte Eintrag '
+            + 'ist vierzehn Monate alt und mitten im Satz abgebrochen.',
+        clue: 'schichtbuch',
+      },
+      {
+        id: 'schleuse', u: 0.498, v: 0.510, r: 0.085,
+        label: 'Schleusentor',
+        text: 'Geschlossen und verriegelt. Auf der Innenseite Kratzspuren in '
+            + 'Griffhöhe, dicht an dicht. Jemand wollte hier durch und hatte '
+            + 'keinen Schlüssel.',
+      },
+      {
+        id: 'laufsteg', u: 0.485, v: 0.810, r: 0.090,
+        label: 'Laufsteg',
+        text: 'Riffelblech über schwarzem Wasser. In der Mitte ein Streifen, der '
+            + 'blanker ist als der Rest — hier geht jemand regelmäßig, und zwar '
+            + 'immer dieselbe Linie.',
+      },
+      {
+        id: 'treppe', u: 0.088, v: 0.555, r: 0.090,
+        kind: 'exit', dir: 'left', goto: 'tunnel',
+        label: 'Wendeltreppe',
+        text: 'Sie führt weiter hinunter, in die Tunnelebene. Der Handlauf ist an '
+            + 'der Außenseite blank gegriffen.',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  tunnel: {
+    id: 'tunnel',
+    district: 'sektor-9',
+    name: 'Tunnelkreuz',
+    sector: 'Sektor 9 · Kanalebene',
+    kind: 'interior',
+    backdrop: 'tunnel-backdrop',
+    spots: [
+      {
+        id: 'gitter', u: 0.195, v: 0.430, r: 0.090,
+        label: 'Altes Gitter',
+        text: 'Halb hochgezogen und mit einem Stück Kabel festgebunden, damit es '
+            + 'nicht zufällt. Dahinter Ziegel und Dunkelheit. Der Knoten ist '
+            + 'frisch und sauber gelegt — von jemandem, der wiederkommen will.',
+      },
+      {
+        id: 'rinne', u: 0.495, v: 0.780, r: 0.095,
+        label: 'Wasserrinne',
+        text: 'Das Wasser läuft langsam und riecht nicht nach Kanal, sondern nach '
+            + 'Desinfektionsmittel. Es kommt aus dem rechten Gang.',
+        clue: 'desinfektion',
+      },
+      {
+        id: 'kabel', u: 0.870, v: 0.450, r: 0.080,
+        label: 'Kabelstrang',
+        text: 'Neu verlegt, viel zu stark für Beleuchtung. Er verschwindet im '
+            + 'rechten Gang. Wer hier unten so viel Strom braucht, betreibt '
+            + 'etwas, das nicht ausfallen darf.',
+      },
+      {
+        id: 'roehre', u: 0.498, v: 0.515, r: 0.080,
+        label: 'Hauptröhre',
+        text: 'Sie läuft geradeaus weiter, bis das Licht aufhört. Von dort kommt '
+            + 'Zugluft und sonst nichts.',
+      },
+      {
+        id: 'zur-klinik', u: 0.710, v: 0.440, r: 0.090,
+        kind: 'exit', dir: 'right', goto: 'klinik',
+        label: 'Rechter Gang',
+        text: 'Neuerer Beton, und um die Ecke brennt Licht. Warmes Licht, nicht '
+            + 'das kalte der Wartung.',
+      },
+      {
+        id: 'tunnel-zurueck', u: 0.500, v: 0.930, r: 0.080,
+        kind: 'exit', dir: 'back', goto: 'pumpwerk',
+        label: 'Zurück zum Pumpwerk',
+        text: '',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  klinik: {
+    id: 'klinik',
+    district: 'sektor-9',
+    name: 'Hinterzimmerklinik',
+    sector: 'Sektor 9 · Kanalebene',
+    kind: 'interior',
+    backdrop: 'klinik-backdrop',
+    spots: [
+      {
+        id: 'op-tisch', u: 0.493, v: 0.630, r: 0.100,
+        label: 'Operationstisch',
+        text: 'Das einzig Saubere im Raum. Frisch abgewischt, noch feucht an den '
+            + 'Kanten. Wer hier zuletzt lag, ist nicht lange her weg — und '
+            + 'jemand hat sich Mühe gegeben, das zu verbergen.',
+      },
+      {
+        id: 'instrumente', u: 0.165, v: 0.660, r: 0.100,
+        label: 'Instrumententisch',
+        text: 'Auf einem Tuch ausgelegt, in Reihe, wie es sich gehört. Ein Platz '
+            + 'in der Reihe ist leer. Daneben liegt eine Patientenkarte, die '
+            + 'niemand hätte liegen lassen dürfen.',
+        item: {
+          id: 'patientenkarte',
+          name: 'Patientenkarte',
+          text: 'Kein Name, nur eine Registriernummer — dieselbe, die auf dem '
+              + 'Vermisstenblatt an der Querstraße stand. Behandelt vorgestern '
+              + 'nachts. Unter „Kostenträger" steht ein Konzernkürzel, unter '
+              + '„Entlassung" steht nichts.',
+          analysis: {
+            wait: 3,
+            label: 'Registerabgleich · Patientenkarte',
+            clue: 'register-luecke',
+            text: 'Die Nummer gehört zu einer Person, die vor vierzehn Monaten für '
+                + 'tot erklärt wurde — vom selben Sachbearbeiter, der in diesem '
+                + 'Sektor seither elf weitere Todesfälle beglaubigt hat. Keiner '
+                + 'davon wurde je obduziert.',
+          },
+        },
+      },
+      {
+        id: 'kartons', u: 0.330, v: 0.655, r: 0.085,
+        label: 'Kartons',
+        text: 'Unbeschriftet, bis auf ein Zollsiegel auf der untersten Lage — '
+            + 'dasselbe wie auf den Kisten in der Kanalgasse. Der Weg der Fracht '
+            + 'endet also hier unten.',
+      },
+      {
+        id: 'geraete', u: 0.680, v: 0.570, r: 0.090,
+        label: 'Gerätewagen',
+        text: 'Zusammengestückelt und trotzdem eingeschaltet. Auf dem einen Schirm '
+            + 'steht noch die letzte Aufzeichnung: vorgestern, 23:58. Achtzehn '
+            + 'Minuten nachdem die Fracht am Terminal eingetroffen ist.',
+      },
+      {
+        id: 'stuhl', u: 0.820, v: 0.726, r: 0.085,
+        label: 'Stuhl mit Gurten',
+        text: 'Die Gurte hängen offen, nicht aufgeschnitten. Wer hier saß, wurde '
+            + 'losgemacht. Der Lederriemen am rechten Arm ist auf einer Seite '
+            + 'ausgeleiert, an der anderen nicht.',
+      },
+      {
+        id: 'abfluss', u: 0.460, v: 0.870, r: 0.060,
+        label: 'Bodenabfluss',
+        text: 'Unter dem Tisch, wo man ihn braucht. Das Gitter ist abgehoben und '
+            + 'schief zurückgelegt worden. Was hier hineingespült wurde, ist '
+            + 'längst im Kanal.',
+      },
+      {
+        id: 'klinik-raus', u: 0.580, v: 0.950, r: 0.075,
+        kind: 'exit', dir: 'out', goto: 'tunnel',
+        label: 'Zurück in den Tunnel',
+        text: '',
+      },
+    ],
+  },
 };
 
 /** Reihenfolge fürs Vorabladen der Hintergründe. */

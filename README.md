@@ -2,9 +2,9 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Acht Orte in zwei Sektoren, vier Figuren, die von einem Sprachmodell
-antworten, eine Beweiskette mit Laborbefund — und ein Spinner, um zwischen
-den Sektoren zu fliegen.
+Elf Orte in drei Sektoren, vier Figuren, die von einem Sprachmodell
+antworten, eine Beweiskette mit Laborbefund — und ein Flugauto, um zwischen
+den Sektoren zu reisen.
 
 ```
 npm install
@@ -49,7 +49,7 @@ halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
 ## Die Welt
 
-Acht Orte in zwei Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen sechs
+Elf Orte in drei Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen sechs
 Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`) mit je eigener
 Marke; die **Querstrasse** ist der erste Ort, an dem man waehlen muss — links
 das Praesidium, rechts die Bar.
@@ -67,18 +67,32 @@ Innenraeume (`kind: 'interior'`) schalten Regen, nasse Fahrbahn und
 Spiegelung ab. Drinnen regnet es nicht — und der Bodenpass wuerde sonst
 mitten im Zimmer eine Pfuetze suchen.
 
-### Der Spinner
+### Die Karte
 
 Gelaufen wird INNERHALB eines Sektors, geflogen ZWISCHEN ihnen. Mit sechs
 Orten reicht Laufen; mit zwanzig nicht mehr — wer vom Kuehlhaus zurueck in die
 Kanalgasse will, klickt sich sonst durch sieben Pfeile, und das ist keine
 Ermittlung, das ist Verwaltung.
 
-Der Spinner ist aber nicht nur Abkuerzung. Er ist auch der Ort, an dem die
-Stadt ihre Groesse zeigt: Ein Sektor, von dem man noch nichts weiss, steht als
-**gesperrte Zeile** auf der Karte, mit dem Hinweis, was fehlt. Der Spieler
-sieht, dass es weitergeht — eine Tuer, die man nie gesehen hat, motiviert
-niemanden.
+Die Karte ist bewusst **gezeichnet** (SVG) und nicht fotografiert. Ein Foto
+waere ein Bild von einer Stadt; ein Bordgeraet ist ein Geraet, das im Wagen
+eingebaut ist — Raster, Leuchtspuren, ein Zielkreuz, das pulst. Als SVG bleibt
+es auf jedem Schirm scharf, und Sektoren koennen leuchten oder gesperrt
+aussehen, ohne dass dafuer ein Bild erzeugt werden muss.
+
+Achtung beim Aendern: Die Schriftgroessen im Kartenfeld sind
+**Ansichtsfeld-Einheiten, keine Pixel**. Bei 100 Einheiten auf rund 680 px
+wird aus `4.4px` am Schirm 30 px — die erste Fassung hatte Sektornamen so
+gross wie Ueberschriften.
+
+Ein Sektor, von dem man noch nichts weiss, steht als **gesperrte Zeile** mit
+dem Hinweis, was fehlt. Der Spieler sieht, dass es weitergeht — eine Tuer, die
+man nie gesehen hat, motiviert niemanden.
+
+Der Flug ist keine Blende, sondern ein Platz im Wagen: die Kanzel von innen,
+Regen auf dem Glas, die Stadt zieht vorbei, Ziel und Hoehe laufen auf dem
+Display herunter. Ein Schnitt haette es auch getan — dann waere das Flugauto
+aber nur ein Menue.
 
 Und ein Flug kostet zwei Ortswechsel statt einem. Weil Laborbefunde in
 Ortswechseln reifen, ist Herumfliegen kein Leerlauf, sondern bringt die
@@ -181,7 +195,7 @@ src/
   ui/viewport.js        Zoom-Sperren und Geraeteraender fuer Mobilgeraete
   game/scenes.js        Orte, Ausgaenge und Untersuchungspunkte, in Bildkoordinaten
   game/districts.js     Sektoren: Ankunftsort und was sie freischaltet
-  game/spinner.js       Flugauto: Zielkarte zwischen den Sektoren
+  game/spinner.js       Flugauto: Bordkarte und Flug zwischen den Sektoren
   game/world.js         Zustand der Ermittlung: Asservate, Analysen, Freischaltungen
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
   game/characters.js    Figuren: Wesen, Wissen, Geheimnis — und die Anweisung daraus

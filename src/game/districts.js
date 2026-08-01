@@ -27,6 +27,9 @@ export const DISTRICTS = {
     name: 'Sektor 7 · Unterstadt',
     kurz: 'Unterstadt',
     arrival: 'alley',
+    // Position auf der Karte (Ansichtsfeld 0…100). Fest, nicht zufällig:
+    // Die Karte soll bei jedem Öffnen gleich aussehen.
+    mx: 38, my: 62,
     blurb: 'Kanäle, Marktgassen, zu wenig Licht. Hier hat es angefangen.',
     // Von Anfang an bekannt: Hier steht man, wenn das Spiel beginnt.
     offen: true,
@@ -37,10 +40,23 @@ export const DISTRICTS = {
     name: 'Sektor 3 · Hafenspange',
     kurz: 'Hafenspange',
     arrival: 'terminal',
+    mx: 76, my: 38,
     blurb: 'Frachtbrücken über schwarzem Wasser. Was hier durchgeht, wird '
          + 'zweimal gezählt und einmal gemeldet.',
     requires: { clue: 'zollsiegel' },
     hint: 'Ein Zollsiegel führt in einen Sektor, den du noch nicht kennst.',
+  },
+
+  'sektor-9': {
+    id: 'sektor-9',
+    name: 'Sektor 9 · Kanalebene',
+    kurz: 'Kanalebene',
+    arrival: 'pumpwerk',
+    mx: 22, my: 84,
+    blurb: 'Unter der Stadt. Pumpen, Tunnel, und Leute, die nicht gefunden '
+         + 'werden wollen — oder es nicht mehr können.',
+    requires: { clue: 'blut-fremd' },
+    hint: 'Ein Blutbefund, der auf einen Toten zeigt, führt unter die Stadt.',
   },
 };
 

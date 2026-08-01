@@ -157,8 +157,15 @@ const CSS = `
   background: linear-gradient(to bottom, rgba(4,6,10,.66), rgba(4,6,10,0));
   pointer-events: none;
 }
-#topbar .actions { display: flex; align-items: center; }
+/* Der Abstand fehlte, solange hier nur zwei Elemente standen —
+   mit dem Karten-Knopf las sich die Zeile als KARTEAKTE. */
+#topbar .actions { display: flex; align-items: center; gap: 18px; }
 #topbar .right { pointer-events: auto; cursor: pointer; color: rgba(190,214,235,.62); }
+#topbar .right.karte { display: inline-flex; align-items: center; gap: 7px; }
+#topbar .right.karte .auto { width: 22px; display: block; color: #7fc9e6; }
+#topbar .right.karte .auto svg { width: 100%; display: block; }
+#topbar .right.karte:hover { color: #dceefb; }
+#topbar .right.karte:hover .auto { color: #b6e8ff; }
 #topbar .right:hover { color: #e8f2ff; }
 #topbar .sector { color: rgba(255,150,90,.72); }
 #topbar .place { color: #dbe9f7; font-size: 13px; letter-spacing: .2em; margin-top: 5px; }
@@ -256,9 +263,9 @@ export function createInteraction(renderer, host) {
   helpBtn.setAttribute('aria-label', 'Steuerung anzeigen');
   const spinnerBtn = document.createElement('div');
   spinnerBtn.className = 'right';
-  spinnerBtn.textContent = 'Spinner';
+  spinnerBtn.classList.add('karte');
   spinnerBtn.setAttribute('role', 'button');
-  spinnerBtn.setAttribute('aria-label', 'Spinner rufen');
+  spinnerBtn.setAttribute('aria-label', 'Karte öffnen');
   actions.append(spinnerBtn, akteBtn, helpBtn);
   top.append(where, actions);
   document.body.appendChild(top);
@@ -440,6 +447,7 @@ export function createInteraction(renderer, host) {
     getScene: () => currentScene,
     notify: toast,
   });
+  spinnerBtn.innerHTML = `<span class="auto">${spinner.icon}</span>Karte`;
   spinnerBtn.onclick = () => { close(); spinner.open(); };
 
   function say(spot) {
