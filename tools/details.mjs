@@ -113,17 +113,33 @@ for (const s of stellen) {
   }
 }
 
-// scenes.js nachtragen — nur für Dateien, die es jetzt wirklich gibt.
-if (gemacht > 0) {
+// scenes.js nachtragen — für alles, wofür es jetzt eine Datei gibt.
+// Bewusst NICHT an `gemacht > 0` gebunden: Sind die Bilder schon da und nur
+// die Einträge fehlen, muss der Lauf sie trotzdem nachtragen können.
+{
   let quelle = readFileSync('src/game/scenes.js', 'utf8');
   let n = 0;
   for (const s of stellen) {
     if (!existsSync(`public/${s.datei}`)) continue;
     if (quelle.includes(`'${s.datei}'`)) continue;
-    // Nach der label-Zeile des Punktes einfügen.
-    const marke = new RegExp(`(id: '${s.spot.id}',[^}]*?label: '[^']*',\\n)`, 's');
-    if (!marke.test(quelle)) { console.log(`  Marke nicht gefunden: ${s.spot.id}`); continue; }
-    quelle = quelle.replace(marke, `$1        detail: '${s.datei}',\n`);
+
+    // ERST den Ortsblock eingrenzen, DANN den Punkt darin suchen.
+    //
+    // Punkt-Kennungen sind nur innerhalb eines Ortes eindeutig: „booth" gibt
+    // es in der Bar und am Frachtterminal, „terminal" sogar als Ort und als
+    // Punkt. Eine Suche über die ganze Datei nimmt den erstbesten Treffer —
+    // so landete die Nahaufnahme der Zollkabine in der Bar und die des
+    // Leseterminals beim Portalkran.
+    const anfang = quelle.indexOf(`\n  ${s.ortId}: {`);
+    if (anfang === -1) { console.log(`  Ort nicht gefunden: ${s.ortId}`); continue; }
+    const ende = quelle.indexOf('\n  },\n', anfang);
+    const block = quelle.slice(anfang, ende);
+
+    const marke = new RegExp(`(id: '${s.spot.id}', u: [^}]*?label: '[^']*',\n)`, 's');
+    if (!marke.test(block)) { console.log(`  Marke nicht gefunden: ${s.ortId}.${s.spot.id}`); continue; }
+    quelle = quelle.slice(0, anfang)
+           + block.replace(marke, `$1        detail: '${s.datei}',\n`)
+           + quelle.slice(ende);
     n += 1;
   }
   writeFileSync('src/game/scenes.js', quelle);

@@ -247,6 +247,9 @@ src/
 api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt serverseitig)
 tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen
 tools/beschneiden.mjs   eingebrannte schwarze Balken von einer Platte schneiden
+tools/details.mjs       Nahaufnahmen fuer Untersuchungspunkte erzeugen
+tools/verkleinern.mjs   Bilder auf die Groesse bringen, in der sie gezeigt werden
+tools/verhoer-zeiten.mjs  Antwortzeiten im Verhoer messen
 tools/shot.mjs          Standbilder aufnehmen (--backdrop, --reveal, --hotspot, --touch, --pan)
 tools/gen.mjs           Platten von einem Bildmodell uebermalen lassen
 prompts/                Bildanweisungen, getrennt vom Code

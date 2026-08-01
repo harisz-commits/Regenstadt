@@ -788,7 +788,11 @@ export function createInteraction(renderer, host) {
         label.style.left = `${x}px`;
         label.style.top = `${y + Math.max(34, hovered.r * plateH * 1.35) * 0.5 + 12}px`;
         label.textContent = hovered.label;
-        label.classList.add('on');
+        // Nicht, solange die Tafel offen ist: Deren Verlauf ist oben
+        // durchsichtig, und die Beschriftung schien hindurch — der Name des
+        // Punktes stand dann zweimal untereinander, einmal als Ueberschrift
+        // und einmal als Geist darueber.
+        label.classList.toggle('on', !panel.classList.contains('on'));
       } else {
         renderer.hover[3] = hoverAmt;
         label.classList.remove('on');

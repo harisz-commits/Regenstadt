@@ -38,24 +38,28 @@ export const SCENES = {
       {
         id: 'stand', u: 0.281, v: 0.735, r: 0.085,
         label: 'Marktstand',
+        detail: 'details/alley-stand.jpg',
         text: 'Unter der Plane liegen Dinge, die niemand mehr abholt. Der Händler '
             + 'ist nicht da. Sein Hocker steht noch da, die Sitzfläche ist trocken.',
       },
       {
         id: 'sign-left', u: 0.392, v: 0.583, r: 0.070,
         label: 'Leuchtreklame',
+        detail: 'details/alley-sign-left.jpg',
         text: 'Ein Ring aus Neon, das Zeichen darin kennst du nicht. Zwei Röhren '
             + 'sind tot. Der Regen zischt darauf, wo das Glas noch warm ist.',
       },
       {
         id: 'lamp-left', u: 0.338, v: 0.610, r: 0.060,
         label: 'Straßenlaterne',
+        detail: 'details/alley-lamp-left.jpg',
         text: 'Natriumdampf, das alte Zeug. Sie steht in einem Kegel aus Regen und '
             + 'macht alles darunter eine Spur gelber, als es sein müsste.',
       },
       {
         id: 'puddle', u: 0.490, v: 0.858, r: 0.100,
         label: 'Pfütze',
+        detail: 'details/alley-puddle.jpg',
         text: 'Der Asphalt hat hier eine Senke. Das Wasser steht seit Tagen und '
             + 'gibt die Reklamen verkehrt herum zurück. Etwas Öliges treibt darauf.',
       },
@@ -73,12 +77,14 @@ export const SCENES = {
       {
         id: 'vent', u: 0.696, v: 0.672, r: 0.070,
         label: 'Dampfauslass',
+        detail: 'details/alley-vent.jpg',
         text: 'Aus dem Gitter kommt Wärme, die nach heißem Metall riecht. '
             + 'Darunter läuft etwas, das nie abgeschaltet wird.',
       },
       {
         id: 'panel-right', u: 0.742, v: 0.358, r: 0.075,
         label: 'Leuchttafel',
+        detail: 'details/alley-panel-right.jpg',
         text: 'Eine Werbetafel, weiß und blendend. Was sie anpreist, ist unter '
             + 'einer Schicht Ruß nicht mehr zu lesen. Sie brennt trotzdem weiter.',
       },
@@ -128,12 +134,14 @@ export const SCENES = {
       {
         id: 'fire-escape', u: 0.352, v: 0.180, r: 0.085,
         label: 'Feuerleiter',
+        detail: 'details/alley2-fire-escape.jpg',
         text: 'Die unterste Leiter ist hochgezogen und mit Draht gesichert. '
             + 'Der Draht ist neu.',
       },
       {
         id: 'dumpster', u: 0.655, v: 0.700, r: 0.085,
         label: 'Müllcontainer',
+        detail: 'details/alley2-dumpster.jpg',
         text: 'Halb offen. Was darin liegt, riecht nach Lösungsmittel, nicht nach '
             + 'Abfall. Der Deckel hat frische Kratzer, von innen. Zwischen zwei '
             + 'Kanistern klemmt etwas Flaches, Helles.',
@@ -148,12 +156,14 @@ export const SCENES = {
       {
         id: 'grate', u: 0.895, v: 0.805, r: 0.080,
         label: 'Lüftungsgitter',
+        detail: 'details/alley2-grate.jpg',
         text: 'Warmer Dunst steigt hier heraus, gleichmäßig, ohne Pause. Unter der '
             + 'Gasse läuft etwas, das Strom frisst.',
       },
       {
         id: 'steps', u: 0.750, v: 0.782, r: 0.070,
         label: 'Betonstufen',
+        detail: 'details/alley2-steps.jpg',
         text: 'Drei Stufen zu einer Tür, die es nicht mehr gibt — zugemauert. '
             + 'Auf der obersten Stufe steht Wasser, in dem etwas glitzert.',
       },
@@ -184,6 +194,7 @@ export const SCENES = {
       {
         id: 'workbench', u: 0.225, v: 0.545, r: 0.100,
         label: 'Werkbank',
+        detail: 'details/backroom-workbench.jpg',
         text: 'Öl, Metallspäne, ein Schraubstock. Und dazwischen etwas, das hier '
             + 'nicht hingehört: ein sauber gefaltetes Tuch.',
         item: {
@@ -206,6 +217,7 @@ export const SCENES = {
       {
         id: 'shelves', u: 0.570, v: 0.470, r: 0.110,
         label: 'Regalwand',
+        detail: 'details/backroom-shelves.jpg',
         text: 'Kanister, Kabeltrommeln, Ersatzteile in Kisten mit demselben '
             + 'Zollsiegel wie draußen in der Gasse. Eine Reihe ist frisch '
             + 'ausgeräumt — der Staub zeigt, was dort gestanden hat.',
@@ -213,12 +225,14 @@ export const SCENES = {
       {
         id: 'cot', u: 0.635, v: 0.630, r: 0.090,
         label: 'Feldbett',
+        detail: 'details/backroom-cot.jpg',
         text: 'Jemand schläft hier. Die Decke ist zurückgeschlagen, darunter liegt '
             + 'ein Mantelknopf, der zu keinem Mantel im Raum gehört.',
       },
       {
         id: 'lamp-int', u: 0.500, v: 0.160, r: 0.075,
         label: 'Deckenlampe',
+        detail: 'details/backroom-lamp-int.jpg',
         text: 'Eine einzelne Leuchtröhre an zwei Drähten. Sie flackert im selben '
             + 'Takt wie das Ding, das unter der Gasse läuft.',
       },
@@ -243,18 +257,21 @@ export const SCENES = {
       {
         id: 'traffic', u: 0.480, v: 0.550, r: 0.090,
         label: 'Verkehr',
+        detail: 'details/crossing-traffic.jpg',
         text: 'Wagen ziehen durch das Wasser, ohne langsamer zu werden. Niemand '
             + 'sieht hierher. In dieser Stadt ist das eine Dienstleistung.',
       },
       {
         id: 'kiosk', u: 0.270, v: 0.560, r: 0.085,
         label: 'Kiosk',
+        detail: 'details/crossing-kiosk.jpg',
         text: 'Hinter der Scheibe stapeln sich Waren aus drei Sektoren. Der Mann '
             + 'darin sieht dich an, als hätte er dich erwartet, und sagt nichts.',
       },
       {
         id: 'board', u: 0.928, v: 0.410, r: 0.085,
         label: 'Anzeigetafel',
+        detail: 'details/crossing-board.jpg',
         text: 'Fahndungen und Vermisste, übereinandergeklebt. Das oberste Blatt '
             + 'ist zwei Tage alt und zeigt kein Gesicht, nur eine Nummer.',
       },
@@ -291,6 +308,7 @@ export const SCENES = {
       {
         id: 'lab-counter', u: 0.490, v: 0.400, r: 0.110, kind: 'lab',
         label: 'Laborschalter',
+        detail: 'details/precinct-lab-counter.jpg',
         text: 'Eine Klappe aus Panzerglas, dahinter eine Frau, die nicht aufsieht. '
             + 'Daneben ein Tablett für das, was untersucht werden soll. Über der '
             + 'Klappe hängt ein Schild: ERGEBNISSE NUR PERSÖNLICH.',
@@ -298,18 +316,21 @@ export const SCENES = {
       {
         id: 'files', u: 0.160, v: 0.580, r: 0.095,
         label: 'Aktenschrank',
+        detail: 'details/precinct-files.jpg',
         text: 'Papier, in einer Stadt, die alles speichert. Was hier liegt, soll '
             + 'nirgends auftauchen. Die oberste Schublade lässt sich nicht öffnen.',
       },
       {
         id: 'bench', u: 0.775, v: 0.630, r: 0.090,
         label: 'Wartebank',
+        detail: 'details/precinct-bench.jpg',
         text: 'Zwei Leute warten. Beide nass, beide still. Einer hat seit einer '
             + 'Stunde dieselbe Nummer in der Hand.',
       },
       {
         id: 'notice', u: 0.900, v: 0.240, r: 0.080,
         label: 'Aushang',
+        detail: 'details/precinct-notice.jpg',
         text: 'Dienstanweisungen und ein handgeschriebener Zettel: Sektor 7, '
             + 'Nachtstreife bis auf Weiteres ausgesetzt. Kein Grund angegeben.',
       },
@@ -341,6 +362,7 @@ export const SCENES = {
       {
         id: 'counter', u: 0.525, v: 0.730, r: 0.105,
         label: 'Tresen',
+        detail: 'details/bar-counter.jpg',
         text: 'Zinkblech, blank gewetzt an zwei Stellen — dort, wo immer dieselben '
             + 'Leute stehen. Hinter dem Tresen fehlt eine Flasche in einer Reihe, '
             + 'die sonst lückenlos ist.',
@@ -348,6 +370,7 @@ export const SCENES = {
       {
         id: 'booth', u: 0.750, v: 0.620, r: 0.100,
         label: 'Nische',
+        detail: 'details/bar-booth.jpg',
         text: 'Die hinterste Sitzbank hat den besten Blick auf die Tür und ist die '
             + 'einzige, die nass ist. Jemand ist hier aufgestanden, ohne zu '
             + 'trocknen, und in Eile gegangen.',
@@ -355,12 +378,14 @@ export const SCENES = {
       {
         id: 'jukebox', u: 0.115, v: 0.620, r: 0.085,
         label: 'Musikautomat',
+        detail: 'details/bar-jukebox.jpg',
         text: 'Er läuft, aber der Ton ist abgedreht. Die Scheibe dreht sich für '
             + 'niemanden. Auf dem Glas liegt Staub — außer an einer Stelle.',
       },
       {
         id: 'backdoor', u: 0.632, v: 0.458, r: 0.080,
         label: 'Hintertür',
+        detail: 'details/bar-backdoor.jpg',
         text: 'Sie steht einen Spalt offen und führt auf denselben Hinterhof wie '
             + 'die Stahltür. Der Riegel ist von innen aufgebogen.',
       },
@@ -385,6 +410,7 @@ export const SCENES = {
       {
         id: 'crane', u: 0.490, v: 0.430, r: 0.080,
         label: 'Portalkran',
+        detail: 'details/terminal-crane.jpg',
         text: 'Er steht still, aber die Katze hängt auf halber Höhe — mitten in '
             + 'einer Bewegung abgestellt. Wer hier arbeitet, hat aufgehört, ohne '
             + 'fertig zu werden.',
@@ -392,6 +418,7 @@ export const SCENES = {
       {
         id: 'booth', u: 0.905, v: 0.460, r: 0.080,
         label: 'Zollkabine',
+        detail: 'details/terminal-booth.jpg',
         text: 'Leer, das Licht brennt. Auf dem Pult liegt ein aufgeschlagenes '
             + 'Buch und daneben ein Becher, aus dem noch Dampf käme, wenn es '
             + 'wärmer wäre. Die Schranke ist unten.',
@@ -399,12 +426,14 @@ export const SCENES = {
       {
         id: 'barrier', u: 0.810, v: 0.596, r: 0.070,
         label: 'Schranke',
+        detail: 'details/terminal-barrier.jpg',
         text: 'Unten und verriegelt. Der Lack ist an einer Stelle bis aufs Metall '
             + 'abgeschürft, in Höhe einer Stoßstange. Frisch.',
       },
       {
         id: 'pallets', u: 0.090, v: 0.790, r: 0.090,
         label: 'Paletten unter Plane',
+        detail: 'details/terminal-pallets.jpg',
         text: 'Die Folie ist aufgerissen und liegt lose. Darunter Kisten mit '
             + 'demselben Zollsiegel wie in der Kanalgasse — und eine Lücke, wo '
             + 'zwei weitere gestanden haben.',
@@ -412,6 +441,7 @@ export const SCENES = {
       {
         id: 'quay-puddle', u: 0.560, v: 0.840, r: 0.090,
         label: 'Wasserlache',
+        detail: 'details/terminal-quay-puddle.jpg',
         text: 'Regen und etwas anderes. Am Rand hat sich ein dunkler Film '
             + 'abgesetzt, den das Wasser nicht mitnimmt.',
       },
@@ -436,6 +466,7 @@ export const SCENES = {
       {
         id: 'clipboards', u: 0.073, v: 0.376, r: 0.085,
         label: 'Klemmbretter',
+        detail: 'details/customs-clipboards.jpg',
         text: 'Eine Reihe Frachtbriefe an Haken, nach Tagen sortiert. Bei '
             + 'vorgestern hängt einer schief, als hätte ihn jemand zurückgehängt '
             + 'und dabei nicht hingesehen.',
@@ -452,6 +483,7 @@ export const SCENES = {
       {
         id: 'table-left', u: 0.200, v: 0.575, r: 0.100,
         label: 'Prüftisch',
+        detail: 'details/customs-table-left.jpg',
         text: 'Zwei Kisten aufgebrochen, das Stroh liegt daneben auf dem Boden. '
             + 'Der Deckel der vorderen wurde von INNEN aufgedrückt — die Nägel '
             + 'stehen nach außen.',
@@ -459,6 +491,7 @@ export const SCENES = {
       {
         id: 'arch', u: 0.835, v: 0.520, r: 0.090,
         label: 'Scanbogen',
+        detail: 'details/customs-arch.jpg',
         text: 'Abgeschaltet und aus der Spur gerollt. Das Kabel liegt quer über '
             + 'die Fahrbahn — hier ist etwas durchgefahren, das nicht durch den '
             + 'Bogen sollte.',
@@ -466,6 +499,7 @@ export const SCENES = {
       {
         id: 'shutter', u: 0.500, v: 0.450, r: 0.080,
         label: 'Rolltor',
+        detail: 'details/customs-shutter.jpg',
         text: 'Geschlossen bis auf einen Spalt am Boden, durch den orangefarbenes '
             + 'Licht fällt. Dahinter der Kai. Von unten kommt Zugluft und der '
             + 'Geruch von Wasser.',
@@ -473,6 +507,7 @@ export const SCENES = {
       {
         id: 'straw', u: 0.350, v: 0.810, r: 0.090,
         label: 'Stroh und Bänder',
+        detail: 'details/customs-straw.jpg',
         text: 'Verpackungsmaterial über den ganzen Boden verteilt, nicht gefegt. '
             + 'Zwischen den Halmen liegt ein abgerissenes Stück Klebeband mit '
             + 'einem Abdruck darin, der zu keinem Handschuh gehört.',
@@ -498,6 +533,7 @@ export const SCENES = {
       {
         id: 'pumpe', u: 0.245, v: 0.540, r: 0.105,
         label: 'Pumpengehäuse',
+        detail: 'details/pumpwerk-pumpe.jpg',
         text: 'Gusseisen, vernietet, so alt wie die Stadt darüber. Es läuft. Der '
             + 'Boden zittert im Takt, und niemand ist hier, der es abstellen '
             + 'könnte, wenn es aufhören müsste.',
@@ -505,6 +541,7 @@ export const SCENES = {
       {
         id: 'pult', u: 0.895, v: 0.710, r: 0.090,
         label: 'Schaltpult',
+        detail: 'details/pumpwerk-pult.jpg',
         text: 'Die meisten Zeiger stehen auf Null, weil sie tot sind. Einer nicht. '
             + 'Daneben liegt ein Schichtbuch, aufgeschlagen — der letzte Eintrag '
             + 'ist vierzehn Monate alt und mitten im Satz abgebrochen.',
@@ -513,6 +550,7 @@ export const SCENES = {
       {
         id: 'schleuse', u: 0.498, v: 0.510, r: 0.085,
         label: 'Schleusentor',
+        detail: 'details/pumpwerk-schleuse.jpg',
         text: 'Geschlossen und verriegelt. Auf der Innenseite Kratzspuren in '
             + 'Griffhöhe, dicht an dicht. Jemand wollte hier durch und hatte '
             + 'keinen Schlüssel.',
@@ -520,6 +558,7 @@ export const SCENES = {
       {
         id: 'laufsteg', u: 0.485, v: 0.810, r: 0.090,
         label: 'Laufsteg',
+        detail: 'details/pumpwerk-laufsteg.jpg',
         text: 'Riffelblech über schwarzem Wasser. In der Mitte ein Streifen, der '
             + 'blanker ist als der Rest — hier geht jemand regelmäßig, und zwar '
             + 'immer dieselbe Linie.',
@@ -546,6 +585,7 @@ export const SCENES = {
       {
         id: 'gitter', u: 0.195, v: 0.430, r: 0.090,
         label: 'Altes Gitter',
+        detail: 'details/tunnel-gitter.jpg',
         text: 'Halb hochgezogen und mit einem Stück Kabel festgebunden, damit es '
             + 'nicht zufällt. Dahinter Ziegel und Dunkelheit. Der Knoten ist '
             + 'frisch und sauber gelegt — von jemandem, der wiederkommen will.',
@@ -553,6 +593,7 @@ export const SCENES = {
       {
         id: 'rinne', u: 0.495, v: 0.780, r: 0.095,
         label: 'Wasserrinne',
+        detail: 'details/tunnel-rinne.jpg',
         text: 'Das Wasser läuft langsam und riecht nicht nach Kanal, sondern nach '
             + 'Desinfektionsmittel. Es kommt aus dem rechten Gang.',
         clue: 'desinfektion',
@@ -560,6 +601,7 @@ export const SCENES = {
       {
         id: 'kabel', u: 0.870, v: 0.450, r: 0.080,
         label: 'Kabelstrang',
+        detail: 'details/tunnel-kabel.jpg',
         text: 'Neu verlegt, viel zu stark für Beleuchtung. Er verschwindet im '
             + 'rechten Gang. Wer hier unten so viel Strom braucht, betreibt '
             + 'etwas, das nicht ausfallen darf.',
@@ -567,6 +609,7 @@ export const SCENES = {
       {
         id: 'roehre', u: 0.498, v: 0.515, r: 0.080,
         label: 'Hauptröhre',
+        detail: 'details/tunnel-roehre.jpg',
         text: 'Sie läuft geradeaus weiter, bis das Licht aufhört. Von dort kommt '
             + 'Zugluft und sonst nichts.',
       },
@@ -598,6 +641,7 @@ export const SCENES = {
       {
         id: 'op-tisch', u: 0.493, v: 0.630, r: 0.100,
         label: 'Operationstisch',
+        detail: 'details/klinik-op-tisch.jpg',
         text: 'Das einzig Saubere im Raum. Frisch abgewischt, noch feucht an den '
             + 'Kanten. Wer hier zuletzt lag, ist nicht lange her weg — und '
             + 'jemand hat sich Mühe gegeben, das zu verbergen.',
@@ -605,6 +649,7 @@ export const SCENES = {
       {
         id: 'instrumente', u: 0.165, v: 0.660, r: 0.100,
         label: 'Instrumententisch',
+        detail: 'details/klinik-instrumente.jpg',
         text: 'Auf einem Tuch ausgelegt, in Reihe, wie es sich gehört. Ein Platz '
             + 'in der Reihe ist leer. Daneben liegt eine Patientenkarte, die '
             + 'niemand hätte liegen lassen dürfen.',
@@ -629,6 +674,7 @@ export const SCENES = {
       {
         id: 'kartons', u: 0.330, v: 0.655, r: 0.085,
         label: 'Kartons',
+        detail: 'details/klinik-kartons.jpg',
         text: 'Unbeschriftet, bis auf ein Zollsiegel auf der untersten Lage — '
             + 'dasselbe wie auf den Kisten in der Kanalgasse. Der Weg der Fracht '
             + 'endet also hier unten.',
@@ -636,6 +682,7 @@ export const SCENES = {
       {
         id: 'geraete', u: 0.680, v: 0.570, r: 0.090,
         label: 'Gerätewagen',
+        detail: 'details/klinik-geraete.jpg',
         text: 'Zusammengestückelt und trotzdem eingeschaltet. Auf dem einen Schirm '
             + 'steht noch die letzte Aufzeichnung: vorgestern, 23:58. Achtzehn '
             + 'Minuten nachdem die Fracht am Terminal eingetroffen ist.',
@@ -643,6 +690,7 @@ export const SCENES = {
       {
         id: 'stuhl', u: 0.820, v: 0.726, r: 0.085,
         label: 'Stuhl mit Gurten',
+        detail: 'details/klinik-stuhl.jpg',
         text: 'Die Gurte hängen offen, nicht aufgeschnitten. Wer hier saß, wurde '
             + 'losgemacht. Der Lederriemen am rechten Arm ist auf einer Seite '
             + 'ausgeleiert, an der anderen nicht.',
@@ -650,6 +698,7 @@ export const SCENES = {
       {
         id: 'abfluss', u: 0.460, v: 0.870, r: 0.060,
         label: 'Bodenabfluss',
+        detail: 'details/klinik-abfluss.jpg',
         text: 'Unter dem Tisch, wo man ihn braucht. Das Gitter ist abgehoben und '
             + 'schief zurückgelegt worden. Was hier hineingespült wurde, ist '
             + 'längst im Kanal.',
@@ -683,6 +732,7 @@ export const SCENES = {
       {
         id: 'tresen', u: 0.680, v: 0.600, r: 0.085,
         label: 'Empfangstresen',
+        detail: 'details/empfang-tresen.jpg',
         text: 'Hinterleuchteter Stein, makellos, und darauf liegt nichts — kein '
             + 'Besucherbuch, kein Terminal, nichts. Wer hier hereinkommt, wird '
             + 'nicht eingetragen. Der Stein hat an einer Stelle einen matten '
@@ -691,6 +741,7 @@ export const SCENES = {
       {
         id: 'sitzinsel', u: 0.860, v: 0.700, r: 0.090,
         label: 'Sitzinsel',
+        detail: 'details/empfang-sitzinsel.jpg',
         text: 'Schwarzes Leder, eine Pflanze, die zu gesund ist für ein Haus ohne '
             + 'Tageslicht. Auf einem der Sitze ein feuchter Abdruck in der Form '
             + 'eines Mantelsaums. Jemand hat hier vor Kurzem im Nassen gewartet.',
@@ -728,6 +779,7 @@ export const SCENES = {
       {
         id: 'bruestung', u: 0.483, v: 0.573, r: 0.100,
         label: 'Brüstung',
+        detail: 'details/dach-bruestung.jpg',
         text: 'Von hier sieht man den Regen von oben, als Decke aus Licht über '
             + 'der Unterstadt. Irgendwo da unten liegt die Kanalgasse. Von hier '
             + 'wirkt sie wie eine Naht im Asphalt.',
@@ -735,6 +787,7 @@ export const SCENES = {
       {
         id: 'unterstand', u: 0.825, v: 0.376, r: 0.085,
         label: 'Unterstand',
+        detail: 'details/dach-unterstand.jpg',
         text: 'Ein Heizstrahler brennt für niemanden. Unter dem Dach ist der '
             + 'Boden trocken bis auf zwei Stellen — dort hat jemand gestanden, '
             + 'lange genug, dass es von seinem Mantel getropft hat.',
@@ -742,6 +795,7 @@ export const SCENES = {
       {
         id: 'tisch', u: 0.800, v: 0.627, r: 0.080,
         label: 'Tisch',
+        detail: 'details/dach-tisch.jpg',
         text: 'Nasses Metall. Am Rand ein ausgedrückter Zigarettenstummel, '
             + 'gebogen, nicht ausgetreten — jemand hat ihn eilig abgelegt und '
             + 'ist gegangen. Er ist noch nicht durchgeweicht.',
@@ -750,6 +804,7 @@ export const SCENES = {
       {
         id: 'kuebel', u: 0.060, v: 0.583, r: 0.075,
         label: 'Pflanzkübel',
+        detail: 'details/dach-kuebel.jpg',
         text: 'Hartes schwarzes Blattwerk, das den Regen aushält. In der Erde '
             + 'steckt etwas Kantiges, halb eingedrückt, als hätte man es im '
             + 'Vorbeigehen hineingeschoben.',
@@ -783,6 +838,7 @@ export const SCENES = {
       {
         id: 'gasse-offen', u: 0.360, v: 0.448, r: 0.095,
         label: 'Offene Regalgasse',
+        detail: 'details/archiv-gasse-offen.jpg',
         text: 'Eine einzige Gasse ist aufgekurbelt, alle anderen stehen dicht. '
             + 'Drinnen ist es dunkel, und in der zweiten Reihe fehlen vier '
             + 'Ordner nebeneinander. Der Staub zeigt, wie lange sie dort standen.',
@@ -790,6 +846,7 @@ export const SCENES = {
       {
         id: 'terminal', u: 0.498, v: 0.506, r: 0.080,
         label: 'Leseterminal',
+        detail: 'details/archiv-terminal.jpg',
         text: 'Es läuft und ist nicht abgemeldet. Die letzte Abfrage steht noch '
             + 'auf dem Schirm: eine Personalnummer, ohne Namen dazu. Wer sie '
             + 'eingegeben hat, ist mitten im Vorgang aufgestanden.',
@@ -797,6 +854,7 @@ export const SCENES = {
       {
         id: 'wagen', u: 0.675, v: 0.735, r: 0.095,
         label: 'Rollwagen',
+        detail: 'details/archiv-wagen.jpg',
         text: 'Vier Archivkisten, schief gestapelt, in einem Raum, in dem sonst '
             + 'nichts schief steht. Die oberste ist nicht verschlossen. Darin '
             + 'liegt eine Akte, die dorthin gehört, wo die Gasse eine Lücke hat.',
@@ -824,6 +882,7 @@ export const SCENES = {
       {
         id: 'handrad', u: 0.092, v: 0.457, r: 0.075,
         label: 'Handrad',
+        detail: 'details/archiv-handrad.jpg',
         text: 'Die Kurbel der vordersten Gasse. Der Griff ist kalt, aber blank — '
             + 'anders als die daneben, auf denen Staub liegt. Diese Gasse wird '
             + 'benutzt, die anderen nicht.',
