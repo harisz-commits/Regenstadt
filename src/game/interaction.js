@@ -510,6 +510,10 @@ export function createInteraction(renderer, host) {
     }
 
     if (talk.has(spot.id)) {
+      // Die Fragen fuer diese Person schon holen, waehrend der Spieler die
+      // Beschreibung liest. Das Verhoer oeffnete sonst in zehn Sekunden
+      // Leerlauf.
+      talk.warmUp(spot.id);
       const t = document.createElement('button');
       t.className = 'go';
       t.textContent = 'Ansprechen';

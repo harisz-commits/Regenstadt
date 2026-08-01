@@ -33,6 +33,19 @@ const MAX_OUTPUT = 2200;
  */
 export async function askModel(body, key) {
   const { system, messages } = body;
+  /**
+   * Wie viel das Modell nachdenken soll.
+   *
+   * Fuer Figurenrede lohnt sich `low`. Fuer die Vorschlagsfragen nicht: Dort
+   * kostete das Nachdenken gemessene neun Sekunden, waehrend die Antwort der
+   * Figur in drei da war. `minimal` halbiert das und macht bei vier kurzen
+   * Fragen keinen erkennbaren Unterschied.
+   *
+   * Erlaubt sind nur `low` und `minimal` — `none` und `off` lehnt die API mit
+   * 400 ab.
+   */
+  const denken = body.denken === 'minimal' ? 'minimal' : 'low';
+  const grenze = Number.isFinite(body.max) ? Math.min(body.max, MAX_OUTPUT) : MAX_OUTPUT;
   if (typeof system !== 'string' || !Array.isArray(messages) || messages.length === 0) {
     return { status: 400, json: { error: 'system (Text) und messages (Liste) werden gebraucht.' } };
   }
@@ -47,12 +60,12 @@ export async function askModel(body, key) {
       parts: [{ text: String(m.text).slice(0, 4000) }],
     })),
     generationConfig: {
-      maxOutputTokens: MAX_OUTPUT,
+      maxOutputTokens: grenze,
       temperature: 1.0,
       // Wenig nachdenken: für Dialog reicht das, und die Denk-Token sind der
       // eigentliche Kostentreiber — sie liegen sonst beim Zehnfachen der
       // ausgegebenen Token.
-      thinkingConfig: { thinkingLevel: 'low' },
+      thinkingConfig: { thinkingLevel: denken },
     },
   };
 

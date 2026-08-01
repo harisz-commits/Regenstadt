@@ -162,8 +162,29 @@ Eine Regel musste nachgereicht werden: **nichts erfinden**. Der erste Durchlauf
 fragte nach einem „Zollsiegel aus Sektor Vier" — den Sektor gibt es nicht, und
 die Figur kann darauf nur Unsinn antworten.
 
-Die Fragen werden NEBENHER geholt: Die Antwort der Figur steht schon da,
-waehrend die naechsten Fragen noch gesucht werden.
+### Warum es sich fluessig anfuehlt
+
+Drei Sachen, ohne die das Verhoer sich zaeh angefuehlt hat:
+
+**Vorlauf.** Die Fragen werden schon geholt, waehrend der Spieler die
+Beschreibung der Person in der Untersuchungstafel liest. Die Sekunden zwischen
+„auf die Gestalt geklickt" und „auf Ansprechen geklickt" sind geschenkte Zeit.
+
+**Die alten Fragen bleiben stehen**, bis die neuen da sind — nur matt und ohne
+die bereits gestellten. Vorher wurde die Zeile geleert, und der Spieler sass
+vor einem Verhoer ganz ohne Schaltflaeche.
+
+**Wenig nachdenken.** Fuer vier kurze Fragen bringt `thinkingLevel: 'low'`
+nichts und kostet alles: gemessen 963 Denk-Token gegen 80 ausgegebene.
+`minimal` schaltet das Nachdenken ab — 5,5 s auf 1,3 s bei gleichem Ergebnis.
+Erlaubt sind nur `low` und `minimal`; `none` und `off` lehnt die API mit 400 ab.
+
+Gemessen mit `node tools/verhoer-zeiten.mjs`: Verhoer oeffnen 10,2 s → 1,5 s.
+
+**Achtung bei Aenderungen an `api/chat.js`:** Der Vorschau-Server laedt die
+Datei beim Start ueber `vite.config.js`. Ein laufender Server bedient sonst
+weiter den alten Stand — hier hat das einmal neun Sekunden Modelllatenz
+vorgetaeuscht, die es nie gab.
 
 Der Schluessel darf **nicht** ins Browser-Buendel — was dort landet, kann jeder
 auslesen, und die Rechnung zahlt der Kontoinhaber. Deshalb kennt der Browser nur

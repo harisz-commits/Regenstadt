@@ -53,6 +53,15 @@ const CSS = `
   font-size: 10px; letter-spacing: .26em; text-transform: uppercase;
   color: rgba(159,180,204,.5); padding: 11px 0;
 }
+/* Waehrend neue Fragen geholt werden, bleiben die alten stehen und bleiben
+   anklickbar — nur matt. Vorher wurde die Zeile geleert, und der Spieler sass
+   zehn Sekunden vor einem Verhoer ohne jede Schaltflaeche. */
+#talk .ask .sug.laedt button { opacity: .5; }
+#talk .ask .sug.laedt::after {
+  content: 'Weitere Fragen …';
+  font-size: 10px; letter-spacing: .26em; text-transform: uppercase;
+  color: rgba(255,190,116,.6); padding-top: 2px;
+}
 #talk .ask .row { display: flex; gap: 9px; }
 #talk .ask input {
   flex: 1; min-width: 0; background: rgba(255,255,255,.045);
@@ -188,24 +197,20 @@ export function createTalk(host) {
     });
   }
 
-  /**
-   * Vorschlagsfragen holen.
-   *
-   * Läuft absichtlich NEBENHER und blockiert nichts: Die Antwort der Figur
-   * steht schon da, während die nächsten Fragen noch gesucht werden.
-   */
-  let fragenLauf = 0;
-  async function ladeFragen() {
-    const lauf = ++fragenLauf;
-    sug.innerHTML = '<div class="sucht">Fragen …</div>';
-    let fragen = NOTFALL;
+  /** Eine Runde Fragen beim Modell holen. Liefert immer eine Liste. */
+  async function holeFragen(c, notes, place, verlauf) {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: buildFragen(char, host.getNotes(), host.getPlace(), history),
+          system: buildFragen(c, notes, place, verlauf),
           messages: [{ role: 'user', text: 'Schreib die vier Fragen.' }],
+          // Vier kurze Fragen brauchen kein langes Nachdenken. Gemessen: mit
+          // `low` neun Sekunden, mit `minimal` gut vier — bei gleichem
+          // Ergebnis. Die knappe Obergrenze hilft zusätzlich.
+          denken: 'minimal',
+          max: 700,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -213,10 +218,65 @@ export function createTalk(host) {
         .split('\n')
         .map((z) => z.replace(/^\s*(?:[-–—•*]|\d+[.)])\s*/, '').replace(/^["„»]|["“«]$/g, '').trim())
         .filter((z) => z.length > 8 && z.length < 130 && /[?？]$/.test(z));
-      if (roh.length >= 2) fragen = roh.slice(0, 4);
-    } catch { /* NOTFALL bleibt stehen */ }
+      return roh.length >= 2 ? roh.slice(0, 4) : NOTFALL;
+    } catch {
+      return NOTFALL;
+    }
+  }
+
+  /**
+   * Vorlauf: Fragen schon holen, während der Spieler die Beschreibung der
+   * Person in der Untersuchungstafel liest.
+   *
+   * Das Öffnen des Verhörs dauerte gemessen zehn Sekunden, in denen nichts
+   * anklickbar war. Die Sekunden zwischen „auf die Gestalt geklickt" und „auf
+   * Ansprechen geklickt" sind geschenkte Zeit — die nutzen wir.
+   */
+  let vorlauf = null;
+  function warmUp(spotId) {
+    const c = CHARACTERS[spotId];
+    if (!c) return;
+    // Nur für ein NEUES Gespräch. Wer zurückkommt, hat schon einen Verlauf,
+    // und Fragen ohne diesen Verlauf wären falsch.
+    if (char?.id === c.id && history.length) return;
+    const key = `${c.id}|${host.getNotes().length}|${host.getPlace()}`;
+    if (vorlauf?.key === key) return;
+    vorlauf = { key, p: holeFragen(c, host.getNotes(), host.getPlace(), []) };
+  }
+
+  /**
+   * Vorschlagsfragen anzeigen.
+   *
+   * Die alten bleiben stehen, bis die neuen da sind — nur matt und mit einem
+   * Hinweis. Vorher wurde die Zeile geleert, und dann stand der Spieler zehn
+   * Sekunden lang vor einem Verhör ohne jede Schaltfläche.
+   */
+  let fragenLauf = 0;
+  async function ladeFragen() {
+    const lauf = ++fragenLauf;
+    // Was schon gefragt wurde, fliegt raus — sonst kann man eine Frage
+    // zweimal stellen, waehrend die neuen noch unterwegs sind.
+    const gestellt = new Set(history.filter((m) => m.role === 'user').map((m) => m.text));
+    for (const b of sug.querySelectorAll('button')) {
+      if (gestellt.has(b.textContent)) b.remove();
+    }
+    const alte = sug.querySelector('button');
+    if (alte) {
+      sug.classList.add('laedt');
+    } else {
+      sug.innerHTML = '<div class="sucht">Fragen …</div>';
+    }
+
+    const key = `${char.id}|${host.getNotes().length}|${host.getPlace()}`;
+    const p = (!history.length && vorlauf?.key === key)
+      ? vorlauf.p
+      : holeFragen(char, host.getNotes(), host.getPlace(), history);
+    vorlauf = null;
+    const fragen = await p;
+
     // Ein späterer Lauf hat inzwischen übernommen: dieses Ergebnis verwerfen.
     if (lauf !== fragenLauf) return;
+    sug.classList.remove('laedt');
     zeigeFragen(fragen);
   }
 
@@ -290,6 +350,9 @@ export function createTalk(host) {
   return {
     /** true, wenn es für diesen Punkt überhaupt eine Figur gibt. */
     has: (spotId) => Boolean(CHARACTERS[spotId]),
+
+    /** Fragen vorladen, solange der Spieler noch die Beschreibung liest. */
+    warmUp,
 
     open(spotId) {
       const c = CHARACTERS[spotId];
