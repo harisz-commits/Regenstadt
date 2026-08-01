@@ -895,6 +895,216 @@ export const SCENES = {
       },
     ],
   },
+
+  /* ====================================================================== */
+  registratur: {
+    id: 'registratur',
+    district: 'sektor-4',
+    name: 'Registratur',
+    sector: 'Sektor 4 · Meldeamt',
+    kind: 'interior',
+    backdrop: 'registratur-backdrop',
+    spots: [
+      {
+        id: 'p-sachbearbeiter', u: 0.505, v: 0.440, r: 0.060, kind: 'person',
+        label: 'Sachbearbeiter',
+        detail: 'details/sachbearbeiter.jpg',
+        text: 'Hinter dem Glas sitzt ein Mann, der aufsieht, als du hereinkommst, '
+            + 'und den Stift nicht weglegt. Neben seiner rechten Hand steht ein '
+            + 'Stempel, griffbereit, als würde gleich noch etwas unterschrieben.',
+      },
+      {
+        id: 'schalter', u: 0.430, v: 0.520, r: 0.080,
+        label: 'Schalter',
+        detail: 'details/registratur-schalter.jpg',
+        text: 'Ein Spalt unter der Scheibe, breit genug für Papier und für nichts '
+            + 'sonst. Auf dem Holz davor sind zwei blanke Stellen — dort legen '
+            + 'Leute ihre Unterarme ab, während sie warten. Nur zwei.',
+      },
+      {
+        id: 'aushang-r', u: 0.608, v: 0.403, r: 0.070,
+        label: 'Aushang',
+        detail: 'details/registratur-aushang-r.jpg',
+        text: 'Hinter dem Glas hängt ein Formularmuster, ausgeblichen bis auf die '
+            + 'Stelle, wo die Unterschrift hingehört. Die ist frisch nachgezogen '
+            + 'worden, mit einem anderen Stift.',
+      },
+      {
+        id: 'schublade-r', u: 0.235, v: 0.497, r: 0.075,
+        label: 'Offene Schublade',
+        detail: 'details/registratur-schublade-r.jpg',
+        text: 'Eine einzige Lade steht offen, in einer Wand aus hunderten. Die '
+            + 'Karten darin sind nach hinten geschoben, als hätte jemand etwas '
+            + 'herausgenommen und die Lücke nicht schließen wollen.',
+      },
+      {
+        id: 'zur-kartei', u: 0.055, v: 0.545, r: 0.085,
+        kind: 'exit', dir: 'left', goto: 'kartei',
+        label: 'Zur Kartei',
+        text: 'Die Schrankwand hört nicht an der Ecke auf. Dahinter geht ein '
+            + 'schmaler Gang weiter, in dem noch mehr davon steht.',
+      },
+      {
+        id: 'zur-halle', u: 0.895, v: 0.538, r: 0.085,
+        kind: 'exit', dir: 'right', goto: 'leichenhalle',
+        label: 'Doppeltür',
+        text: 'Schwer, mit zwei kleinen Fenstern. Dahinter ist es kälter, und das '
+            + 'Licht hat eine andere Farbe.',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  leichenhalle: {
+    id: 'leichenhalle',
+    district: 'sektor-4',
+    name: 'Leichenhalle',
+    sector: 'Sektor 4 · Meldeamt',
+    kind: 'interior',
+    backdrop: 'leichenhalle-backdrop',
+    spots: [
+      {
+        id: 'fach-offen', u: 0.305, v: 0.448, r: 0.095,
+        label: 'Offenes Fach',
+        detail: 'details/leichenhalle-fach-offen.jpg',
+        clue: 'leeres-fach',
+        text: 'Halb herausgezogen und leer. Blankes Blech, frisch gewischt, kein '
+            + 'Staub in den Ecken. Im Kartenhalter am Griff steckt noch die '
+            + 'Marke von dem, was hier gelegen haben soll.',
+        item: {
+          id: 'zehenmarke',
+          name: 'Fachmarke',
+          text: 'Ein steifer Kartonstreifen mit einer Nummer — derselben wie auf '
+              + 'der Patientenkarte und der Ausweiskarte. Auf der Rückseite zwei '
+              + 'Kürzel: eines für die Einlieferung, eines für die Freigabe. Sie '
+              + 'sind von derselben Hand geschrieben.',
+          analysis: {
+            wait: 3,
+            label: 'Prüfung · Fachmarke',
+            clue: 'ohne-leiche',
+            text: 'Einlieferung und Freigabe tragen dieselbe Handschrift — die '
+                + 'des Sachbearbeiters, der auch die elf Totenscheine '
+                + 'unterzeichnet hat. Zwischen beiden Einträgen liegen elf '
+                + 'Minuten. In elf Minuten wird niemand eingeliefert, untersucht '
+                + 'und freigegeben. Es hat nie eine Leiche gegeben.',
+          },
+        },
+      },
+      {
+        id: 'wagen-lh', u: 0.505, v: 0.573, r: 0.085,
+        label: 'Rollwagen',
+        detail: 'details/leichenhalle-wagen-lh.jpg',
+        text: 'Leer und blank, mitten im Gang abgestellt statt an der Wand. Die '
+            + 'Rollen stehen quer. Wer ihn zuletzt geschoben hat, hat ihn '
+            + 'losgelassen und ist gegangen.',
+      },
+      {
+        id: 'waage', u: 0.640, v: 0.269, r: 0.075,
+        label: 'Waage',
+        detail: 'details/leichenhalle-waage.jpg',
+        text: 'Sie hängt von der Decke und zeigt nicht auf Null. Jemand hat etwas '
+            + 'daraufgelegt und wieder heruntergenommen, ohne sie zurückzustellen.',
+      },
+      {
+        id: 'rinne-lh', u: 0.493, v: 0.807, r: 0.090,
+        label: 'Abflussrinne',
+        detail: 'details/leichenhalle-rinne-lh.jpg',
+        text: 'Sauber bis auf einen Abdruck am Rand, halb weggewischt. Es ist '
+            + 'kein Fußabdruck. Es ist die Kante von etwas Rechteckigem, das man '
+            + 'hier abgestellt und wieder mitgenommen hat.',
+      },
+      {
+        id: 'faecher', u: 0.850, v: 0.448, r: 0.090,
+        label: 'Fächerwand',
+        detail: 'details/leichenhalle-faecher.jpg',
+        text: 'Drei Reihen Edelstahl, alle geschlossen, alle mit leerem '
+            + 'Kartenhalter. In einem Haus, das jeden Toten aktenkundig macht, '
+            + 'steht an keinem einzigen Fach ein Name.',
+      },
+      {
+        id: 'lh-raus', u: 0.500, v: 0.930, r: 0.080,
+        kind: 'exit', dir: 'out', goto: 'registratur',
+        label: 'Zurück zur Registratur',
+        text: '',
+      },
+    ],
+  },
+
+  /* ====================================================================== */
+  kartei: {
+    id: 'kartei',
+    district: 'sektor-4',
+    name: 'Kartei',
+    sector: 'Sektor 4 · Meldeamt',
+    kind: 'interior',
+    backdrop: 'kartei-backdrop',
+    spots: [
+      {
+        id: 'lade-offen', u: 0.710, v: 0.681, r: 0.100,
+        label: 'Ausgezogene Lade',
+        detail: 'details/kartei-lade-offen.jpg',
+        text: 'Sie liegt oben auf dem Schrank, die Karten aufgefächert und '
+            + 'durcheinander — die einzige Unordnung in einem Raum, in dem seit '
+            + 'Jahren nichts verrutscht ist. Eine Karte steckt verkehrt herum.',
+        item: {
+          id: 'karteikarte',
+          name: 'Karteikarte',
+          text: 'Die Karte des vermissten Händlers. Sie ist zweimal abgelegt '
+              + 'worden: einmal vor Jahren, einmal vorgestern — die zweite '
+              + 'Ablage ist mit Bleistift datiert, einen Tag BEVOR ihn jemand '
+              + 'als vermisst gemeldet hat.',
+          analysis: {
+            wait: 3,
+            label: 'Prüfung · Karteikarte',
+            clue: 'vordatiert',
+            text: 'Der Bleistiftvermerk stammt vom selben Sachbearbeiter. Er hat '
+                + 'die Karte zurückgelegt, bevor die Vermisstenmeldung einging — '
+                + 'er wusste also vorher, dass der Händler nicht wiederkommt. '
+                + 'Das ist der Punkt, an dem aus Mitwissen Beteiligung wird.',
+          },
+        },
+      },
+      {
+        id: 'leiter', u: 0.400, v: 0.538, r: 0.085,
+        label: 'Leiter',
+        detail: 'details/kartei-leiter.jpg',
+        text: 'Auf Schiene, an die linke Wand gelehnt. Die drei untersten Sprossen '
+            + 'sind staubig, die vierte nicht. Wer hier hinaufgestiegen ist, hat '
+            + 'genau eine Höhe gebraucht — und ist nicht schwer gewesen.',
+      },
+      {
+        id: 'fenster-k', u: 0.498, v: 0.448, r: 0.075,
+        label: 'Fenster',
+        detail: 'details/kartei-fenster-k.jpg',
+        text: 'Milchglas, dahinter eine Straßenlaterne als kalter Fleck. Der '
+            + 'Rahmen ist von innen zugestrichen worden. Dieses Fenster ist nicht '
+            + 'zum Öffnen gedacht und war es nie.',
+      },
+      {
+        id: 'birne', u: 0.498, v: 0.260, r: 0.070,
+        label: 'Glühbirne',
+        detail: 'details/kartei-birne.jpg',
+        text: 'Eine einzige, an einem Kabel, mitten im Gang. Sie brennt. In einem '
+            + 'Raum, in den angeblich niemand mehr kommt, hat jemand das Licht '
+            + 'angelassen.',
+      },
+      {
+        id: 'schrankwand', u: 0.150, v: 0.448, r: 0.095,
+        label: 'Schrankwand',
+        detail: 'details/kartei-schrankwand.jpg',
+        text: 'Hunderte Laden aus Holz, jede mit einem Messinggriff und einem '
+            + 'Schildchen. Auf Höhe der Brust läuft ein Streifen, wo der Lack '
+            + 'blanker ist — die Höhe, in der ein Mensch entlangstreicht, wenn er '
+            + 'im Gehen sucht.',
+      },
+      {
+        id: 'kartei-raus', u: 0.500, v: 0.930, r: 0.080,
+        kind: 'exit', dir: 'out', goto: 'registratur',
+        label: 'Zurück zur Registratur',
+        text: '',
+      },
+    ],
+  },
 };
 
 /** Reihenfolge fürs Vorabladen der Hintergründe. */

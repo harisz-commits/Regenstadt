@@ -17,18 +17,34 @@
  *
  * Ausgänge bekommen keine — dort ist der neue Blickwinkel der nächste Ort.
  *
- * WARUM 1K UND NICHT 2K:
- * Gemessen kostet beides gleich viel — 1235 gegen 1228 Ausgabe-Token. Die
- * Abrechnung hängt daran, DASS ein Bild entsteht, nicht an seiner Größe. 1K
- * ist trotzdem richtig: 1200 px reichen für eine Nahaufnahme, die im Spiel
- * höchstens 420 CSS-Pixel breit erscheint (bei dreifacher Pixeldichte rund
- * 1260 echte Punkte), es geht ein Fünftel schneller, und die Datei ist ein
- * Viertel so groß. Die PLATTEN bleiben bei 2K — die füllen den Schirm.
+ * GRÖSSE: Erzeugt wird in 2K, verkleinert wird danach mit
+ * tools/verkleinern.mjs. Kleiner zu erzeugen spart nichts — gemessen kosten
+ * 1K und 2K gleich viel (1235 gegen 1228 Ausgabe-Token), weil die Abrechnung
+ * daran hängt, DASS ein Bild entsteht, nicht an seiner Auflösung. Das
+ * Nachpacken bleibt aber Pflicht: Die JPEGs des Modells sind sehr schwach
+ * komprimiert, und 64 Bilder à 2,5 MB wären 158 MB Ladelast auf dem Handy.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { SCENES } from '../src/game/scenes.js';
+
+const lauf = promisify(execFile);
+
+/**
+ * Wie viele Bilder gleichzeitig.
+ *
+ * Gemessen: EIN Bild braucht 24,5 s, DREI gleichzeitig brauchen ebenfalls
+ * 24 s. Die Zeit geht fast vollstaendig fuer die Rechenzeit des Bildmodells
+ * drauf, nicht fuer Leitung oder Aufbereitung — und die laeuft nebenlaeufig.
+ * Der erste Stapel lief nacheinander und hat dadurch das Dreifache gebraucht.
+ *
+ * Vier ist bewusst nicht ausgereizt: Es geht um den Faktor, nicht um das
+ * letzte Prozent, und ein Kontingentfehler mitten im Stapel kostet mehr, als
+ * die zusaetzliche Nebenlaeufigkeit einbringt.
+ */
+const GLEICHZEITIG = Number(process.env.GEN_PARALLEL || 4);
 
 const argv = process.argv.slice(2);
 const arg = (n, d) => { const i = argv.indexOf('--' + n); return i === -1 ? d : argv[i + 1]; };
@@ -101,24 +117,39 @@ if (!alle && !nurOrt) {
 }
 
 let gemacht = 0;
-for (const s of stellen) {
-  if (gemacht >= grenze) break;
-  const ziel = `public/${s.datei}`;
-  if (existsSync(ziel)) { console.log(`  übersprungen (da): ${s.datei}`); continue; }
 
-  const vorlage = `public/plates/${s.ort.backdrop}.jpg`;
-  if (!existsSync(vorlage)) { console.log(`  KEINE PLATTE: ${vorlage}`); continue; }
+/** Die Warteschlange abarbeiten, hoechstens GLEICHZEITIG auf einmal. */
+const warteschlange = stellen.slice(0, grenze).filter((s) => {
+  if (existsSync(`public/${s.datei}`)) { console.log(`  übersprungen (da): ${s.datei}`); return false; }
+  if (!existsSync(`public/plates/${s.ort.backdrop}.jpg`)) { console.log(`  KEINE PLATTE: ${s.ort.backdrop}`); return false; }
+  return true;
+});
 
-  const tmp = `/tmp/anw-${s.ortId}-${s.spot.id}.txt`;
-  writeFileSync(tmp, anweisung(s.ort, s.spot));
-  process.stdout.write(`\n→ ${s.ortId} · ${s.spot.label} … `);
-  try {
-    execFileSync('node', ['tools/gen.mjs', '--in', vorlage, '--out', `public/${s.datei.replace(/\.jpg$/, '.png')}`,
-      '--prompt', tmp, '--aspect', '4:3', '--size', '1K'], { stdio: 'inherit' });
-    gemacht += 1;
-  } catch {
-    console.log('  FEHLGESCHLAGEN');
+const t0 = Date.now();
+let naechste = 0;
+async function arbeiter(nr) {
+  while (naechste < warteschlange.length) {
+    const s = warteschlange[naechste++];
+    const tmp = `/tmp/anw-${s.ortId}-${s.spot.id}.txt`;
+    writeFileSync(tmp, anweisung(s.ort, s.spot));
+    const t = Date.now();
+    try {
+      await lauf('node', ['tools/gen.mjs',
+        '--in', `public/plates/${s.ort.backdrop}.jpg`,
+        '--out', `public/${s.datei.replace(/\.jpg$/, '.png')}`,
+        '--prompt', tmp, '--aspect', '4:3']);
+      gemacht += 1;
+      console.log(`  [${nr}] ${s.ortId} · ${s.spot.label} — ${((Date.now() - t) / 1000).toFixed(1)} s`);
+    } catch {
+      console.log(`  [${nr}] FEHLGESCHLAGEN: ${s.ortId} · ${s.spot.label}`);
+    }
   }
+}
+await Promise.all(Array.from({ length: GLEICHZEITIG }, (_, i) => arbeiter(i + 1)));
+if (warteschlange.length) {
+  const dauer = (Date.now() - t0) / 1000;
+  console.log(`\n${warteschlange.length} Bilder in ${dauer.toFixed(0)} s `
+            + `(${(dauer / warteschlange.length).toFixed(1)} s je Bild bei ${GLEICHZEITIG} gleichzeitig)`);
 }
 
 // scenes.js nachtragen — für alles, wofür es jetzt eine Datei gibt.

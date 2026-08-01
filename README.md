@@ -2,7 +2,7 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Vierzehn Orte in vier Sektoren, fuenf Figuren, die von einem Sprachmodell
+Siebzehn Orte in fuenf Sektoren, sechs Figuren, die von einem Sprachmodell
 antworten, eine Beweiskette mit Laborbefund — und ein Flugauto, um zwischen
 den Sektoren zu reisen.
 
@@ -49,7 +49,7 @@ halten zeigt alle Punkte, **ESC** schliesst Tafel und Akte.
 
 ## Die Welt
 
-Vierzehn Orte in vier Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen acht
+Siebzehn Orte in fuenf Sektoren, und man geht nicht nur geradeaus. Ausgaenge kennen acht
 Richtungen (`forward`, `back`, `left`, `right`, `in`, `out`, `up`, `down`) mit je eigener
 Marke; die **Querstrasse** ist der erste Ort, an dem man waehlen muss — links
 das Praesidium, rechts die Bar.
@@ -101,15 +101,27 @@ Ermittlung voran.
 ### Die Beweiskette
 
 Damit eine Ermittlung nicht nach zwei Minuten durch ist, muss etwas von etwas
-anderem abhaengen:
+anderem abhaengen. Inzwischen sind es zwei ineinandergreifende Straenge, und
+jeder Sektor haengt am Ergebnis des vorigen:
 
 ```
 Muellcontainer → Schluesselkarte → oeffnet die Stahltuer
                                  → Lagerraum → Tuch mit dunklen Flecken
-                                             → Laborschalter im Praesidium
-                                             → vier Ortswechsel
-                                             → Befund: fremdes Blut
+                                             → Labor → Befund: fremdes Blut
+                                                     → SEKTOR 9 Kanalebene
+
+Kistenstapel → Zollsiegel → SEKTOR 3 Hafenspange
+                          → Frachtbrief → SEKTOR 1 Konzernterrassen
+
+Kanalebene → Patientenkarte → Labor → Registerluecke → oeffnet das Archiv
+                                    → Personalakte → Labor → Konzernprogramm
+                                                           → SEKTOR 4 Meldeamt
 ```
+
+Am Ende steht der Sachbearbeiter, der elf Totenscheine unterschrieben hat.
+Fachmarke und Karteikarte belegen, dass es nie eine Leiche gab und dass er es
+vor der Vermisstenmeldung wusste — der Punkt, an dem aus Mitwissen
+Beteiligung wird.
 
 Die Wartezeit laeuft in **Ortswechseln**, nicht in Sekunden. Eine Uhr zwingt
 zum Warten, ein Zaehler zwingt zum Weitergehen — und wer das Spiel weglegt,
@@ -281,9 +293,13 @@ Trotzdem ist die Groesse nicht egal:
 | `--size 1K` | 1200×896 | 771 kB | 18 s |
 | `--size 2K` | 2400×1792 | 3009 kB | 23 s |
 
-Deshalb: **Platten in 2K** (sie fuellen den Schirm), **Nahaufnahmen in 1K**
-(sie erscheinen hoechstens 420 CSS-Pixel breit, bei dreifacher Pixeldichte
-also rund 1260 echte Punkte).
+Alles wird in 2K erzeugt und danach verkleinert.
+
+**Erzeugt wird nebenlaeufig.** Ein Bild braucht 24,5 s, DREI gleichzeitig
+brauchen ebenfalls 24 s — die Zeit geht fast vollstaendig fuer die Rechenzeit
+des Bildmodells drauf, und die laeuft parallel. Der erste Stapel lief
+nacheinander und hat dadurch das Dreifache gebraucht. `tools/details.mjs`
+arbeitet jetzt vier auf einmal ab (`GEN_PARALLEL` setzt die Zahl).
 
 Die JPEGs des Modells sind sehr schwach komprimiert. `tools/verkleinern.mjs`
 packt sie nach — dasselbe 1200-px-Bild wiegt danach 222 statt 771 kB. Ueber

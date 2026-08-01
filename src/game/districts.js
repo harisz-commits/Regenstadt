@@ -70,6 +70,18 @@ export const DISTRICTS = {
     requires: { clue: 'frachtbrief' },
     hint: 'Ein Frachtbrief mit zweimal durchgestrichenem Kürzel führt nach oben.',
   },
+
+  'sektor-4': {
+    id: 'sektor-4',
+    name: 'Sektor 4 · Meldeamt',
+    kurz: 'Meldeamt',
+    arrival: 'registratur',
+    mx: 62, my: 74,
+    blurb: 'Wo aus einem Menschen eine Nummer wird und aus einer Nummer nichts. '
+         + 'Ein Stempel, und die Stadt hat einen weniger.',
+    requires: { clue: 'konzern-programm' },
+    hint: 'Elf Totenscheine von derselben Hand führen zu der Hand.',
+  },
 };
 
 /** Reihenfolge auf der Karte. */

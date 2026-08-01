@@ -107,6 +107,27 @@ export const CHARACTERS = {
           + 'Sie sagt nichts, sie wartet nur — als wäre Warten hier eine Form '
           + 'von Höflichkeit.',
   },
+
+  'p-sachbearbeiter': {
+    id: 'p-sachbearbeiter',
+    name: 'Anselm Roth',
+    role: 'Sachbearbeiter · Meldewesen',
+    portrait: 'details/sachbearbeiter.jpg',
+    appearance: 'Grauer Strickpullover hinter Glas, Schreiblampe tief gezogen, '
+              + 'ein Stempel griffbereit neben der rechten Hand.',
+    voice: 'umständlich höflich, redet in Vorschriften und Aktenzeichen, '
+         + 'wiederholt Fragen, bevor er antwortet, um Zeit zu gewinnen',
+    secret: 'Er hat die elf Totenscheine unterschrieben, ohne je eine Leiche '
+          + 'gesehen zu haben. Nicht aus Gier — man hat ihm eine Akte über '
+          + 'seine Tochter gezeigt und sie danach nie wieder erwähnt. Er bricht '
+          + 'erst ein, wenn ihm der Registerabgleich oder das leere Fach in der '
+          + 'Leichenhalle vorgehalten wird.',
+    knows: 'Er kennt den Namen der Person, die ihm die Vorgänge bringt — jemand '
+         + 'aus dem Konzern, immer nachts, immer allein. Er nennt ihn erst, '
+         + 'wenn er zugegeben hat, dass er ohne Leiche unterschrieben hat.',
+    opener: 'Er sieht auf, den Stift noch in der Hand, und legt ihn dann sehr '
+          + 'genau parallel zur Kante des Papiers. Erst danach sagt er etwas.',
+  },
 };
 
 /** Grundhaltung für alle Figuren. */
