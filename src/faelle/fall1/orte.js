@@ -1414,7 +1414,7 @@ export const ORTE = {
       },
       {
         id: 'p-bote', u: 0.648, v: 0.735, r: 0.075, kind: 'person',
-        label: 'Jemand sitzt in deinem Sessel',
+        label: 'Unbekannter Mann',
         detail: 'details/bote.jpg',
         erscheint: { clue: 'name-malaunt' },
         text: 'Die Tür war zu. Der Sessel ist es nicht mehr. Jemand sitzt '

@@ -11,6 +11,7 @@ import { ORTE } from './orte.js';
 import { SEKTOREN } from './sektoren.js';
 import { FIGUREN } from './figuren.js';
 import { LOESUNG, PRAEMISSE } from './loesung.js';
+import { MELDUNGEN } from './meldungen.js';
 
 export const FALL = {
   id: 'fall-1',
@@ -22,4 +23,5 @@ export const FALL = {
   sektoren: SEKTOREN,
   figuren: FIGUREN,
   loesung: LOESUNG,
+  meldungen: MELDUNGEN,
 };

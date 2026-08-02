@@ -357,7 +357,7 @@ export const FIGUREN = {
   // Spiel sagt dir damit: Sie weiss es auch.
   'p-bote': {
     id: 'p-bote',
-    name: 'Der Mann im Sessel',
+    name: 'Unbekannter Mann',
     role: 'Unangemeldeter Besuch',
     portrait: 'details/bote.jpg',
     appearance: 'Vierzig, nasser dunkler Mantel, Unterarme auf den Knien, die '

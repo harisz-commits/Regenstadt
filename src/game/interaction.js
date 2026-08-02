@@ -18,6 +18,7 @@ import { createTalk } from './talk.js';
 import { createSpinner } from './spinner.js';
 import { createAnklage } from './anklage.js';
 import * as speicher from './speichern.js';
+import { createMeldung } from './meldung.js';
 
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
@@ -470,6 +471,10 @@ export function createInteraction(renderer, host) {
     neuAnfangen: () => { speicher.loeschen(); location.reload(); },
   });
 
+  // Meldungen: was sich woanders geaendert hat. Bleiben stehen, bis sie
+  // weggeklickt sind — siehe meldung.js.
+  const meldung = createMeldung({ world, onGesehen: () => sichern() });
+
   /* --- Sichern ------------------------------------------------------------
      Nach jeder Aenderung, aber gebuendelt: Ein Klick auf „In die Akte" loest
      mehrere Aenderungen auf einmal aus (Notiz, Spur, Punkte neu gebaut), und
@@ -488,6 +493,7 @@ export function createInteraction(renderer, host) {
         notizen: notes,
         gesehen: [...seen],
         gespraeche: talk.stand(),
+        meldungen: meldung.stand(),
         ende: anklage.ausgang(),
       });
     }, 400);
@@ -595,6 +601,9 @@ export function createInteraction(renderer, host) {
   world.onChange(() => {
     updateAkteBtn();
     if (currentScene) buildSpots(currentScene.spots);
+    // Erst die Punkte, dann die Meldung: Wer sie wegklickt und sofort
+    // hinfliegt, soll den neuen Punkt schon vorfinden.
+    meldung.pruefe();
     sichern();
   });
 
@@ -930,7 +939,7 @@ export function createInteraction(renderer, host) {
     if (e.key === 'Tab') { e.preventDefault(); layer.classList.add('reveal'); }
     if (e.key === 'Escape') {
       // Die schliessen sich selbst.
-      if (talk.isOpen() || spinner.isOpen() || anklage.isOpen()) return;
+      if (talk.isOpen() || spinner.isOpen() || anklage.isOpen() || meldung.isOpen()) return;
       close();
       akte.classList.remove('on');
     }
@@ -967,6 +976,9 @@ export function createInteraction(renderer, host) {
       seen.clear();
       for (const id of stand.gesehen || []) seen.add(id);
       talk.setStand(stand.gespraeche);
+      // VOR world.restore: Das loest onChange aus, und schon gesehene
+      // Meldungen duerfen dabei nicht noch einmal aufpoppen.
+      meldung.setStand(stand.meldungen);
       world.restore(speicher.welteinlesen(stand.welt));
       if (stand.ende) anklage.setAusgang(stand.ende);
       updateAkteBtn();
