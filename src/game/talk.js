@@ -281,14 +281,21 @@ export function createTalk(host) {
   }
   const istErschoepft = (c) => zustand(c).gestellt >= MAX_FRAGEN;
 
-  function zeigeErschoepft() {
+  /**
+   * @param {object} c Die Figur AUSDRUECKLICH — nicht das laufende `char`.
+   *
+   * Gemeldet: Im Gespräch mit Bea Ohlert stand „Aus Konrad Selb ist nichts
+   * mehr herauszuholen". Der Text las `char` zum Zeitpunkt der Anzeige, und
+   * das war nach einem Figurenwechsel jemand anders als der, um den es ging.
+   */
+  function zeigeErschoepft(c) {
     sug.classList.remove('laedt');
     sug.innerHTML = '';
     const d = document.createElement('div');
     d.className = 'aus';
     // Bewusst ohne Fürwort — das Spiel kennt zu den Figuren kein Geschlecht,
     // und „von der" wäre bei der nächsten Figur schon falsch.
-    d.textContent = `Aus ${char.name} ist gerade nichts mehr herauszuholen. `
+    d.textContent = `Aus ${c.name} ist gerade nichts mehr herauszuholen. `
                   + 'Nicht mit dem, was ich in der Hand habe.';
     sug.appendChild(d);
     input.disabled = true;
@@ -422,10 +429,16 @@ export function createTalk(host) {
   let fragenLauf = 0;
   async function ladeFragen() {
     const lauf = ++fragenLauf;
+    /* Die Figur beim Eintritt festhalten.
+       Alles hier drin ist asynchron, und `char` kann sich zwischendurch
+       aendern — wer waehrend einer laufenden Runde jemand anderen anspricht,
+       bekam sonst die Anzeige der vorigen Figur zu sehen. */
+    const c = char;
+    if (!c) return;
     // Ausgereizt: gar nicht erst fragen. Spart nebenbei den Aufruf.
-    if (istErschoepft(char)) { zeigeErschoepft(); return; }
+    if (istErschoepft(c)) { zeigeErschoepft(c); return; }
 
-    const z = zustand(char);
+    const z = zustand(c);
     // Was schon gefragt wurde, fliegt sofort raus — sonst kann man eine Frage
     // zweimal stellen, waehrend die neuen noch unterwegs sind.
     const weg = new Set(z.gefragt.map(schluessel));
@@ -438,20 +451,21 @@ export function createTalk(host) {
       sug.innerHTML = '<div class="sucht">Fragen …</div>';
     }
 
-    const key = `${char.id}|${host.getNotes().length}|${host.getPlace()}`;
+    const key = `${c.id}|${host.getNotes().length}|${host.getPlace()}`;
     const p = (!history.length && vorlauf?.key === key)
       ? vorlauf.p
-      : holeFragen(char, host.getNotes(), host.getPlace(), history, z.gefragt,
-                   offeneGestaendnisse(char, host.meets, new Set(z.gesagt)));
+      : holeFragen(c, host.getNotes(), host.getPlace(), history, z.gefragt,
+                   offeneGestaendnisse(c, host.meets, new Set(z.gesagt)));
     vorlauf = null;
     const { fragen, fehler } = await p;
 
-    // Ein späterer Lauf hat inzwischen übernommen: dieses Ergebnis verwerfen.
-    if (lauf !== fragenLauf) return;
+    // Ein späterer Lauf hat inzwischen übernommen, oder die Figur ist
+    // gewechselt: dieses Ergebnis verwerfen.
+    if (lauf !== fragenLauf || char !== c) return;
     sug.classList.remove('laedt');
 
     if (fehler) { zeigeStoerung(); return; }
-    if (!fragen.length) { zeigeErschoepft(); return; }
+    if (!fragen.length) { zeigeErschoepft(c); return; }
     zeigeFragen(fragen);
   }
 
@@ -480,12 +494,21 @@ export function createTalk(host) {
 
   async function ask(question) {
     if (busy || !char) return;
+    /* AN WEN die Frage geht, wird hier festgehalten und nicht spaeter noch
+       einmal aus `char` gelesen.
+       Gemeldet: Bei Emil Bracke und Iris Malaunt liess sich manchmal keine
+       einzige Frage stellen. Ursache: Wer die Figur wechselt, waehrend eine
+       Antwort unterwegs ist, bekam sie der NEUEN Figur angerechnet — deren
+       Zaehler stieg, ohne dass man sie je etwas gefragt hatte, bis sie bei
+       neun stand und als ausgereizt galt. Aus demselben Grund stand in einem
+       Gespraech der Name einer ganz anderen Figur. */
+    const c = char;
     // Die Sperre gilt auch fuer die freie Eingabe. Ohne diese Zeile liesse
     // sich die zehnte Frage tippen, obwohl die Schaltflaechen weg sind.
-    if (istErschoepft(char)) { zeigeErschoepft(); return; }
+    if (istErschoepft(c)) { zeigeErschoepft(c); return; }
     setBusy(true);
     const slot = addTurn(question, '');
-    slot.innerHTML = '<span class="thinking">…' + char.name + ' überlegt</span>';
+    slot.innerHTML = '<span class="thinking">…' + c.name + ' überlegt</span>';
 
     history.push({ role: 'user', text: question });
 
@@ -494,8 +517,8 @@ export function createTalk(host) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: buildSystem(char, host.getNotes(), host.getPlace(), host.getInnen?.(),
-                              offeneGestaendnisse(char, host.meets, new Set(zustand(char).gesagt))),
+          system: buildSystem(c, host.getNotes(), host.getPlace(), host.getInnen?.(),
+                              offeneGestaendnisse(c, host.meets, new Set(zustand(c).gesagt))),
           // Nur die letzten Wechsel mitschicken. Neun Fragen ergeben achtzehn
           // Eintraege, das passt ohnehin — aber der Endpunkt kuerzt sowieso auf
           // die letzten 24, und was er ohnehin wegwirft, muss nicht durch die
@@ -520,7 +543,11 @@ export function createTalk(host) {
 
       // Zaehlen, BEVOR die naechsten Fragen geholt werden — sonst laedt der
       // Vorlauf noch vier Fragen fuer ein Gespraech, das gerade zu Ende ist.
-      const z = zustand(char);
+      // Verworfen, wenn inzwischen jemand anders angesprochen wurde: Die
+      // Antwort gehoert in ein Gespraech, das nicht mehr offen ist.
+      if (char !== c) { setBusy(false); return; }
+
+      const z = zustand(c);
       z.gestellt += 1;
       z.gefragt.push(question);
 
@@ -535,10 +562,10 @@ export function createTalk(host) {
        * Notiz und hat nie etwas bewegt.
        */
       if (kennung) {
-        const g = (char.spuren || []).find((x) => x.id === kennung);
+        const g = (c.spuren || []).find((x) => x.id === kennung);
         if (g && !z.gesagt.includes(g.id)) {
           z.gesagt.push(g.id);
-          host.addNote(`${char.name}: ${kurz(g.notiz, 38)}`, g.notiz);
+          host.addNote(`${c.name}: ${kurz(g.notiz, 38)}`, g.notiz);
           if (g.clue) host.addClue(g.clue);
           neueSpur(g.notiz);
         }
@@ -546,8 +573,8 @@ export function createTalk(host) {
         const spur = m[1].trim();
         // Die Spur steht in der dritten Person und beginnt oft mit dem Namen
         // der Figur — dann nicht noch einmal davorsetzen.
-        const doppelt = spur.toLowerCase().startsWith(char.name.toLowerCase());
-        const label = doppelt ? kurz(spur, 46) : `${char.name}: ${kurz(spur, 38)}`;
+        const doppelt = spur.toLowerCase().startsWith(c.name.toLowerCase());
+        const label = doppelt ? kurz(spur, 46) : `${c.name}: ${kurz(spur, 38)}`;
         host.addNote(label, spur);
         neueSpur(spur);
       }
@@ -625,6 +652,10 @@ export function createTalk(host) {
         char = c;
         history = [];
         log.innerHTML = '';
+        // Und die Vorschlaege der vorigen Figur sofort weg — nicht erst,
+        // wenn die neuen da sind. Sonst steht beim Aufmachen noch der Satz
+        // ueber jemand anderen da.
+        sug.innerHTML = '';
         const o = document.createElement('div');
         o.className = 'opener';
         o.textContent = c.opener;

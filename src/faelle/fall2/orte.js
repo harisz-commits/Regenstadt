@@ -93,7 +93,7 @@ export const ORTE = {
     backdrop: 'f2-halle-backdrop',
     spots: [
       {
-        id: 'f2-technikerin', u: 0.660, v: 0.620, r: 0.060, kind: 'person',
+        id: 'f2-technikerin', u: 0.800, v: 0.580, r: 0.060, kind: 'person',
         label: 'Frau am Spurenwagen',
         detail: 'details/f2-technikerin.jpg',
         text: 'Sie arbeitet im Stehen, mit Handschuhen, und sieht nicht auf. '
@@ -101,7 +101,7 @@ export const ORTE = {
             + 'werden. Sie ist die Einzige hier, die etwas beweisen kann.',
       },
       {
-        id: 'f2-wagen', u: 0.625, v: 0.615, r: 0.090, kind: 'lab',
+        id: 'f2-wagen', u: 0.740, v: 0.640, r: 0.090, kind: 'lab',
         label: 'Spurenwagen',
         detail: 'details/f2-halle-f2-wagen.jpg',
         text: 'Ein Kastenwagen mit offenen Hecktüren und einer Arbeitsleuchte '
@@ -249,6 +249,20 @@ export const ORTE = {
             + 'mehr offiziell.',
       },
       {
+        /* Die Meldung „In der Siedlung ist ein Licht ausgegangen" hatte keine
+           Entsprechung — man ging hin und fand nichts. Eine Meldung, die auf
+           nichts zeigt, ist schlimmer als gar keine. Jetzt gibt es das
+           dunkle Fenster. */
+        id: 'f2-dunkles-fenster', u: 0.885, v: 0.310, r: 0.080,
+        label: 'Das dunkle Fenster',
+        erscheint: { clue: 'f2-nachtarbeit' },
+        clue: 'f2-einer-weniger',
+        text: 'Von dreien brennen noch zwei. Im dritten steht die Gardine '
+            + 'offen, und dahinter ist nichts mehr — kein Bett, kein Ofen, '
+            + 'kein Karton vor der Scheibe. Ausgeräumt, nicht ausgezogen: Die '
+            + 'Tür steht angelehnt, und der Schlüssel steckt von außen.',
+      },
+      {
         id: 'f2-lieferwagen', u: 0.368, v: 0.724, r: 0.085,
         label: 'Lieferwagen',
         detail: 'details/f2-siedlung-f2-lieferwagen.jpg',
@@ -301,7 +315,7 @@ export const ORTE = {
     backdrop: 'f2-haus-backdrop',
     spots: [
       {
-        id: 'f2-zeuge', u: 0.733, v: 0.780, r: 0.060, kind: 'person',
+        id: 'f2-zeuge', u: 0.593, v: 0.520, r: 0.060, kind: 'person',
         label: 'Der Mann, den es nicht gibt',
         detail: 'details/f2-zeuge.jpg',
         clue: 'f2-zeuge-gefunden',
@@ -311,7 +325,7 @@ export const ORTE = {
             + 'weißt, und sagt trotzdem nichts.',
       },
       {
-        id: 'f2-striche', u: 0.610, v: 0.381, r: 0.085,
+        id: 'f2-striche', u: 0.664, v: 0.369, r: 0.085,
         label: 'Strichliste',
         detail: 'details/f2-haus-f2-striche.jpg',
         text: 'In den Putz geritzt, in Fünferblöcken, über eine halbe Wand. '
@@ -319,7 +333,7 @@ export const ORTE = {
             + 'Stilllegung — er zählt die Tage seit seinem eigenen Todesdatum.',
       },
       {
-        id: 'f2-fenster-h', u: 0.337, v: 0.298, r: 0.080,
+        id: 'f2-fenster-h', u: 0.484, v: 0.327, r: 0.080,
         label: 'Zugeklebtes Fenster',
         detail: 'details/f2-haus-f2-fenster-h.jpg',
         text: 'Von innen mit Karton verschlossen, sauber verklebt, mit einem '
@@ -327,7 +341,7 @@ export const ORTE = {
             + 'sondern auf den Zaun.',
       },
       {
-        id: 'f2-tisch', u: 0.190, v: 0.774, r: 0.085,
+        id: 'f2-tisch', u: 0.200, v: 0.769, r: 0.085,
         label: 'Tisch aus einer Tür',
         detail: 'details/f2-haus-f2-tisch.jpg',
         text: 'Eine Tür auf zwei Kisten. Darauf ein Radio, ein Blechteller und '

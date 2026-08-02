@@ -30,7 +30,7 @@ const CSS = `
 #meldung .karte {
   max-width: 60ch; width: 100%;
   background: rgba(6,10,16,.96);
-  border: 1px solid rgba(255,190,116,.4);
+  border: 1px solid rgba(255,96,96,.5);
   border-left-width: 3px;
   padding: 18px clamp(16px, 3vw, 26px) 16px;
   box-shadow: 0 18px 60px rgba(0,0,0,.8);
@@ -49,18 +49,20 @@ const CSS = `
   from { transform: translateY(16px); }
   to   { transform: translateY(0); }
 }
-#meldung .t {
-  font-size: 10px; letter-spacing: .3em; text-transform: uppercase;
-  color: rgba(255,190,116,.85); margin-bottom: 10px;
-}
-#meldung .h { font-size: 14px; letter-spacing: .06em; color: #ffd7a4; margin-bottom: 9px; }
+/* Rot, und ohne Etikett darueber.
+   „ETWAS HAT SICH GEAENDERT" stand als Ueberschrift ueber jeder Meldung und
+   hat nur wiederholt, was der Satz darunter ohnehin sagt. Die Farbe macht das
+   besser als ein Wort: Orange ist im Spiel die Farbe von Vorhalten und
+   Befunden, Rot gibt es sonst nirgends — es heisst also nichts anderes als
+   „hiervon solltest du wissen". */
+#meldung .h { font-size: 15px; letter-spacing: .06em; color: #ffc9c9; margin-bottom: 10px; }
 #meldung .b { opacity: .78; max-width: 56ch; }
 #meldung button {
   font: inherit; font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
-  margin-top: 17px; padding: 11px 19px; cursor: pointer; color: #ffbe74;
-  background: rgba(255,190,116,.09); border: 1px solid rgba(255,190,116,.42);
+  margin-top: 17px; padding: 11px 19px; cursor: pointer; color: #ff9c9c;
+  background: rgba(255,96,96,.1); border: 1px solid rgba(255,96,96,.5);
 }
-#meldung button:hover { background: rgba(255,190,116,.2); }
+#meldung button:hover { background: rgba(255,96,96,.22); }
 @media (max-width: 820px) {
   #meldung { font-size: 14px; padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
 }
@@ -79,7 +81,6 @@ export function createMeldung(host) {
   el.id = 'meldung';
   el.innerHTML = `
     <div class="karte">
-      <div class="t">Etwas hat sich geändert</div>
       <div class="h"></div>
       <div class="b"></div>
       <button type="button">Verstanden</button>

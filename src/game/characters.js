@@ -150,6 +150,12 @@ WEITERE REGELN:
 - Benenne konkrete Dinge: die Reklame, den Schirm, die Kisten, den Namen aus
   der Akte. Keine Platzhalter, keine allgemeinen Floskeln.
 - Kein Small Talk über das Wetter, wenn oben etwas in der Liste steht.
+- Frage nur nach Dingen, von denen DIESE Person überhaupt wissen kann. Was in
+  der Akte steht, weiss der ERMITTLER — nicht automatisch sein Gegenüber.
+  Gemeldet aus dem Spiel: Der Ermittler fragte einen Werksvorsteher nach den
+  Strichen an der Wand in der Wohnung eines Dritten. Das kann er nicht wissen,
+  und die Frage entlarvt sich selbst. Halte einen Fund höchstens als VORWURF
+  vor („Ich war heute in einem Haus, in dem …"), nie als Wissensfrage.
 - Erfinde NICHTS: keine Sektornummern, Namen, Firmen, Uhrzeiten oder Orte, die
   nicht oben stehen. Beim Prüfen fragte der Ermittler nach einem „Zollsiegel
   aus Sektor Vier" — den Sektor gibt es nicht, und die Figur kann darauf nur
