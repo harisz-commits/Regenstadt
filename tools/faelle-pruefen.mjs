@@ -118,6 +118,49 @@ for (const F of FAELLE) {
     o.spots.filter((s) => s.kind === 'anklage').map((s) => s.id));
   ok(anklagen.length === 1, `Genau ein Anklagepunkt (${anklagen.join(', ') || 'keiner'})`);
 
+  /* --- Ist der Fall LOESBAR? ---------------------------------------------
+     Die Pruefungen oben sagen, dass jeder Hinweis irgendwo herkommt. Sie
+     sagen NICHT, dass man ihn in der richtigen Reihenfolge bekommen kann: Ein
+     Gestaendnis, dessen Bedingung nur aus einem spaeteren Gestaendnis
+     derselben Figur faellt, ist eine Schlaufe, aus der niemand herauskommt.
+
+     Deshalb hier eine Simulation bis zum Stillstand: Was ist erreichbar,
+     wenn man alles nimmt, was man mit dem Erreichten schon bekommen kann?
+     Was danach noch fehlt, ist im Spiel nicht zu holen. */
+  const habe = new Set();
+  const halteGegenstaende = new Set();
+  const erreichbar = (bed) => !bed
+    || ((!bed.clue || habe.has(bed.clue))
+        && (!bed.item || halteGegenstaende.has(bed.item))
+        && (!bed.not || !habe.has(bed.not)));
+
+  let gewachsen = true;
+  let runden = 0;
+  while (gewachsen && runden < 50) {
+    gewachsen = false; runden += 1;
+    const vorher = habe.size + halteGegenstaende.size;
+    // Was an Orten liegt, deren Punkte gerade sichtbar und erreichbar sind.
+    for (const o of Object.values(orte)) for (const sp of o.spots) {
+      if (sp.erscheint && !erreichbar(sp.erscheint)) continue;
+      if (sp.clue) habe.add(sp.clue);
+      if (sp.item) { halteGegenstaende.add(sp.item.id); if (sp.item.analysis?.clue) habe.add(sp.item.analysis.clue); }
+    }
+    // Was Figuren preisgeben, sobald man ihnen das Passende vorhalten kann.
+    for (const c of Object.values(figuren)) for (const g of c.spuren || []) {
+      if (g.clue && erreichbar(g.wenn)) habe.add(g.clue);
+    }
+    if (habe.size + halteGegenstaende.size > vorher) gewachsen = true;
+  }
+  ok(runden < 50, `Die Erreichbarkeit kommt zum Stillstand (${runden} Runden)`);
+  ok(habe.has(L.voraussetzung.clue),
+     `LOESBAR: die Anklage wird ueberhaupt moeglich ("${L.voraussetzung.clue}")`);
+  for (const b of L.beweise) {
+    ok(habe.has(b.clue), `LOESBAR: Beleg "${b.clue}" ist in der richtigen Reihenfolge zu holen`);
+  }
+  const nieErreicht = [...ausGespraech, ...ausOrten].filter((c) => !habe.has(c));
+  ok(nieErreicht.length === 0,
+     `Kein Hinweis haengt in einer Schlaufe${nieErreicht.length ? ': ' + nieErreicht.join(', ') : ''}`);
+
   /* --- Meldungen --------------------------------------------------------- */
   for (const m of F.meldungen || []) {
     ok(Boolean(m.titel && m.text), `Meldung "${m.id}": hat Titel und Text`);
