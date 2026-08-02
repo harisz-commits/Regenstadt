@@ -77,6 +77,22 @@ if (arg('backdrop', '0') === '1') {
 }
 
 // Direkt an einen anderen Ort springen, ohne den Pfeil anzuklicken.
+/* Welcher Fall.
+   Ein Ort aus Fall 2 existiert in Fall 1 nicht — `goTo` wirft dann
+   „Unbekannter Ort". Umgeschaltet wird ueber denselben Weg wie im Spiel: die
+   Fallwahl in den Browserspeicher schreiben und neu laden. Damit prueft das
+   Werkzeug nebenbei genau den Pfad, den ein Spieler nimmt. */
+const fallId = arg('fall', null);
+if (fallId) {
+  await page.evaluate((id) => localStorage.setItem('regenstadt.fall', id), fallId);
+  await page.reload({ waitUntil: 'load' });
+  const neu = page.locator('#weiter .neu');
+  if (await neu.count()) await neu.click();
+  await page.waitForFunction(() => window.__ready === true, { timeout: 40000 });
+  if (freeze) await page.evaluate(() => window.__regenstadt?.freeze());
+  await page.waitForTimeout(600);
+}
+
 const loc = arg('ort', null);
 if (loc !== null) {
   await page.evaluate((id) => window.__regenstadt?.goTo(id), loc);

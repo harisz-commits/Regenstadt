@@ -93,7 +93,7 @@ export const ORTE = {
     backdrop: 'f2-halle-backdrop',
     spots: [
       {
-        id: 'f2-technikerin', u: 0.700, v: 0.500, r: 0.060, kind: 'person',
+        id: 'f2-technikerin', u: 0.660, v: 0.620, r: 0.060, kind: 'person',
         label: 'Frau am Spurenwagen',
         detail: 'details/f2-technikerin.jpg',
         text: 'Sie arbeitet im Stehen, mit Handschuhen, und sieht nicht auf. '
@@ -101,7 +101,7 @@ export const ORTE = {
             + 'werden. Sie ist die Einzige hier, die etwas beweisen kann.',
       },
       {
-        id: 'f2-wagen', u: 0.615, v: 0.560, r: 0.090, kind: 'lab',
+        id: 'f2-wagen', u: 0.625, v: 0.615, r: 0.090, kind: 'lab',
         label: 'Spurenwagen',
         detail: 'details/f2-halle-f2-wagen.jpg',
         text: 'Ein Kastenwagen mit offenen Hecktüren und einer Arbeitsleuchte '
@@ -126,7 +126,7 @@ export const ORTE = {
             + 'gebraucht hat.',
       },
       {
-        id: 'f2-grat', u: 0.135, v: 0.660, r: 0.080,
+        id: 'f2-grat', u: 0.200, v: 0.290, r: 0.080,
         label: 'Schneegrat an der Wand',
         detail: 'details/f2-halle-f2-grat.jpg',
         text: 'Unter dem zerschlagenen Fensterband hat der Schnee einen Wall '
@@ -135,7 +135,7 @@ export const ORTE = {
             + 'durch das Tor.',
       },
       {
-        id: 'f2-zum-buero', u: 0.870, v: 0.435, r: 0.080,
+        id: 'f2-zum-buero', u: 0.497, v: 0.512, r: 0.080,
         kind: 'exit', dir: 'in', goto: 'f2-buero',
         label: 'Werksbüro',
         text: 'Eine Stahltür, angelehnt, dahinter warmes Licht. In einem Werk '
@@ -211,7 +211,7 @@ export const ORTE = {
             + 'zwar mehrfach.',
       },
       {
-        id: 'f2-becher', u: 0.700, v: 0.705, r: 0.070,
+        id: 'f2-becher', u: 0.700, v: 0.650, r: 0.070,
         label: 'Zwei Becher',
         detail: 'details/f2-buero-f2-becher.jpg',
         clue: 'f2-zwei-becher',
@@ -239,7 +239,7 @@ export const ORTE = {
     backdrop: 'f2-siedlung-backdrop',
     spots: [
       {
-        id: 'f2-fenster', u: 0.400, v: 0.455, r: 0.090,
+        id: 'f2-fenster', u: 0.130, v: 0.545, r: 0.090,
         label: 'Drei erleuchtete Fenster',
         detail: 'details/f2-siedlung-f2-fenster.jpg',
         clue: 'f2-drei-fenster',
@@ -249,7 +249,7 @@ export const ORTE = {
             + 'mehr offiziell.',
       },
       {
-        id: 'f2-lieferwagen', u: 0.720, v: 0.615, r: 0.085,
+        id: 'f2-lieferwagen', u: 0.368, v: 0.724, r: 0.085,
         label: 'Lieferwagen',
         detail: 'details/f2-siedlung-f2-lieferwagen.jpg',
         text: 'Ohne Aufschrift, ohne Schnee auf der Scheibe. Er ist vor '
@@ -257,7 +257,7 @@ export const ORTE = {
             + 'ausgeschlagen mit Decken, die nicht dazugehören.',
       },
       {
-        id: 'f2-zaun', u: 0.500, v: 0.380, r: 0.080,
+        id: 'f2-zaun', u: 0.525, v: 0.635, r: 0.080,
         label: 'Maschendrahtzaun',
         detail: 'details/f2-siedlung-f2-zaun.jpg',
         text: 'Am Ende der Straße, und dahinter der Umriss des Werks. Auf '
@@ -274,7 +274,7 @@ export const ORTE = {
             + 'ein Pfad.',
       },
       {
-        id: 'f2-zum-haus', u: 0.250, v: 0.525, r: 0.085,
+        id: 'f2-zum-haus', u: 0.150, v: 0.700, r: 0.085,
         kind: 'exit', dir: 'in', goto: 'f2-haus',
         label: 'Das mittlere Haus',
         text: 'Die Tür ist nicht abgeschlossen. Sie klemmt nur, weil sie sich '
@@ -301,7 +301,7 @@ export const ORTE = {
     backdrop: 'f2-haus-backdrop',
     spots: [
       {
-        id: 'f2-zeuge', u: 0.500, v: 0.510, r: 0.060, kind: 'person',
+        id: 'f2-zeuge', u: 0.733, v: 0.780, r: 0.060, kind: 'person',
         label: 'Der Mann, den es nicht gibt',
         detail: 'details/f2-zeuge.jpg',
         clue: 'f2-zeuge-gefunden',
@@ -311,7 +311,7 @@ export const ORTE = {
             + 'weißt, und sagt trotzdem nichts.',
       },
       {
-        id: 'f2-striche', u: 0.215, v: 0.405, r: 0.085,
+        id: 'f2-striche', u: 0.610, v: 0.381, r: 0.085,
         label: 'Strichliste',
         detail: 'details/f2-haus-f2-striche.jpg',
         text: 'In den Putz geritzt, in Fünferblöcken, über eine halbe Wand. '
@@ -319,7 +319,7 @@ export const ORTE = {
             + 'Stilllegung — er zählt die Tage seit seinem eigenen Todesdatum.',
       },
       {
-        id: 'f2-fenster-h', u: 0.705, v: 0.385, r: 0.080,
+        id: 'f2-fenster-h', u: 0.337, v: 0.298, r: 0.080,
         label: 'Zugeklebtes Fenster',
         detail: 'details/f2-haus-f2-fenster-h.jpg',
         text: 'Von innen mit Karton verschlossen, sauber verklebt, mit einem '
@@ -327,7 +327,7 @@ export const ORTE = {
             + 'sondern auf den Zaun.',
       },
       {
-        id: 'f2-tisch', u: 0.480, v: 0.665, r: 0.085,
+        id: 'f2-tisch', u: 0.190, v: 0.774, r: 0.085,
         label: 'Tisch aus einer Tür',
         detail: 'details/f2-haus-f2-tisch.jpg',
         text: 'Eine Tür auf zwei Kisten. Darauf ein Radio, ein Blechteller und '
@@ -335,7 +335,7 @@ export const ORTE = {
             + 'Die oberste ist an einer Stelle durchgelesen bis zum Riss.',
       },
       {
-        id: 'f2-maentel', u: 0.825, v: 0.455, r: 0.075,
+        id: 'f2-maentel', u: 0.867, v: 0.333, r: 0.075,
         label: 'Mäntel am Nagel',
         detail: 'details/f2-haus-f2-maentel.jpg',
         text: 'Drei Mäntel an einem Nagel, für einen Mann. Zwei davon sind zu '
@@ -360,7 +360,7 @@ export const ORTE = {
     backdrop: 'f2-kantine-backdrop',
     spots: [
       {
-        id: 'f2-vorsteher', u: 0.640, v: 0.505, r: 0.060, kind: 'person',
+        id: 'f2-vorsteher', u: 0.278, v: 0.545, r: 0.060, kind: 'person',
         label: 'Mann am Fenstertisch',
         detail: 'details/f2-vorsteher.jpg',
         text: 'Er sitzt allein an dem einzigen Tisch, der nicht abgeräumt ist, '
@@ -369,7 +369,7 @@ export const ORTE = {
             + 'du hereingekommen bist, und das ist eine Entscheidung.',
       },
       {
-        id: 'f2-tresen', u: 0.480, v: 0.435, r: 0.085,
+        id: 'f2-tresen', u: 0.532, v: 0.513, r: 0.085,
         label: 'Ausgabe',
         detail: 'details/f2-kantine-f2-tresen.jpg',
         text: 'Aus einem der Warmhaltefächer steigt Dampf. Für einen Mann kocht '
@@ -397,7 +397,7 @@ export const ORTE = {
         },
       },
       {
-        id: 'f2-anschlag', u: 0.150, v: 0.405, r: 0.080,
+        id: 'f2-anschlag', u: 0.960, v: 0.320, r: 0.080,
         label: 'Anschlagbrett',
         detail: 'details/f2-kantine-f2-anschlag.jpg',
         text: 'Leer bis auf die Reißnägel — und die stecken in einem Raster, '
@@ -405,7 +405,7 @@ export const ORTE = {
             + 'Sie sind alle am selben Tag abgenommen worden.',
       },
       {
-        id: 'f2-tische', u: 0.300, v: 0.650, r: 0.090,
+        id: 'f2-tische', u: 0.780, v: 0.700, r: 0.090,
         label: 'Tische',
         detail: 'details/f2-kantine-f2-tische.jpg',
         text: 'Auf den meisten stehen die Stühle hochgestellt. Auf sechs nicht. '
