@@ -125,7 +125,55 @@ for (const id of alle) for (const s of SCENES[id].spots) {
 }
 
 /* ======================================================================== */
-/* 9. Der Abschluss.                                                         */
+/* 9. Gestaendnisse.                                                         */
+/*                                                                           */
+/* Ein Gespraech kann seit dem Umbau echte Hinweise setzen. Damit kann es     */
+/* auch Ketten bilden — und eine Kette, deren erstes Glied nirgends           */
+/* herkommt, ist eine Figur, die nie etwas sagt. Der Fehler faellt beim       */
+/* Spielen nur auf, wenn man genau diese Figur genau dann anspricht.          */
+/* ======================================================================== */
+
+/** Alles, was der Spieler ueberhaupt bekommen kann — aus Orten UND Gespraechen. */
+const ausOrten = new Set();
+const gegenstaende = new Set();
+for (const id of alle) for (const s of SCENES[id].spots) {
+  if (s.clue) ausOrten.add(s.clue);
+  if (s.item) gegenstaende.add(s.item.id);
+  if (s.item?.analysis?.clue) ausOrten.add(s.item.analysis.clue);
+}
+const ausGespraech = new Set();
+for (const c of Object.values(CHARACTERS)) for (const g of c.spuren || []) {
+  if (g.clue) ausGespraech.add(g.clue);
+}
+
+const kennungen = new Set();
+for (const [cid, c] of Object.entries(CHARACTERS)) {
+  for (const g of c.spuren || []) {
+    ok(!kennungen.has(g.id), `Gestaendnis-Kennung "${g.id}" ist eindeutig`);
+    kennungen.add(g.id);
+    ok(Boolean(g.was && g.notiz), `${cid}.${g.id}: hat Text und Notiz`);
+    const w = g.wenn || {};
+    if (w.clue) {
+      ok(ausOrten.has(w.clue) || ausGespraech.has(w.clue),
+         `${cid}.${g.id}: Bedingung "${w.clue}" ist im Spiel erreichbar`);
+    }
+    if (w.item) {
+      ok(gegenstaende.has(w.item), `${cid}.${g.id}: Gegenstand "${w.item}" gibt es`);
+    }
+  }
+}
+
+// Ein Hinweis darf nicht aus zwei Quellen kommen — sonst ist unklar, was ihn
+// gesetzt hat, und eine der beiden Quellen ist tote Arbeit.
+for (const c of ausGespraech) {
+  ok(!ausOrten.has(c), `Hinweis "${c}" kommt nur aus dem Gespraech, nicht auch aus einem Ort`);
+}
+
+ok(ausGespraech.size >= 8,
+   `Gespraeche bringen echte Hinweise (${ausGespraech.size})`);
+
+/* ======================================================================== */
+/* 10. Der Abschluss.                                                         */
 /*                                                                           */
 /* Das Spiel muss durchspielbar SEIN, nicht nur begehbar. Diese Pruefung      */
 /* spielt die ganze Kette in der Reihenfolge durch, in der ein Spieler sie    */

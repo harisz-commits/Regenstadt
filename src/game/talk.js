@@ -9,7 +9,7 @@
  * liegt dort auf der Serverseite — siehe `api/chat.js`.
  */
 
-import { CHARACTERS, buildSystem, buildFragen } from './characters.js';
+import { CHARACTERS, buildSystem, buildFragen, offeneGestaendnisse } from './characters.js';
 
 const CSS = `
 #talk {
@@ -100,6 +100,18 @@ const CSS = `
 #talk button:hover:not(:disabled) { background: rgba(126,190,230,.16); border-color: rgba(126,190,230,.6); }
 #talk button:disabled { opacity: .35; cursor: wait; }
 #talk button.hold { color: #ffbe74; border-color: rgba(255,190,116,.38); background: rgba(255,190,116,.07); }
+/* Eine Stoerung sieht aus wie eine Stoerung — nicht wie ein Spielzustand. */
+#talk .ask .sug .stoerung {
+  border-left: 2px solid rgba(255,120,120,.5); padding: 10px 0 10px 14px;
+  font-size: 13px; line-height: 1.65; color: rgba(255,176,176,.85); max-width: 62ch;
+}
+/* Was gerade in die Akte gewandert ist, steht im Verlauf — sonst sieht man
+   den Fortschritt nur an einer Zahl in der Kopfzeile. */
+#talk .spur {
+  margin: -8px 0 24px; padding: 9px 0 9px 14px; max-width: 74ch;
+  border-left: 2px solid rgba(120,240,180,.6);
+  font-size: 11px; letter-spacing: .1em; color: #9df3c8;
+}
 
 @media (max-width: 820px) {
   #talk { font-size: 15px; }
@@ -187,15 +199,40 @@ export function createTalk(host) {
   }
 
   /**
-   * Wenn das Archiv nicht antwortet, muss trotzdem etwas dastehen. Bewusst
-   * allgemein gehalten — konkret kann nur das Modell werden, weil nur es
-   * weiß, was in der Akte steht.
+   * Sichtbar machen, dass gerade etwas herausgekommen ist.
+   *
+   * Ohne diese Zeile merkt man den Fortschritt nur daran, dass die Zahl neben
+   * „Akte" oben um eins steigt — und darauf schaut niemand mitten im Gespräch.
    */
-  const NOTFALL = [
-    'Wie lange stehen Sie hier schon?',
-    'Wer war heute Abend noch hier?',
-    'Was verschweigen Sie mir?',
-  ];
+  function neueSpur(text) {
+    const d = document.createElement('div');
+    d.className = 'spur';
+    d.textContent = 'IN DIE AKTE · ' + text;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  /**
+   * Ein Vergleichsschlüssel für Fragen.
+   *
+   * Wortgleich zu vergleichen reicht nicht: Das Modell stellt dieselbe Frage
+   * gern zweimal mit anderen Worten, und der Spieler sieht sie dann wieder
+   * auftauchen, obwohl er sie längst gestellt hat. Der Schlüssel wirft alles
+   * weg, was sich leicht umformulieren lässt — Satzzeichen, Höflichkeit,
+   * Wortstellung — und behält die bedeutungstragenden Wörter, sortiert.
+   */
+  function schluessel(frage) {
+    const FUELL = new Set(['der','die','das','den','dem','des','ein','eine','einen','einem','einer',
+      'und','oder','aber','doch','sie','ihr','ihre','ihren','ihrem','ihnen','mir','mich','ich',
+      'was','wer','wie','wann','warum','wo','wieso','denn','noch','mal','eigentlich','hier','da',
+      'ist','sind','war','waren','haben','hat','hatte','habe','wird','werden','wurde','sich','nicht']);
+    return String(frage).toLowerCase()
+      .replace(/[^a-zäöüß\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !FUELL.has(w))
+      .sort()
+      .join(' ');
+  }
 
   /**
    * Wann ein Gespräch ausgereizt ist.
@@ -217,13 +254,23 @@ export function createTalk(host) {
    * Fehler.
    */
   const MAX_FRAGEN = 9;
-  /** Ab hier wird angesagt, dass es zu Ende geht. */
-  const WARNUNG_AB = 3;
-  /** @type {Map<string, {gestellt: number, standNotizen: number}>} */
+  /**
+   * Je Figur: wie viele Fragen seit dem letzten Fund, welche Fragen ueberhaupt
+   * schon gestellt wurden und welche Gestaendnisse schon heraus sind.
+   *
+   * `gefragt` haelt ALLE je gestellten Fragen, nicht nur die des laufenden
+   * Gespraechs. Vorher ging nur der letzte Verlauf an das Modell, und nach
+   * einem Fund tauchten laengst gestellte Fragen wieder auf.
+   *
+   * @type {Map<string, {gestellt: number, standNotizen: number,
+   *                     gefragt: string[], gesagt: string[]}>}
+   */
   const stand = new Map();
 
   function zustand(c) {
-    if (!stand.has(c.id)) stand.set(c.id, { gestellt: 0, standNotizen: host.getNotes().length });
+    if (!stand.has(c.id)) {
+      stand.set(c.id, { gestellt: 0, standNotizen: host.getNotes().length, gefragt: [], gesagt: [] });
+    }
     const z = stand.get(c.id);
     // Neues in der Akte macht das Gespräch wieder sinnvoll.
     if (host.getNotes().length > z.standNotizen) {
@@ -232,8 +279,7 @@ export function createTalk(host) {
     }
     return z;
   }
-  const offeneFragen = (c) => Math.max(0, MAX_FRAGEN - zustand(c).gestellt);
-  const istErschoepft = (c) => offeneFragen(c) === 0;
+  const istErschoepft = (c) => zustand(c).gestellt >= MAX_FRAGEN;
 
   function zeigeErschoepft() {
     sug.classList.remove('laedt');
@@ -250,61 +296,99 @@ export function createTalk(host) {
     input.placeholder = 'Erst mit etwas Neuem …';
   }
 
+  /**
+   * Die Vorschlagsfragen hinschreiben.
+   *
+   * BLAU ist eine gewoehnliche Frage, ORANGE ein Vorhalt: Die Frage nennt
+   * etwas Konkretes aus der Akte und konfrontiert die Person damit. Vorher war
+   * die letzte Zeile einfach immer orange — „die unangenehme" —, was nirgends
+   * stand und deshalb nichts bedeutete. Jetzt sagt die Farbe, ob die Frage
+   * einen Beweis einsetzt, und genau das entscheidet, ob etwas aufbricht.
+   *
+   * Der Zaehler „noch drei Fragen" ist absichtlich weg: Er hat die
+   * Aufmerksamkeit vom Gespraech auf ein Budget gezogen.
+   *
+   * @param {{text: string, vorhalt: boolean}[]} fragen
+   */
   function zeigeFragen(fragen) {
     sug.innerHTML = '';
-
-    /* Vorwarnen, statt die Tuer zuzuschlagen.
-       Neun Fragen sind schnell weg, und ohne Ansage fuehlt sich das Ende des
-       Gespraechs wie ein Fehler an. Erst ab drei uebrigen — davor waere es nur
-       ein Zaehler, der die Aufmerksamkeit vom Gespraech wegzieht. */
-    const uebrig = offeneFragen(char);
-    if (uebrig <= WARNUNG_AB) {
-      const w = document.createElement('div');
-      w.className = 'rest';
-      w.textContent = uebrig === 1
-        ? 'Eine Frage noch, dann ist der Faden hier zu Ende.'
-        : `Noch ${uebrig} Fragen, dann ist hier nichts mehr zu holen.`;
-      sug.appendChild(w);
-    }
-
-    fragen.forEach((q, i) => {
+    for (const f of fragen) {
       const b = document.createElement('button');
       b.type = 'button';
-      // Die letzte ist laut Anweisung die unangenehme — sie bekommt die
-      // warme Farbe, damit man sieht, dass sie etwas kostet.
-      if (i === fragen.length - 1 && fragen.length > 2) b.className = 'hold';
-      b.textContent = q;
-      b.onclick = () => ask(q);
+      if (f.vorhalt) b.className = 'hold';
+      b.textContent = f.text;
+      b.title = f.vorhalt ? 'Vorhalt — setzt etwas aus deiner Akte ein' : '';
+      b.onclick = () => ask(f.text);
       b.disabled = busy;
       sug.appendChild(b);
-    });
+    }
   }
 
-  /** Eine Runde Fragen beim Modell holen. Liefert immer eine Liste. */
-  async function holeFragen(c, notes, place, verlauf) {
-    try {
+  /**
+   * Eine Runde Fragen beim Modell holen.
+   *
+   * ZWEI FEHLER AUS DEM SPIEL SIND HIER BEHOBEN:
+   *
+   * 1. Die Antwort wurde nie auf Erfolg geprueft. Bei jedem Aussetzer las
+   *    `data.text` als leer, und der Spieler bekam wortlos die Notfall-Liste —
+   *    „Wie lange stehen Sie hier schon? / Wer war heute Abend noch hier? /
+   *    Was verschweigen Sie mir?" — bei jeder Figur dieselben drei. Es sah aus
+   *    wie ein Spielzustand und war ein verschluckter Fehler. Jetzt wird
+   *    geprueft, einmal wiederholt, und erst dann aufgegeben.
+   *
+   * 2. Es kamen mal drei, mal vier Fragen, weil das Modell mal drei, mal vier
+   *    brauchbare Zeilen lieferte. Fuer den Spieler sah das aus, als schrumpfe
+   *    die Auswahl mit dem Fortschritt. Jetzt sind es immer vier.
+   *
+   * @returns {Promise<{fragen: {text:string,vorhalt:boolean}[], fehler: boolean}>}
+   */
+  async function holeFragen(c, notes, place, verlauf, schonGefragt, gestaendnisse) {
+    const versuch = async () => {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: buildFragen(c, notes, place, verlauf),
-          messages: [{ role: 'user', text: 'Schreib die vier Fragen.' }],
+          system: buildFragen(c, notes, place, verlauf, schonGefragt, gestaendnisse),
+          messages: [{ role: 'user', text: 'Schreib die Fragen.' }],
           // Vier kurze Fragen brauchen kein langes Nachdenken. Gemessen: mit
           // `low` neun Sekunden, mit `minimal` gut vier — bei gleichem
           // Ergebnis. Die knappe Obergrenze hilft zusätzlich.
           denken: 'minimal',
-          max: 700,
+          max: 900,
         }),
       });
       const data = await res.json().catch(() => ({}));
-      const roh = String(data.text || '')
-        .split('\n')
-        .map((z) => z.replace(/^\s*(?:[-–—•*]|\d+[.)])\s*/, '').replace(/^["„»]|["“«]$/g, '').trim())
-        .filter((z) => z.length > 8 && z.length < 130 && /[?？]$/.test(z));
-      return roh.length >= 2 ? roh.slice(0, 4) : NOTFALL;
-    } catch {
-      return NOTFALL;
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return String(data.text || '');
+    };
+
+    let roh = '';
+    for (let i = 0; i < 2 && !roh; i++) {
+      try { roh = await versuch(); } catch { if (i) return { fragen: [], fehler: true }; }
     }
+    if (!roh) return { fragen: [], fehler: true };
+
+    // „! " markiert einen Vorhalt, „- " eine gewoehnliche Frage.
+    const gesperrt = new Set(schonGefragt.map(schluessel));
+    const fragen = [];
+    for (const zeile of roh.split('\n')) {
+      const m = zeile.trim().match(/^([-!–—•*])\s*(.+)$/);
+      if (!m) continue;
+      const text = m[2].replace(/^["„»]|["“«]$/g, '').trim();
+      if (text.length < 9 || text.length > 130 || !/[?？]$/.test(text)) continue;
+      // Aehnliche Fragen aussortieren, nicht nur wortgleiche: Das Modell
+      // formuliert dieselbe Frage gern zweimal anders.
+      const k = schluessel(text);
+      if (gesperrt.has(k)) continue;
+      gesperrt.add(k);
+      fragen.push({ text, vorhalt: m[1] === '!' });
+    }
+    /* Vorhalte nach vorn.
+       Es kommen sechs Zeilen, gezeigt werden vier — und wenn gekuerzt wird,
+       darf nicht ausgerechnet der Vorhalt wegfallen. Er ist das Einzige, was
+       ein Gestaendnis aufbrechen kann. */
+    fragen.sort((a, b) => Number(b.vorhalt) - Number(a.vorhalt));
+    return { fragen: fragen.slice(0, 4), fehler: false };
   }
 
   /**
@@ -324,7 +408,8 @@ export function createTalk(host) {
     if (char?.id === c.id && history.length) return;
     const key = `${c.id}|${host.getNotes().length}|${host.getPlace()}`;
     if (vorlauf?.key === key) return;
-    vorlauf = { key, p: holeFragen(c, host.getNotes(), host.getPlace(), []) };
+    vorlauf = { key, p: holeFragen(c, host.getNotes(), host.getPlace(), [], zustand(c).gefragt,
+                                   offeneGestaendnisse(c, host.meets, new Set(zustand(c).gesagt))) };
   }
 
   /**
@@ -339,14 +424,15 @@ export function createTalk(host) {
     const lauf = ++fragenLauf;
     // Ausgereizt: gar nicht erst fragen. Spart nebenbei den Aufruf.
     if (istErschoepft(char)) { zeigeErschoepft(); return; }
-    // Was schon gefragt wurde, fliegt raus — sonst kann man eine Frage
+
+    const z = zustand(char);
+    // Was schon gefragt wurde, fliegt sofort raus — sonst kann man eine Frage
     // zweimal stellen, waehrend die neuen noch unterwegs sind.
-    const gestellt = new Set(history.filter((m) => m.role === 'user').map((m) => m.text));
+    const weg = new Set(z.gefragt.map(schluessel));
     for (const b of sug.querySelectorAll('button')) {
-      if (gestellt.has(b.textContent)) b.remove();
+      if (weg.has(schluessel(b.textContent))) b.remove();
     }
-    const alte = sug.querySelector('button');
-    if (alte) {
+    if (sug.querySelector('button')) {
       sug.classList.add('laedt');
     } else {
       sug.innerHTML = '<div class="sucht">Fragen …</div>';
@@ -355,14 +441,41 @@ export function createTalk(host) {
     const key = `${char.id}|${host.getNotes().length}|${host.getPlace()}`;
     const p = (!history.length && vorlauf?.key === key)
       ? vorlauf.p
-      : holeFragen(char, host.getNotes(), host.getPlace(), history);
+      : holeFragen(char, host.getNotes(), host.getPlace(), history, z.gefragt,
+                   offeneGestaendnisse(char, host.meets, new Set(z.gesagt)));
     vorlauf = null;
-    const fragen = await p;
+    const { fragen, fehler } = await p;
 
     // Ein späterer Lauf hat inzwischen übernommen: dieses Ergebnis verwerfen.
     if (lauf !== fragenLauf) return;
     sug.classList.remove('laedt');
+
+    if (fehler) { zeigeStoerung(); return; }
+    if (!fragen.length) { zeigeErschoepft(); return; }
     zeigeFragen(fragen);
+  }
+
+  /**
+   * Die Leitung klemmt.
+   *
+   * Vorher wurde dieser Fall wortlos zur Notfall-Liste — drei allgemeine
+   * Fragen, bei jeder Figur dieselben. Der Spieler hielt das fuer einen
+   * Spielzustand und fragte weiter ins Leere. Ein Fehler muss als Fehler
+   * erkennbar sein, und man muss es noch einmal versuchen koennen.
+   */
+  function zeigeStoerung() {
+    sug.classList.remove('laedt');
+    sug.innerHTML = '';
+    const d = document.createElement('div');
+    d.className = 'stoerung';
+    d.textContent = 'Das Archiv antwortet gerade nicht. Ohne Verbindung fällt '
+                  + 'mir keine Frage ein, die etwas brächte.';
+    sug.appendChild(d);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = 'Noch einmal versuchen';
+    b.onclick = () => ladeFragen();
+    sug.appendChild(b);
   }
 
   async function ask(question) {
@@ -381,7 +494,8 @@ export function createTalk(host) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: buildSystem(char, host.getNotes(), host.getPlace(), host.getInnen?.()),
+          system: buildSystem(char, host.getNotes(), host.getPlace(), host.getInnen?.(),
+                              offeneGestaendnisse(char, host.meets, new Set(zustand(char).gesagt))),
           // Nur die letzten Wechsel mitschicken. Neun Fragen ergeben achtzehn
           // Eintraege, das passt ohnehin — aber der Endpunkt kuerzt sowieso auf
           // die letzten 24, und was er ohnehin wegwirft, muss nicht durch die
@@ -393,9 +507,13 @@ export function createTalk(host) {
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
       const raw = String(data.text || '');
-      // Die Figur markiert eine neue Spur mit [SPUR] in der letzten Zeile.
-      const m = raw.match(/\[SPUR\]\s*(.+)\s*$/im);
-      const clean = raw.replace(/\[SPUR\].*$/ims, '').trim();
+      // Zwei Formen: `[SPUR:kennung]` verweist auf ein Gestaendnis aus den
+      // Falldaten und bringt einen echten Hinweis mit; das blosse `[SPUR] …`
+      // ist freie Rede, die nur in die Akte wandert.
+      const kEnn = raw.match(/\[SPUR:([a-z0-9-]+)\]/i);
+      const kennung = kEnn ? kEnn[1] : null;
+      const m = kennung ? null : raw.match(/\[SPUR\]\s*(.+)\s*$/im);
+      const clean = raw.replace(/\[SPUR(:[a-z0-9-]+)?\].*$/ims, '').trim();
 
       slot.textContent = clean;
       history.push({ role: 'model', text: clean });
@@ -404,19 +522,38 @@ export function createTalk(host) {
       // Vorlauf noch vier Fragen fuer ein Gespraech, das gerade zu Ende ist.
       const z = zustand(char);
       z.gestellt += 1;
+      z.gefragt.push(question);
 
-      if (m) {
+      /*
+       * Ein Gestaendnis aus den Falldaten.
+       *
+       * Das ist der Unterschied zwischen Reden und Ermitteln: `[SPUR:kennung]`
+       * verweist auf einen Eintrag in `spuren` der Figur, und der bringt einen
+       * ECHTEN Hinweis mit — denselben, den auch ein Fundstueck setzen wuerde.
+       * Damit kann ein Verhoer eine Tuer oeffnen, einen Sektor freischalten
+       * und am Ende die Anklage tragen. Vorher erzeugte ein Gespraech nur eine
+       * Notiz und hat nie etwas bewegt.
+       */
+      if (kennung) {
+        const g = (char.spuren || []).find((x) => x.id === kennung);
+        if (g && !z.gesagt.includes(g.id)) {
+          z.gesagt.push(g.id);
+          host.addNote(`${char.name}: ${kurz(g.notiz, 38)}`, g.notiz);
+          if (g.clue) host.addClue(g.clue);
+          neueSpur(g.notiz);
+        }
+      } else if (m) {
         const spur = m[1].trim();
         // Die Spur steht in der dritten Person und beginnt oft mit dem Namen
         // der Figur — dann nicht noch einmal davorsetzen.
         const doppelt = spur.toLowerCase().startsWith(char.name.toLowerCase());
         const label = doppelt ? kurz(spur, 46) : `${char.name}: ${kurz(spur, 38)}`;
         host.addNote(label, spur);
-        // Der Stand wird MITGEZOGEN: Was diese Figur selbst preisgegeben hat,
-        // ist kein Fund von draussen und darf das Gespraech nicht verlaengern.
-        // Genau diese Zeile fehlte — jede Spur setzte den Zaehler zurueck.
-        z.standNotizen = host.getNotes().length;
+        neueSpur(spur);
       }
+      // Der Stand wird MITGEZOGEN: Was diese Figur selbst preisgegeben hat,
+      // ist kein Fund von draussen und darf das Gespraech nicht verlaengern.
+      z.standNotizen = host.getNotes().length;
 
       // Neue Fragen zum neuen Stand. Nebenher, damit die Antwort sofort steht —
       // aber NACH der Notiz, damit sie die frische Spur schon kennen.

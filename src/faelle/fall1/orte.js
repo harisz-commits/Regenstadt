@@ -382,6 +382,7 @@ export const ORTE = {
       {
         id: 'booth', u: 0.750, v: 0.620, r: 0.100,
         label: 'Nische',
+        clue: 'nasse-bank',
         detail: 'details/bar-booth.jpg',
         text: 'Die hinterste Sitzbank hat den besten Blick auf die Tür und ist die '
             + 'einzige, die nass ist. Jemand ist hier aufgestanden, ohne zu '

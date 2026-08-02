@@ -411,6 +411,10 @@ export function createInteraction(renderer, host) {
     // Drinnen regnet es nicht. Ohne diese Auskunft erzaehlte jede Figur vom
     // Regen auf ihrem Mantel — auch im Kuehlhaus und im obersten Stock.
     getInnen: () => currentScene?.kind === 'interior',
+    // Damit ein Gestaendnis dasselbe bewirken kann wie ein Fundstueck: eine
+    // Tuer oeffnen, einen Sektor freischalten, die Anklage tragen.
+    meets: (req) => world.meets(req),
+    addClue: (id) => world.addClue(id),
   });
 
   // Der Abschluss. Liest dieselbe Akte wie das Verhoer, damit der Nachspann

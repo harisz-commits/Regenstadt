@@ -22,13 +22,31 @@ export const FIGUREN = {
     appearance: 'Regenmantel aus Werbeplane, Finger voller Ringe, ein Schirm, '
               + 'der zu gut ist für diese Gasse.',
     voice: 'spöttisch, redet schnell, weicht aus, stellt Gegenfragen',
-    secret: 'Sie hat eine Schlüsselkarte kopiert und weiterverkauft. Das gibt '
-          + 'sie nur preis, wenn jemand ihr etwas Konkretes vorhält.',
-    knows: 'Sie steht seit Stunden hier und hat gesehen, wer durch die Stahltür '
-         + 'im hinteren Abschnitt gegangen ist. Sie erwähnt es nur beiläufig '
-         + 'und nur, wenn das Gespräch darauf kommt.',
+    secret: 'Sie hat eine Schluesselkarte kopiert und weiterverkauft — an '
+            + 'jemanden, der nachts kam und bar bezahlt hat.',
+    knows: 'Sie steht seit Stunden hier und hat gesehen, wer durch die '
+           + 'Stahltuer im hinteren Abschnitt gegangen ist.',
     opener: 'Sie sieht dich kommen, lange bevor du bei ihr bist, und dreht sich '
           + 'nicht weg. Der Regen läuft in Fäden vom Schirmrand.',
+
+    spuren: [
+      {
+        id: 'kess-karte',
+        wenn: { item: 'keycard' },
+        clue: 'karte-kopiert',
+        was: 'Du hast die Schlüsselkarte kopiert und weiterverkauft — an jemanden, '
+           + 'der nachts kam und bar bezahlt hat.',
+        notiz: 'Die Schlüsselkarte wurde kopiert und verkauft. Käufer kam nachts, zahlte bar.',
+      },
+      {
+        id: 'kess-tuer',
+        wenn: { clue: 'karte-kopiert' },
+        clue: 'gesicht-an-der-tuer',
+        was: 'Du hast gesehen, wer durch die Stahltür ging: eine Frau im dunklen '
+           + 'Anzug, ohne Schirm, die nicht hierhergehörte.',
+        notiz: 'Eine Frau im dunklen Anzug ging durch die Stahltür — ohne Schirm, im Regen.',
+      },
+    ],
   },
 
   'p-coat': {
@@ -39,13 +57,31 @@ export const FIGUREN = {
     appearance: 'Verbrannte linke Hand, ruhige Augen, ein Mantel, der bis zu '
               + 'den Schultern durchnässt ist.',
     voice: 'höflich, langsam, misst jedes Wort, wird nie laut',
-    secret: 'Er nimmt Ware an, nach der niemand fragen soll — die Frachtkisten '
-          + 'in der Gasse gehören ihm. Er gibt es erst zu, wenn ihm jemand '
-          + 'den Zollcode vorhält.',
+    secret: 'Er nimmt Ware an, nach der niemand fragen soll. Die Frachtkisten in '
+            + 'der Gasse gehoeren ihm.',
     knows: 'Er weiß, dass der Marktstand seit zwei Tagen unbesetzt ist und dass '
          + 'der Händler nicht freiwillig weggeblieben ist.',
     opener: 'Er steht im Regen, als wäre das eine Verabredung. Als du näher '
           + 'kommst, sieht er dich an und wartet ab, wer zuerst spricht.',
+
+    spuren: [
+      {
+        id: 'vey-kisten',
+        wenn: { clue: 'zollsiegel' },
+        clue: 'kisten-gehoeren-vey',
+        was: 'Die Frachtkisten in der Gasse gehören dir. Du nimmst Ware an, nach '
+           + 'der niemand fragen soll.',
+        notiz: 'Doran Vey nimmt Ware an, nach der niemand fragt. Die Kisten gehören ihm.',
+      },
+      {
+        id: 'vey-auftrag',
+        wenn: { clue: 'kisten-gehoeren-vey' },
+        clue: 'leere-kisten',
+        was: 'Die letzten drei Lieferungen waren leer. Bezahlt wurde trotzdem — '
+           + 'es ging nie um Ware, sondern um den Papierweg.',
+        notiz: 'Die letzten drei Kisten waren leer. Bezahlt wurde trotzdem.',
+      },
+    ],
   },
 
   'p-wirtin': {
@@ -57,13 +93,30 @@ export const FIGUREN = {
               + 'schon oft befragt wurde und es nie mochte.',
     voice: 'kurz angebunden, trocken, antwortet mit Gegenfragen, nie unhöflich',
     secret: 'Sie ist dafür bezahlt worden zu vergessen, wer in der hinteren '
-          + 'Nische saß. Das Geld liegt noch unangerührt da. Sie gibt es nur zu, '
-          + 'wenn ihr jemand die nasse Sitzbank vorhält.',
+          + 'Nische saß. Das Geld liegt noch unangerührt da.',
     knows: 'Sie hat gesehen, wer vorgestern in Eile durch die Hintertür ist — '
-         + 'jemand, der offiziell seit über einem Jahr tot ist. Sie sagt es erst, '
-         + 'wenn ihr der Laborbefund vorgehalten wird.',
+         + 'jemand, der offiziell seit über einem Jahr tot ist.',
     opener: 'Sie füllt nichts nach und wischt nichts weg. Sie sieht dich den '
           + 'ganzen Weg vom Eingang bis zum Tresen an und sagt nichts.',
+
+    spuren: [
+      {
+        id: 'kruse-geld',
+        wenn: { clue: 'nasse-bank' },
+        clue: 'bezahltes-vergessen',
+        was: 'Du bist dafür bezahlt worden zu vergessen, wer in der hinteren '
+           + 'Nische saß. Das Geld liegt noch unangerührt unter der Kasse.',
+        notiz: 'Vesna Kruse wurde bezahlt, um zu vergessen, wer in der Nische saß.',
+      },
+      {
+        id: 'kruse-toter',
+        wenn: { clue: 'blut-fremd' },
+        clue: 'toter-geht-um',
+        was: 'Der Mann, der vorgestern durch die Hintertür ist, ist seit über '
+           + 'einem Jahr amtlich tot. Du kennst sein Gesicht von früher.',
+        notiz: 'Ein seit einem Jahr amtlich Toter ging vorgestern durch die Hintertür.',
+      },
+    ],
   },
 
   // Sitzt hinter dem Panzerglas im Praesidium. Derselbe Punkt ist auch der
@@ -76,13 +129,32 @@ export const FIGUREN = {
     appearance: 'Abgetragener Kittel hinter zerkratztem Panzerglas, halb '
               + 'abgewandt. Sie sieht nicht auf, wenn sie spricht.',
     voice: 'sachlich bis zur Unhöflichkeit, redet in Befunden, keine Floskeln',
-    secret: 'Ihr wurde untersagt, bestimmte Melderegister-Einträge gegenzuprüfen. '
-          + 'Sie hat es einmal trotzdem getan und hat seitdem Angst. Sie sagt es '
-          + 'nur, wenn ihr der Laborbefund vorgehalten wird.',
+    secret: 'Ihr wurde untersagt, bestimmte Melderegister-Eintraege '
+            + 'gegenzupruefen. Sie hat es einmal trotzdem getan und hat seitdem '
+            + 'Angst.',
     knows: 'Sie weiß, dass in diesem Sektor seit vierzehn Monaten Tote gemeldet '
          + 'werden, deren Akten danach nie wieder angefasst wurden.',
     opener: 'Die Klappe bleibt zu. Sie arbeitet weiter, als hätte sie dich nicht '
           + 'bemerkt, und redet in Richtung ihrer Hände.',
+
+    spuren: [
+      {
+        id: 'ferz-verbot',
+        wenn: { clue: 'blut-fremd' },
+        clue: 'gegenprobe-verboten',
+        was: 'Dir wurde untersagt, Melderegister-Einträge gegenzuprüfen. Einmal '
+           + 'hast du es trotzdem getan, und seitdem hast du Angst.',
+        notiz: 'Der Laborantin wurde untersagt, Melderegister-Einträge gegenzuprüfen.',
+      },
+      {
+        id: 'ferz-vierzehn',
+        wenn: { clue: 'gegenprobe-verboten' },
+        clue: 'vierzehn-monate',
+        was: 'Seit vierzehn Monaten werden in diesem Sektor Tote gemeldet, deren '
+           + 'Akten danach nie wieder angefasst wurden.',
+        notiz: 'Seit vierzehn Monaten Tote, deren Akten nie wieder angefasst wurden.',
+      },
+    ],
   },
 
   'p-empfang': {
@@ -97,15 +169,32 @@ export const FIGUREN = {
     secret: 'Sie führt seit einem Jahr eine eigene Liste — jeden, der hier '
           + 'hereinkommt, ohne eingetragen zu werden. Nicht aus Gewissen, '
           + 'sondern weil ihr einmal etwas angehängt wurde, das sie nicht '
-          + 'getan hat. Sie gibt es nur preis, wenn ihr jemand zeigt, dass er '
-          + 'das Haus ohnehin schon durchschaut hat.',
+          + 'getan hat.',
     knows: 'Die Person, deren Nummer auf der Patientenkarte steht, ist in den '
          + 'letzten zwei Wochen zweimal durch diese Halle gegangen — nach dem '
-         + 'Datum, an dem sie für tot erklärt wurde. Sie erwähnt es erst, wenn '
-         + 'vom Melderegister oder von der Klinik die Rede ist.',
+         + 'Datum, an dem sie für tot erklärt wurde.',
     opener: 'Sie sieht dich schon an, bevor du auf halber Höhe der Halle bist. '
           + 'Sie sagt nichts, sie wartet nur — als wäre Warten hier eine Form '
           + 'von Höflichkeit.',
+
+    spuren: [
+      {
+        id: 'ferrin-liste',
+        wenn: { clue: 'register-luecke' },
+        clue: 'zweite-liste',
+        was: 'Du führst seit einem Jahr eine eigene Liste: jeden, der hier '
+           + 'hereinkommt, ohne eingetragen zu werden.',
+        notiz: 'Die Empfangsleitung führt eine eigene Liste der nicht eingetragenen Besucher.',
+      },
+      {
+        id: 'ferrin-zweimal',
+        wenn: { clue: 'zweite-liste' },
+        clue: 'tote-gehen-hier-ein',
+        was: 'Die Person, deren Nummer auf der Patientenkarte steht, ist in zwei '
+           + 'Wochen zweimal durch diese Halle gegangen — nach ihrem Todesdatum.',
+        notiz: 'Die Person von der Patientenkarte ging nach ihrem Todesdatum zweimal hier durch.',
+      },
+    ],
   },
 
   'p-sachbearbeiter': {
@@ -119,14 +208,30 @@ export const FIGUREN = {
          + 'wiederholt Fragen, bevor er antwortet, um Zeit zu gewinnen',
     secret: 'Er hat die elf Totenscheine unterschrieben, ohne je eine Leiche '
           + 'gesehen zu haben. Nicht aus Gier — man hat ihm eine Akte über '
-          + 'seine Tochter gezeigt und sie danach nie wieder erwähnt. Er bricht '
-          + 'erst ein, wenn ihm der Registerabgleich oder das leere Fach in der '
-          + 'Leichenhalle vorgehalten wird.',
+          + 'seine Tochter gezeigt und sie danach nie wieder erwähnt.',
     knows: 'Er kennt den Namen der Person, die ihm die Vorgänge bringt — jemand '
-         + 'aus dem Konzern, immer nachts, immer allein. Er nennt ihn erst, '
-         + 'wenn er zugegeben hat, dass er ohne Leiche unterschrieben hat.',
+         + 'aus dem Konzern, immer nachts, immer allein.',
     opener: 'Er sieht auf, den Stift noch in der Hand, und legt ihn dann sehr '
           + 'genau parallel zur Kante des Papiers. Erst danach sagt er etwas.',
+
+    spuren: [
+      {
+        id: 'roth-blanko',
+        wenn: { clue: 'ohne-leiche' },
+        clue: 'roth-gestand',
+        was: 'Du hast elf Totenscheine unterschrieben, ohne je eine Leiche '
+           + 'gesehen zu haben. Man hat dir eine Akte über deine Tochter gezeigt.',
+        notiz: 'Anselm Roth unterschrieb elf Totenscheine ohne Leiche — unter Druck.',
+      },
+      {
+        id: 'roth-name',
+        wenn: { clue: 'roth-gestand' },
+        clue: 'nachtbesuch',
+        was: 'Die Vorgänge bringt dir jemand aus dem Konzern. Immer nachts, '
+           + 'immer allein, immer dieselbe Frau im dunklen Anzug.',
+        notiz: 'Die Vorgänge bringt eine Frau im dunklen Anzug — nachts, allein.',
+      },
+    ],
   },
   // Der Vermisste. Die einzige Figur im Spiel, die nichts verbirgt, weil sie
   // nichts mehr zu verlieren hat — und deshalb die einzige, die zu viel redet.
@@ -141,15 +246,32 @@ export const FIGUREN = {
          + 'entschuldigt sich für Dinge, für die sich niemand entschuldigen muss',
     secret: 'Er ist nicht verschleppt worden. Er ist selbst hierhergegangen und '
           + 'hat sich einschließen lassen — bezahlt hat er mit der Ware aus '
-          + 'zwei Kisten, die ihm nicht gehörten. Das gibt er erst zu, wenn ihm '
           + 'jemand den Frachtbrief oder die Lücke im Palettenstapel vorhält.',
     knows: 'Er kennt den Namen der Person, unter deren Aufsicht seine eigene '
          + 'Sterbeurkunde vorbereitet wird: Iris Malaunt, Bestandsführung, '
-         + 'oberste Etage der Konzernterrassen. Er nennt ihn erst, wenn ihm '
          + 'jemand sagt, dass es zu keinem der elf Fälle je eine Leiche gab.',
     opener: 'Er sieht dich durch die beschlagene Scheibe und steht nicht auf. '
           + 'Er wischt nur mit dem Ärmel eine Stelle frei, damit ihr euch '
           + 'ansehen könnt, und wartet, dass du zuerst etwas sagst.',
+
+    spuren: [
+      {
+        id: 'bracke-freiwillig',
+        wenn: { clue: 'frachtbrief' },
+        clue: 'freiwillig-verschwunden',
+        was: 'Niemand hat dich verschleppt. Du bist selbst hierhergegangen und '
+           + 'hast dich einschließen lassen — bezahlt mit Ware aus zwei Kisten.',
+        notiz: 'Der Händler ist freiwillig untergetaucht und hat mit fremder Ware bezahlt.',
+      },
+      {
+        id: 'bracke-name',
+        wenn: { clue: 'ohne-leiche' },
+        clue: 'name-malaunt',
+        was: 'Du kennst den Namen, unter dessen Aufsicht deine eigene '
+           + 'Sterbeurkunde vorbereitet wird: Iris Malaunt, Bestandsführung.',
+        notiz: 'Iris Malaunt, Bestandsführung, lässt die Sterbeurkunden vorbereiten.',
+      },
+    ],
   },
 
   // Die letzte Figur. Bei allen anderen ist das Geheimnis NICHT die Tat — hier
@@ -177,5 +299,16 @@ export const FIGUREN = {
     opener: 'Sie lässt dich die ganze Länge des Raums gehen und sieht dir dabei '
           + 'zu. Als du stehen bleibst, nickt sie einmal, als hättet ihr einen '
           + 'Termin, und sagt deinen Dienstgrad, den du nie genannt hast.',
+
+    spuren: [
+      {
+        id: 'malaunt-verwaltung',
+        wenn: { clue: 'letzte-unterschrift' },
+        clue: 'programm-eingeraeumt',
+        was: 'Du räumst das Programm ein — aber als Verwaltung, nicht als '
+           + 'Verbrechen: Wer aus dem Register fällt, kostet die Stadt nichts mehr.',
+        notiz: 'Malaunt räumt das Programm ein und nennt es Verwaltung.',
+      },
+    ],
   },
 };
