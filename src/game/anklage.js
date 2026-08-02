@@ -22,35 +22,15 @@
  */
 
 import { CHARACTERS } from './characters.js';
+import { fall, beiFallwechsel } from './fall.js';
 
 /**
- * Die Lösung des Falls.
- *
- * Bewusst als DATEN, wie alle Bedingungen im Spiel (siehe world.js): Der
- * später generierte Fall wird eine eigene Lösung mitliefern, und die Auswertung
- * hier muss dafür nicht angefasst werden.
+ * Die Loesung des laufenden Falls — lebende Bindung, siehe characters.js.
+ * Wieder ausgefuehrt, weil die Pruefwerkzeuge sie brauchen.
  */
-export const LOESUNG = {
-  taeter: 'p-direktorin',
+export let LOESUNG = fall().loesung;
 
-  /** Was die Anklage tragen muss. Fehlt eines davon, geht sie frei. */
-  beweise: [
-    { clue: 'ohne-leiche', label: 'Zu keinem der elf Fälle gab es je eine Leiche' },
-    { clue: 'elf-namen', label: 'Die Liste ist ein Terminkalender, kein Verzeichnis' },
-    { clue: 'letzte-unterschrift', label: 'Die zwölfte Urkunde liegt fertig auf ihrem Tisch' },
-  ],
-
-  /**
-   * Ohne das hier gibt es gar nichts anzuklagen. Es ist der Punkt, an dem aus
-   * einem Vermisstenfall etwas anderes wird: Der Mann lebt.
-   */
-  voraussetzung: {
-    clue: 'haendler-lebt',
-    text: 'Ein Vermisster, ein Zollsiegel und ein Verdacht. Damit stellt man '
-        + 'sich vor niemanden hin. Solange du nicht weißt, was aus dem Händler '
-        + 'geworden ist, hast du keinen Fall, sondern eine Vermutung.',
-  },
-};
+beiFallwechsel(() => { LOESUNG = fall().loesung; });
 
 const CSS = `
 #anklage {
@@ -319,10 +299,7 @@ export function createAnklage(host) {
     return `Du schreibst den Nachspann eines deutschsprachigen Neo-Noir-Detektivspiels.
 Dauerregen, Neonreklame, Konzernmacht, nasse Straßen, moralische Grauzonen.
 
-DER FALL: Ein Marktstandbetreiber gilt als vermisst. Tatsächlich läuft in dieser
-Stadt ein Programm, das Menschen für tot erklärt, aus dem Melderegister nimmt
-und danach weiterverwendet. Elf Totenscheine, zu keinem davon je eine Leiche.
-Der Vermisste sollte der zwölfte werden.
+DER FALL: ${fall().praemisse}
 
 DER ERMITTLER HAT ANGEKLAGT: ${person.name}, ${person.role}.
 AUSGANG: ${lage}
