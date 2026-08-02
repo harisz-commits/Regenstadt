@@ -29,8 +29,6 @@ const CSS = `
 #hs-layer .hs:focus { outline: none; }
 #hs-layer .hs .mark {
   position: absolute; inset: 0; border-radius: 50%;
-  border: 1px solid rgba(210,232,255,.5);
-  box-shadow: 0 0 14px rgba(150,200,255,.28), inset 0 0 10px rgba(150,200,255,.14);
   opacity: 0;
   /* Kein Uebergang auf der Deckkraft.
      Die Schaltflaeche bekommt jeden Frame neue Inline-Masse; dabei startete
@@ -39,15 +37,56 @@ const CSS = `
      derselben Klasse rechnete korrekt 0.8, das bestehende blieb auf 0.
      Ohne Uebergang schaltet sie sofort, und das genuegt hier voellig. */
 }
-#hs-layer .hs.person .mark { border-color: rgba(255,178,110,.62); box-shadow: 0 0 16px rgba(255,178,110,.32); }
-/* Die Pinnwand ist der einzige Punkt, an dem das Spiel endet. Sie sieht
-   deshalb auch als Einzige anders aus: dauerhaft schwach sichtbar, in Grün,
-   damit man in der eigenen Wohnung nicht danach sucht. */
-#hs-layer .hs.anklage .mark {
-  border-color: rgba(120,240,180,.6); box-shadow: 0 0 18px rgba(120,240,180,.28);
-  opacity: .45;
+
+/* --- Der Punkt ----------------------------------------------------------
+   Frueher war jeder Untersuchungspunkt ein duenner Ring, so gross wie seine
+   Klickflaeche, und normalerweise unsichtbar — man musste die Punkte suchen.
+   Das hat zwei Probleme gemacht: Man wusste nie, ob man alles gefunden hat,
+   und man hat abgesuchte Stellen wieder und wieder angeklickt.
+
+   Jetzt ist es ein kleiner leuchtender Punkt, dauerhaft sichtbar und immer
+   gleich gross — die Klickflaeche bleibt so gross wie vorher, nur die Anzeige
+   haengt nicht mehr an ihr. Und wenn an einer Stelle nichts mehr ist, ist der
+   Punkt weg (siehe erledigt() weiter unten). Das ist die eigentliche Auskunft:
+   Wo kein Punkt leuchtet, gibt es nichts mehr zu holen. */
+#hs-layer .hs:not(.exit) .mark {
+  inset: auto; left: 50%; top: 50%;
+  width: 9px; height: 9px; margin: 0;
+  transform: translate(-50%, -50%);
+  border: 0; border-radius: 50%;
+  background: #cfe9ff;
+  /* Dunkler Ring, dann Leuchten. Ohne den Ring verschwindet der Punkt in der
+     Kanalgasse zwischen den Neonschildern — gemessen an einem Bildschirmfoto:
+     ein reines Leuchten war auf hellem Grund praktisch unsichtbar. */
+  box-shadow:
+    0 0 0 1.5px rgba(2,6,12,.62),
+    0 0 7px 2px rgba(120,195,255,.9),
+    0 0 18px 5px rgba(60,150,235,.5);
+  opacity: .92;
+  animation: punktAtmet 3.2s ease-in-out infinite;
 }
-#hs-layer .hs.anklage:hover .mark { opacity: 1; }
+#hs-layer .hs:not(.exit):hover .mark,
+#hs-layer .hs:not(.exit):focus-visible .mark { opacity: 1; }
+@keyframes punktAtmet {
+  0%, 100% { transform: translate(-50%, -50%) scale(.86); opacity: .82; }
+  50%      { transform: translate(-50%, -50%) scale(1.14); opacity: 1; }
+}
+/* Personen leuchten warm — ein Mensch ist kein Gegenstand. */
+#hs-layer .hs.person .mark {
+  width: 11px; height: 11px; background: #ffe2bd;
+  box-shadow:
+    0 0 0 1.5px rgba(12,4,0,.62),
+    0 0 8px 2px rgba(255,186,120,.95),
+    0 0 20px 6px rgba(255,150,70,.5);
+}
+/* Die Pinnwand ist der einzige Punkt, an dem das Spiel endet. */
+#hs-layer .hs.anklage .mark {
+  width: 12px; height: 12px; background: #d8fff0;
+  box-shadow:
+    0 0 0 1.5px rgba(0,10,6,.62),
+    0 0 9px 3px rgba(130,245,190,.95),
+    0 0 22px 7px rgba(90,220,160,.5);
+}
 
 /* Ausgänge: Pfeil statt Kreis, und dauerhaft sichtbar. Wohin man gehen kann,
    soll man sehen, ohne danach zu suchen. */
@@ -103,9 +142,8 @@ const CSS = `
 @keyframes nudgeLeft  { 0%,100% { transform: translateX(3px);  } 50% { transform: translateX(-3px); } }
 @keyframes nudgeRight { 0%,100% { transform: translateX(-3px); } 50% { transform: translateX(3px);  } }
 
-#hs-layer.reveal .hs .mark, #hs-layer .hs:focus-visible .mark { opacity: .8; }
-#hs-layer.touch .hs:not(.exit) .mark { opacity: .32; }
-#hs-layer.touch .hs.active .mark { opacity: .95; }
+#hs-layer.reveal .hs .mark { opacity: .95; }
+#hs-layer.touch .hs.active .mark { opacity: 1; }
 
 #hs-label {
   position: fixed; z-index: 14; pointer-events: none; transform: translate(-50%, 0);
@@ -296,6 +334,7 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   #panel, #fade, #panel .shot { transition: none; }
   #hs-layer .hs.exit .mark { animation: none; }
+  #hs-layer .hs:not(.exit) .mark { animation: none; transform: translate(-50%, -50%); }
 }
 `;
 
@@ -365,9 +404,11 @@ export function createInteraction(renderer, host) {
   hintBar.id = 'hint-bar';
   // Kurz halten: auf einem Handy lief der lange Satz ueber vier Zeilen und
   // verdeckte mehr Bild, als er erklaerte.
+  // Seit die Punkte leuchten, muss der Balken sie nicht mehr erklaeren — er
+  // sagt jetzt, was sie BEDEUTEN.
   hintBar.textContent = touch
-    ? 'Antippen · Pfeile führen weiter · ziehen zum Umsehen'
-    : 'Klicken zum Untersuchen · Pfeile führen weiter · TAB zeigt alle Punkte';
+    ? 'Leuchtpunkte zeigen, wo es etwas gibt · Pfeile führen weiter · ziehen zum Umsehen'
+    : 'Leuchtpunkte zeigen, wo es etwas gibt · erlischt einer, ist dort nichts mehr';
   document.body.appendChild(hintBar);
 
   /* --- Akte -------------------------------------------------------------- */
@@ -746,6 +787,10 @@ export function createInteraction(renderer, host) {
         // geaendert, und ohne das taucht „In die Akte" nach dem Neuladen
         // wieder auf.
         sichern();
+        // Und die Punkte neu setzen: Diese Stelle ist jetzt erledigt, ihr
+        // Punkt gehoert weg. `seen` liegt ausserhalb der Welt, also loest es
+        // von selbst kein onChange aus.
+        if (currentScene) buildSpots(currentScene.spots);
       };
       pAct.appendChild(b);
     }
@@ -774,12 +819,48 @@ export function createInteraction(renderer, host) {
   let hovered = null;
   let hoverAmt = 0;
 
+  /**
+   * Ist an diesem Punkt noch etwas zu holen?
+   *
+   * Wo kein Punkt leuchtet, gibt es nichts mehr — das ist die eigentliche
+   * Auskunft der neuen Darstellung. Erledigt ist ein Punkt, wenn er in der
+   * Akte steht UND nichts mehr hergibt.
+   *
+   * Ausgaenge, Personen, der Laborschalter und die Pinnwand sind NIE erledigt:
+   * Ein Weg bleibt ein Weg, ein Mensch hat spaeter vielleicht mehr zu sagen,
+   * der Schalter nimmt den naechsten Gegenstand an, und der Fall wird an der
+   * Pinnwand geschlossen.
+   */
+  function erledigt(s) {
+    if (s.kind === 'exit' || s.kind === 'person' || s.kind === 'lab' || s.kind === 'anklage') return false;
+    if (!seen.has(s.id)) return false;
+    if (s.item && !world.wasTaken(s.item.id)) return false;
+    return true;
+  }
+
+  /**
+   * Welche Punkte gerade dastehen.
+   *
+   * `erscheint` und `verschwindet` sind dieselbe Bedingungsmechanik wie bei
+   * verschlossenen Tueren (siehe world.js) — nur auf Untersuchungspunkte
+   * angewandt. Damit bewegt sich die Stadt: An einem Ort, an dem man schon
+   * dreimal war, steht auf einmal jemand, der vorher nicht da war, und was
+   * dort lag, ist verschwunden.
+   */
+  function sichtbar(spots) {
+    return spots.filter((s) => {
+      if (s.erscheint && !world.meets(s.erscheint)) return false;
+      if (s.verschwindet && world.meets(s.verschwindet)) return false;
+      return !erledigt(s);
+    });
+  }
+
   function buildSpots(spots) {
     layer.innerHTML = '';
     hovered = null;
     hoverAmt = 0;
     renderer.hover[3] = 0;
-    nodes = spots.map((s) => {
+    nodes = sichtbar(spots).map((s) => {
       const b = document.createElement('button');
       b.className = 'hs' + (s.kind ? ' ' + s.kind : '') + (s.dir ? ' ' + s.dir : '')
                   + (s.goto && !world.meets(s.requires) ? ' locked' : '');

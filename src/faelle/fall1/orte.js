@@ -42,6 +42,7 @@ export const ORTE = {
       {
         id: 'stand', u: 0.281, v: 0.735, r: 0.085,
         label: 'Marktstand',
+        verschwindet: { clue: 'haendler-lebt' },
         detail: 'details/alley-stand.jpg',
         text: 'Unter der Plane liegen Dinge, die niemand mehr abholt. Der Händler '
             + 'ist nicht da. Sein Hocker steht noch da, die Sitzfläche ist trocken.',
@@ -105,6 +106,15 @@ export const ORTE = {
         detail: 'details/mantel.jpg',
         text: 'Der Mantel ist nass bis zu den Schultern. Wer so lange im Regen '
             + 'steht, wartet nicht auf gutes Wetter.',
+      },
+      {
+        id: 'stand-offen', u: 0.281, v: 0.735, r: 0.085,
+        label: 'Der Stand ist wieder offen',
+        erscheint: { clue: 'haendler-lebt' },
+        text: 'Die Plane ist hochgebunden, die Kisten stehen ausgerichtet, und '
+            + 'auf dem Brett liegt Ware, die heute Morgen noch nicht da war. '
+            + 'Niemand steht dahinter. Wer auch immer aufgesperrt hat, wollte '
+            + 'nicht, dass es jemand sieht.',
       },
       {
         id: 'go-deeper', u: 0.500, v: 0.618, r: 0.070,
@@ -268,6 +278,9 @@ export const ORTE = {
       {
         id: 'kiosk', u: 0.270, v: 0.560, r: 0.085,
         label: 'Kiosk',
+        // Verschwindet, sobald der Mann darin etwas zu sagen hat — dann steht
+        // an derselben Stelle die Figur.
+        verschwindet: { clue: 'zweite-liste' },
         detail: 'details/crossing-kiosk.jpg',
         text: 'Hinter der Scheibe stapeln sich Waren aus drei Sektoren. Der Mann '
             + 'darin sieht dich an, als hätte er dich erwartet, und sagt nichts.',
@@ -290,6 +303,16 @@ export const ORTE = {
         kind: 'exit', dir: 'right', goto: 'bar',
         label: 'Zur Bar',
         text: 'Eine Tür unter einer Reklame, die seit Jahren dasselbe verspricht.',
+      },
+      {
+        id: 'p-kiosk', u: 0.270, v: 0.548, r: 0.070, kind: 'person',
+        label: 'Der Mann im Kiosk',
+        detail: 'details/kiosk-mann.jpg',
+        erscheint: { clue: 'zweite-liste' },
+        text: 'Die Klappe steht einen Spalt offen, was sie sonst nie tut. Der '
+            + 'Mann dahinter hat sich vorgelehnt, als wollte er etwas sagen, '
+            + 'und hält inne, als du stehen bleibst. Er sieht dich an wie '
+            + 'jemand, der lange gewartet hat, dass ihn einer fragt.',
       },
       {
         id: 'nach-hause', u: 0.352, v: 0.470, r: 0.075,
@@ -1358,6 +1381,7 @@ export const ORTE = {
       {
         id: 'sessel', u: 0.648, v: 0.760, r: 0.085,
         label: 'Sessel',
+        verschwindet: { clue: 'name-malaunt' },
         detail: 'details/wohnung-sessel.jpg',
         text: 'Leder, an einer Stelle durchgesessen, und zur Pinnwand gedreht '
             + 'statt zum Fenster. Wer hier sitzt, sieht sich nicht die Stadt an, '
@@ -1387,6 +1411,26 @@ export const ORTE = {
             + 'gestern nicht geleert wurde. Daneben Zettel mit deiner eigenen '
             + 'Schrift, und auf dem obersten steht eine Uhrzeit, die noch nicht '
             + 'vorbei ist.',
+      },
+      {
+        id: 'p-bote', u: 0.648, v: 0.735, r: 0.075, kind: 'person',
+        label: 'Jemand sitzt in deinem Sessel',
+        detail: 'details/bote.jpg',
+        erscheint: { clue: 'name-malaunt' },
+        text: 'Die Tür war zu. Der Sessel ist es nicht mehr. Jemand sitzt '
+            + 'darin, im nassen Mantel, die Unterarme auf den Knien, und hat '
+            + 'nicht einmal das Licht angemacht. Der Schirm lehnt an deiner '
+            + 'Pinnwand. Er hat gewartet, und er hat Zeit gehabt.',
+      },
+      {
+        id: 'papiere-durchsucht', u: 0.530, v: 0.865, r: 0.075,
+        label: 'Die Papiere liegen anders',
+        erscheint: { clue: 'name-malaunt' },
+        clue: 'wohnung-durchsucht',
+        text: 'Sie liegen nicht mehr im Bogen um den Sessel, sondern in einem '
+            + 'Stapel, dessen Kanten bündig sind. Jemand hat sie gelesen, '
+            + 'sortiert und ordentlicher hingelegt, als du es je getan hast. '
+            + 'Es fehlt nichts. Das ist das Beunruhigende daran.',
       },
       {
         id: 'wohnung-raus', u: 0.310, v: 0.420, r: 0.070,

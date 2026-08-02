@@ -2,7 +2,7 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Zwanzig Orte in sechs Sektoren, acht Figuren, die von einem Sprachmodell
+Zwanzig Orte in sechs Sektoren, zehn Figuren, die von einem Sprachmodell
 antworten, eine Beweiskette mit Laborbefund, ein Flugauto, um zwischen den
 Sektoren zu reisen — und ein Ende, das man erreichen kann.
 
@@ -181,6 +181,37 @@ wird in der Akte, mit Rueckfrage.
 Zwei Eigenschaften muss man kennen, weil sie sonst wie Fehler aussehen: Der
 Stand haengt an Browser UND Geraet (Chrome und Safari sind zwei
 Ermittlungen), und im privaten Fenster ist er nach dem Schliessen weg.
+
+### Der Leuchtpunkt
+
+Frueher war jeder Untersuchungspunkt ein duenner Ring, so gross wie seine
+Klickflaeche, und normalerweise unsichtbar — man musste die Punkte suchen. Das
+hat zwei Probleme gemacht: Man wusste nie, ob man alles gefunden hat, und man
+hat abgesuchte Stellen wieder und wieder angeklickt.
+
+Jetzt ist es ein kleiner leuchtender Punkt, dauerhaft sichtbar und immer gleich
+gross — die Klickflaeche bleibt, nur die Anzeige haengt nicht mehr an ihr.
+BLAU fuer Dinge, ORANGE fuer Menschen, GRUEN fuer die Pinnwand. Der dunkle Ring
+um den Punkt ist noetig: Ein reines Leuchten war in der Kanalgasse zwischen den
+Neonschildern praktisch unsichtbar.
+
+Und wenn an einer Stelle nichts mehr ist — abgeheftet, nichts mehr
+mitzunehmen —, erlischt der Punkt. Das ist die eigentliche Auskunft: Wo keiner
+leuchtet, gibt es nichts mehr zu holen. Ausgaenge, Personen, der Laborschalter
+und die Pinnwand erloeschen nie.
+
+### Die Stadt bewegt sich
+
+Punkte tragen `erscheint` und `verschwindet` — dieselbe Bedingungsmechanik wie
+verschlossene Tueren, nur auf Untersuchungspunkte angewandt. Damit steht an
+einem Ort, an dem man dreimal war, auf einmal jemand:
+
+  Querstrasse   der Kiosk schweigt seit Jahren. Sobald der Ermittler weiss,
+                dass jemand Buch fuehrt, lehnt sich der Mann darin vor.
+  Wohnung       sobald der Name der Direktorin in der Akte steht, sitzt jemand
+                im eigenen Sessel. Die Tuer war zu.
+  Kanalgasse    der Marktstand ist wieder offen, sobald der Haendler lebt —
+                und niemand steht dahinter.
 
 ### Wann ein Verhoer zu Ende ist
 

@@ -172,6 +172,22 @@ for (const c of ausGespraech) {
 ok(ausGespraech.size >= 8,
    `Gespraeche bringen echte Hinweise (${ausGespraech.size})`);
 
+/* Punkte, die auftauchen oder verschwinden.
+   Ein `erscheint`, dessen Bedingung nie eintritt, ist ein Punkt, den niemand
+   je sieht — und beim Durchspielen faellt das nicht auf, weil an der Stelle
+   ja auch vorher nichts war. */
+const alleHinweise = new Set([...ausOrten, ...ausGespraech]);
+let beweglich = 0;
+for (const id of alle) for (const s of SCENES[id].spots) {
+  for (const [feld, bed] of [['erscheint', s.erscheint], ['verschwindet', s.verschwindet]]) {
+    if (!bed?.clue) continue;
+    beweglich += 1;
+    ok(alleHinweise.has(bed.clue),
+       `${id}.${s.id}: ${feld}-Bedingung "${bed.clue}" tritt im Spiel ein`);
+  }
+}
+ok(beweglich >= 4, `Die Stadt bewegt sich (${beweglich} Punkte kommen oder gehen)`);
+
 /* ======================================================================== */
 /* 10. Der Abschluss.                                                         */
 /*                                                                           */

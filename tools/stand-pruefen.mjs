@@ -114,14 +114,17 @@ ok(gleich(nachher.taken, vorher.taken), `Aufgehobenes bleibt aufgehoben: ${nachh
 ok(gleich(nachher.analysen, vorher.analysen),
    `Labor mit Restzeit: ${JSON.stringify(nachher.analysen)}`);
 
-// Ein bereits abgehefteter Punkt darf „In die Akte" nicht erneut anbieten.
+/* Ein abgehefteter Punkt ist nach dem Neuladen ERLEDIGT — sein Leuchtpunkt
+   gehoert weg. Vorher hat der Test nur geprueft, dass „In die Akte" nicht
+   noch einmal angeboten wird; seit die Punkte erloeschen, ist die Abwesenheit
+   des Punktes die staerkere Zusicherung: Sie beweist, dass `gesehen` den
+   Neustart ueberlebt hat UND dass die Anzeige daraus folgt. */
 await page.evaluate(() => window.__regenstadt.goTo('alley'));
 await page.waitForTimeout(1200);
-await page.locator('#hs-layer .hs[aria-label="Kistenstapel"]').click({ force: true });
-await page.waitForSelector('#panel.on');
-ok(await page.locator('#panel button', { hasText: 'In die Akte' }).count() === 0,
-   'Was in der Akte steht, wird nicht noch einmal angeboten');
-await page.locator('#panel button', { hasText: 'Weiter' }).click();
+ok(await page.locator('#hs-layer .hs[aria-label="Kistenstapel"]').count() === 0,
+   'Der erledigte Punkt leuchtet nach dem Neuladen nicht mehr');
+ok(await page.locator('#hs-layer .hs[aria-label="Leuchtreklame"]').count() === 1,
+   'Ein unerledigter Punkt am selben Ort leuchtet weiter');
 
 /* --- Verwerfen ----------------------------------------------------------- */
 await page.locator('#topbar .right:not(.karte):not(.help)').click();

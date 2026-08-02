@@ -311,4 +311,83 @@ export const FIGUREN = {
       },
     ],
   },
+
+  /* --- Figuren, die erst spaeter auftauchen ------------------------------ */
+
+  // Steht seit Jahren an derselben Ecke und hat immer geschwiegen. Sobald der
+  // Ermittler weiss, dass jemand Buch fuehrt, faellt ihm ein, dass er das
+  // auch tut — auf seine Art.
+  'p-kiosk': {
+    id: 'p-kiosk',
+    name: 'Grigor Anselm',
+    role: 'Kioskbetreiber · Querstraße',
+    portrait: 'details/kiosk-mann.jpg',
+    appearance: 'Sechzig, Strickjacke unter zwei Pullovern, hinter Plexiglas '
+              + 'zwischen gestapelter Ware. Er lehnt sich vor und hält dann inne.',
+    voice: 'umständlich, redet in Umwegen, entschuldigt sich fürs Reden, '
+         + 'kommt aber immer wieder auf denselben Punkt zurück',
+    secret: 'Er hat den Wagen notiert, der nachts an der Ecke hält. Immer '
+          + 'derselbe, immer dieselbe Uhrzeit, seit vierzehn Monaten.',
+    knows: 'Er kennt jedes Gesicht dieser Kreuzung und weiß, welche seit '
+         + 'einem Jahr fehlen.',
+    opener: 'Er sieht dich schon, als du noch am Zebrastreifen stehst, und '
+          + 'schiebt die Klappe einen Spalt auf. Dann wartet er, ob du '
+          + 'stehen bleibst.',
+    spuren: [
+      {
+        id: 'kiosk-wagen',
+        wenn: { clue: 'zweite-liste' },
+        clue: 'nachtwagen',
+        was: 'Du hast dir den Wagen notiert, der seit vierzehn Monaten nachts '
+           + 'an dieser Ecke hält — immer derselbe, immer dieselbe Uhrzeit.',
+        notiz: 'Seit vierzehn Monaten hält nachts derselbe Wagen an der Querstraße.',
+      },
+      {
+        id: 'kiosk-fehlende',
+        wenn: { clue: 'nachtwagen' },
+        clue: 'fehlende-gesichter',
+        was: 'Neun Gesichter von dieser Kreuzung fehlen seit einem Jahr. Du '
+           + 'hast nie jemanden gefragt, weil nie jemand gefragt hat.',
+        notiz: 'Neun Stammgäste der Kreuzung fehlen seit einem Jahr. Niemand hat gefragt.',
+      },
+    ],
+  },
+
+  // Sitzt in deinem Sessel, sobald du den Namen der Direktorin kennst. Das
+  // Spiel sagt dir damit: Sie weiss es auch.
+  'p-bote': {
+    id: 'p-bote',
+    name: 'Der Mann im Sessel',
+    role: 'Unangemeldeter Besuch',
+    portrait: 'details/bote.jpg',
+    appearance: 'Vierzig, nasser dunkler Mantel, Unterarme auf den Knien, die '
+              + 'Hände locker gefaltet. Er hat den Schirm mit hereingebracht.',
+    voice: 'höflich und leise, nennt dich beim Dienstgrad, droht nie — er '
+         + 'stellt fest, und das ist schlimmer',
+    secret: 'Er ist nicht gekommen, um dich zu warnen. Er ist gekommen, um zu '
+          + 'sehen, wie weit du bist, und wird es weitergeben.',
+    knows: 'Er kennt den Inhalt deiner Pinnwand, ohne hinzusehen. Er weiß, '
+         + 'welche Namen du schon hast und welchen noch nicht.',
+    opener: 'Die Tür war zu. Er sitzt trotzdem da, in deinem Sessel, und hat '
+          + 'nicht einmal das Licht angemacht. Als du stehen bleibst, sagt er '
+          + 'deinen Dienstgrad und wartet.',
+    spuren: [
+      {
+        id: 'bote-auftrag',
+        wenn: { clue: 'name-malaunt' },
+        clue: 'man-weiss-von-dir',
+        was: 'Du bist geschickt worden, um zu sehen, wie weit er ist. Von '
+           + 'derselben Etage, aus der die Vorgänge kommen.',
+        notiz: 'Der Besuch kam aus der Direktion — man weiß dort, wie weit die Ermittlung ist.',
+      },
+      {
+        id: 'bote-frist',
+        wenn: { clue: 'man-weiss-von-dir' },
+        clue: 'frist',
+        was: 'Die zwölfte Urkunde wird übermorgen unterschrieben. Danach ist '
+           + 'der Vorgang abgeschlossen, und niemand fragt mehr nach.',
+        notiz: 'Übermorgen wird die zwölfte Urkunde unterschrieben. Danach fragt niemand mehr.',
+      },
+    ],
+  },
 };

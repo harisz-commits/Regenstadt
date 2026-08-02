@@ -1,0 +1,27 @@
+This is a wide shot of a dim apartment at night: a cork board on the left wall,
+a rain-streaked window, a leather armchair, papers on the floor.
+
+Produce a CLOSE-UP of a man sitting in that armchair, as if the same camera
+moved nearer to him. He was not there before.
+
+SUBJECT: a man in his forties in a wet dark overcoat, seated, leaning slightly
+forward with forearms on his knees and hands loosely clasped. Head and
+shoulders, three-quarter view, lit only by the city through the window behind
+him — so he is largely a silhouette with one side of his face caught in cold
+blue light. Calm. Patient. Someone who let himself in and is comfortable
+waiting. Not threatening in posture; threatening in the fact that he is there.
+
+FRAMING: medium close-up. The window behind him blown out to soft bokeh, the
+cork board a dark shape at the edge. Shallow depth of field.
+
+CONTINUITY — must match the wide shot exactly:
+- Same lighting: cold blue window light as the only source, one distant warm
+  kitchen bulb far behind.
+- Same palette: desaturated blue-grey, a single warm accent.
+- Indoors: he is wet from outside, the room is dry.
+
+LOOK: photorealistic cinematic film still, anamorphic 35mm, Blade Runner 2049.
+Fine film grain. Highlights roll off, never clip to white.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters or numbers
+anywhere. Not an illustration, not anime.

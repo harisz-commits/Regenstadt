@@ -1,0 +1,25 @@
+This is a wide shot of a rainy neon street corner at night with a lit kiosk.
+Produce a CLOSE-UP of the man inside the kiosk, as if the same camera moved
+right up to its serving window.
+
+SUBJECT: a man in his sixties, seen THROUGH the kiosk's plexiglass window,
+surrounded by stacked goods. Head and shoulders, slightly from the front. He
+has leaned forward into the light to say something and has stopped himself. A
+face that has watched this crossing for thirty years and decided, tonight, that
+watching is no longer enough. Wary, tired, on the edge of speaking.
+
+FRAMING: medium close-up through the serving hatch. Packets and cans out of
+focus at the edges of frame. Shallow depth of field; rain streaks on the
+plexiglass between him and the camera.
+
+CONTINUITY — must match the wide shot exactly:
+- Same lighting: warm fluorescent from inside the kiosk, cold blue street
+  beyond, wet reflections.
+- Same palette: amber interior against blue-green rain.
+- Outdoors: the camera is in the rain, he is not.
+
+LOOK: photorealistic cinematic film still, anamorphic 35mm, Blade Runner 2049.
+Fine film grain. Highlights roll off, never clip to white.
+
+FORBIDDEN: no text, no watermark, no logo, no readable letters or numbers
+anywhere. Not an illustration, not anime.
