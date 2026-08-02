@@ -11,6 +11,7 @@
  * Bild hätte weder die Farbe des Ortes noch seine Stimmung.
  *
  *   node tools/details.mjs                 # zeigt, was fehlt
+ *   node tools/details.mjs --fall fall-2   # ein anderer Fall
  *   node tools/details.mjs --alle          # erzeugt alles Fehlende
  *   node tools/details.mjs --ort terminal  # nur ein Ort
  *   node tools/details.mjs --max 6         # höchstens sechs Stück
@@ -28,7 +29,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { SCENES } from '../src/game/scenes.js';
+import { FAELLE, setzeFall, fall } from '../src/game/fall.js';
 
 const lauf = promisify(execFile);
 
@@ -51,6 +52,20 @@ const arg = (n, d) => { const i = argv.indexOf('--' + n); return i === -1 ? d : 
 const alle = argv.includes('--alle');
 const nurOrt = arg('ort', null);
 const grenze = Number(arg('max', 999));
+
+/* Welcher Fall.
+   Seit die Falldaten unter src/faelle/<name>/ liegen, muss das Werkzeug
+   wissen, fuer welchen es arbeitet — und vor allem, in WELCHE Datei es die
+   Eintraege nachtraegt. Vorher stand alles in src/game/scenes.js; dorthin zu
+   schreiben wuerde jetzt nichts mehr treffen. */
+const fallId = arg('fall', FAELLE[0].id);
+if (!FAELLE.some((f) => f.id === fallId)) {
+  console.error(`Unbekannter Fall: ${fallId}. Bekannt: ${FAELLE.map((f) => f.id).join(', ')}`);
+  process.exit(1);
+}
+setzeFall(fallId);
+const SCENES = fall().orte;
+const ORTE_DATEI = `src/faelle/${fallId.replace('-', '')}/orte.js`;
 
 /** Punkte, die eine Nahaufnahme verdienen. */
 function offeneStellen() {
@@ -156,7 +171,7 @@ if (warteschlange.length) {
 // Bewusst NICHT an `gemacht > 0` gebunden: Sind die Bilder schon da und nur
 // die Einträge fehlen, muss der Lauf sie trotzdem nachtragen können.
 {
-  let quelle = readFileSync('src/game/scenes.js', 'utf8');
+  let quelle = readFileSync(ORTE_DATEI, 'utf8');
   let n = 0;
   for (const s of stellen) {
     if (!existsSync(`public/${s.datei}`)) continue;
@@ -169,7 +184,13 @@ if (warteschlange.length) {
     // Punkt. Eine Suche über die ganze Datei nimmt den erstbesten Treffer —
     // so landete die Nahaufnahme der Zollkabine in der Bar und die des
     // Leseterminals beim Portalkran.
-    const anfang = quelle.indexOf(`\n  ${s.ortId}: {`);
+    /* Der Ortsblock — mit ODER ohne Anfuehrungszeichen um den Schluessel.
+       Fall 1 hat blosse Bezeichner (`alley: {`), Fall 2 braucht wegen der
+       Bindestriche Zeichenketten (`'f2-becken': {`). Die erste Fassung kannte
+       nur die erste Form und hat deshalb 26 fertige Bilder erzeugt und KEINES
+       eingetragen — die Bilder lagen da, das Spiel wusste nichts davon. */
+    let anfang = quelle.indexOf(`\n  ${s.ortId}: {`);
+    if (anfang === -1) anfang = quelle.indexOf(`\n  '${s.ortId}': {`);
     if (anfang === -1) { console.log(`  Ort nicht gefunden: ${s.ortId}`); continue; }
     const ende = quelle.indexOf('\n  },\n', anfang);
     const block = quelle.slice(anfang, ende);
@@ -181,6 +202,6 @@ if (warteschlange.length) {
            + quelle.slice(ende);
     n += 1;
   }
-  writeFileSync('src/game/scenes.js', quelle);
-  console.log(`\n${gemacht} Bilder erzeugt, ${n} in scenes.js eingetragen.`);
+  writeFileSync(ORTE_DATEI, quelle);
+  console.log(`\n${gemacht} Bilder erzeugt, ${n} in ${ORTE_DATEI} eingetragen.`);
 }

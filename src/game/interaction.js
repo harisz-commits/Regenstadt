@@ -469,6 +469,12 @@ export function createInteraction(renderer, host) {
     ],
     onEnde: () => sichern(),
     neuAnfangen: () => { speicher.loeschen(); location.reload(); },
+    // Den naechsten Fall anfangen: Der Stand des alten wird verworfen, der
+    // gewuenschte Fall vorgemerkt, dann neu geladen. Ueber den Speicher und
+    // nicht ueber setzeFall im laufenden Bild, weil sonst mitten im Spiel
+    // Platten, Punkte, Figuren und Karte gleichzeitig wechseln muessten —
+    // ein Neustart ist hier ehrlicher als ein Umbau bei laufendem Betrieb.
+    naechsterFall: (id) => { speicher.loeschen(); speicher.merkeFall(id); location.reload(); },
   });
 
   // Meldungen: was sich woanders geaendert hat. Bleiben stehen, bis sie

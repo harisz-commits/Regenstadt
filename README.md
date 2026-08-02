@@ -2,13 +2,32 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-Zwanzig Orte in sechs Sektoren, zehn Figuren, die von einem Sprachmodell
+ZWEI FAELLE. Fall 1: zwanzig Orte in sechs Sektoren, zehn Figuren, die von einem Sprachmodell
 antworten, eine Beweiskette mit Laborbefund, ein Flugauto, um zwischen den
 Sektoren zu reisen — und ein Ende, das man erreichen kann.
+
+Fall 2 „Die zweite Schicht": sieben Orte in drei Sektoren, vier Figuren,
+Winter statt Dauerregen.
 
 ```
 npm install
 npm run dev        # http://127.0.0.1:5173
+```
+
+## Ein Fall ist DATEN
+
+Unter `src/faelle/<name>/` liegen Orte, Sektoren, Figuren, Loesung und
+Meldungen. Die Mechanik in `src/game/` liest sie und weiss nicht, welchen Fall
+sie spielt. Fall 2 hat deshalb KEINE Zeile Mechanik gebraucht.
+
+Der Kniff sind lebende ES-Modul-Bindungen: `scenes.js` und die anderen fuehren
+ihre Daten als `export let` aus und setzen sie beim Fallwechsel neu. Jeder
+Importeur sieht die neuen Daten, ohne dass sich an seiner Importzeile etwas
+aendert — deshalb hat der Umbau keine Aufrufstelle angefasst.
+
+```
+tools/faelle-pruefen.mjs      Regeln, die fuer JEDEN Fall gelten
+tools/fallwechsel-pruefen.mjs der Uebergang im echten Browser
 ```
 
 **F1** öffnet die Bildsteuerung mit allen Reglern und der Frame-Zeit-Kurve.

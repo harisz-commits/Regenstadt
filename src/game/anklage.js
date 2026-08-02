@@ -22,7 +22,7 @@
  */
 
 import { CHARACTERS } from './characters.js';
-import { fall, beiFallwechsel } from './fall.js';
+import { fall, beiFallwechsel, naechsterFall } from './fall.js';
 
 /**
  * Die Loesung des laufenden Falls — lebende Bindung, siehe characters.js.
@@ -355,10 +355,31 @@ REGELN:
     bilanz.textContent = bilanzText;
     ende.appendChild(bilanz);
 
+    /*
+     * Der naechste Fall.
+     *
+     * Ein Fall endet, die Stadt nicht. Steht noch einer an, ist er das
+     * naheliegende Angebot — und „Von vorn" bleibt daneben stehen, weil man
+     * denselben Fall auch anders ausgehen lassen koennen soll.
+     *
+     * Beides beginnt mit einem frischen Weltzustand: Die Akte des alten Falls
+     * gehoert nicht in den neuen. Was bleibt, ist die Wohnung — und dass an
+     * der Pinnwand noch Nadeln stecken.
+     */
+    const weiterFall = naechsterFall();
+    if (weiterFall) {
+      const w = document.createElement('button');
+      w.className = 'tat';
+      w.type = 'button';
+      w.textContent = `Nächster Fall: ${weiterFall.titel}`;
+      w.onclick = () => host.naechsterFall?.(weiterFall.id);
+      fuss.appendChild(w);
+    }
+
     const neu = document.createElement('button');
-    neu.className = 'tat';
+    neu.className = weiterFall ? 'weg' : 'tat';
     neu.type = 'button';
-    neu.textContent = 'Von vorn';
+    neu.textContent = 'Denselben Fall von vorn';
     neu.onclick = () => host.neuAnfangen?.();
     fuss.appendChild(neu);
 

@@ -21,6 +21,7 @@ export const ORTE = {
       {
         id: 'f2-plane', u: 0.640, v: 0.605, r: 0.090,
         label: 'Plane auf dem Eis',
+        detail: 'details/f2-becken-f2-plane.jpg',
         clue: 'f2-fundort',
         text: 'Eine Plane, mit Ziegeln beschwert, mitten auf der Eisfläche. '
             + 'Darunter liegt er seit mindestens zwei Tagen. Das Eis ringsum '
@@ -30,6 +31,7 @@ export const ORTE = {
       {
         id: 'f2-eis', u: 0.545, v: 0.735, r: 0.085,
         label: 'Aufgebrochenes Eis',
+        detail: 'details/f2-becken-f2-eis.jpg',
         text: 'Die Bruchkanten zeigen nach innen, nicht nach außen. Das Loch '
             + 'ist von oben geschlagen worden, mit etwas Schwerem und ohne Eile. '
             + 'Wer das tut, rechnet nicht damit, dass jemand kommt.',
@@ -37,6 +39,7 @@ export const ORTE = {
       {
         id: 'f2-steg', u: 0.375, v: 0.790, r: 0.085,
         label: 'Steg',
+        detail: 'details/f2-becken-f2-steg.jpg',
         // Der Sektor haengt an DIESEM Hinweis, nicht an der Marke selbst: Ein
         // Gegenstand verlaesst beim Abgeben die Asservate, und die Siedlung
         // waere wieder zugefallen, sobald man die Marke untersuchen laesst.
@@ -57,6 +60,7 @@ export const ORTE = {
       {
         id: 'f2-mast', u: 0.618, v: 0.215, r: 0.075,
         label: 'Flutlichtmast',
+        detail: 'details/f2-becken-f2-mast.jpg',
         text: 'Der einzige Mast, der noch brennt, in einem Werk ohne Strom. '
             + 'Am Fuß liegt ein Kabel, das jemand von Hand neu geklemmt hat. '
             + 'Nicht sauber, aber fachkundig.',
@@ -64,6 +68,7 @@ export const ORTE = {
       {
         id: 'f2-rand', u: 0.865, v: 0.645, r: 0.085,
         label: 'Beckenrand',
+        detail: 'details/f2-becken-f2-rand.jpg',
         text: 'Der Reif am Beton ist über eine Länge von zwei Metern '
             + 'abgeschabt. Etwas ist hier über die Kante geschoben worden, und '
             + 'zwar an der Stelle, die vom Werkstor aus nicht einzusehen ist.',
@@ -90,6 +95,7 @@ export const ORTE = {
       {
         id: 'f2-technikerin', u: 0.700, v: 0.500, r: 0.060, kind: 'person',
         label: 'Frau am Spurenwagen',
+        detail: 'details/f2-technikerin.jpg',
         text: 'Sie arbeitet im Stehen, mit Handschuhen, und sieht nicht auf. '
             + 'Neben ihr steht der Koffer offen, in dem die Abdrücke abgeglichen '
             + 'werden. Sie ist die Einzige hier, die etwas beweisen kann.',
@@ -97,6 +103,7 @@ export const ORTE = {
       {
         id: 'f2-wagen', u: 0.615, v: 0.560, r: 0.090, kind: 'lab',
         label: 'Spurenwagen',
+        detail: 'details/f2-halle-f2-wagen.jpg',
         text: 'Ein Kastenwagen mit offenen Hecktüren und einer Arbeitsleuchte '
             + 'auf einem Stativ — das einzige saubere, gewartete Ding im ganzen '
             + 'Werk. Auf der Ladekante liegt ein Tablett für das, was untersucht '
@@ -105,6 +112,7 @@ export const ORTE = {
       {
         id: 'f2-pumpen', u: 0.245, v: 0.520, r: 0.095,
         label: 'Pumpenreihe',
+        detail: 'details/f2-halle-f2-pumpen.jpg',
         text: 'Zwei Reihen Gehäuse unter Planen, alle mit derselben Staubschicht '
             + 'aus derselben Zeit. Bis auf eine: Die Plane liegt daneben, und '
             + 'am Gehäuse ist der Staub in Handbreite abgewischt.',
@@ -112,6 +120,7 @@ export const ORTE = {
       {
         id: 'f2-kran', u: 0.500, v: 0.175, r: 0.080,
         label: 'Laufkran',
+        detail: 'details/f2-halle-f2-kran.jpg',
         text: 'Mitten über der Halle stehengeblieben, nicht in der Parkstellung. '
             + 'Wer ihn zuletzt bewegt hat, hat ihn dort gelassen, wo er ihn '
             + 'gebraucht hat.',
@@ -119,6 +128,7 @@ export const ORTE = {
       {
         id: 'f2-grat', u: 0.135, v: 0.660, r: 0.080,
         label: 'Schneegrat an der Wand',
+        detail: 'details/f2-halle-f2-grat.jpg',
         text: 'Unter dem zerschlagenen Fensterband hat der Schnee einen Wall '
             + 'gebildet. An einer Stelle ist er niedergetreten und wieder '
             + 'überweht — jemand ist hier durchs Fenster hereingekommen, statt '
@@ -152,6 +162,7 @@ export const ORTE = {
       {
         id: 'f2-pfoertnerin', u: 0.575, v: 0.470, r: 0.060, kind: 'person',
         label: 'Gestalt hinter dem Glas',
+        detail: 'details/f2-pfoertnerin.jpg',
         text: 'Sie steht im Mantel in einem Raum, den sie geheizt hat, und '
             + 'sieht in die dunkle Halle hinaus statt auf die Tür. Sie hat dich '
             + 'kommen gehört, lange bevor du da warst, und sich nicht umgedreht.',
@@ -159,6 +170,7 @@ export const ORTE = {
       {
         id: 'f2-schichtbuch', u: 0.330, v: 0.615, r: 0.085,
         label: 'Schichtbuch',
+        detail: 'details/f2-buero-f2-schichtbuch.jpg',
         text: 'Aufgeschlagen, mit einem Stift daneben. Die letzte Eintragung '
             + 'ist vier Monate alt und schließt das Werk. Danach nichts mehr — '
             + 'außer dass die letzten drei Seiten neuer aussehen als der Rest '
@@ -185,6 +197,7 @@ export const ORTE = {
       {
         id: 'f2-tafel', u: 0.285, v: 0.400, r: 0.080,
         label: 'Schichttafel',
+        detail: 'details/f2-buero-f2-tafel.jpg',
         text: 'Holzhaken für jeden Mann, und an fast jedem hängt nichts mehr. '
             + 'An dreien hängen noch Marken, und alle drei sind auf der '
             + 'Rückseite blank geschliffen. Keine Nummern, keine Namen.',
@@ -192,6 +205,7 @@ export const ORTE = {
       {
         id: 'f2-ofen', u: 0.455, v: 0.650, r: 0.070,
         label: 'Ölofen',
+        detail: 'details/f2-buero-f2-ofen.jpg',
         text: 'Er brennt. Der Kanister daneben ist zu zwei Dritteln voll und '
             + 'trägt kein Werkszeichen — den hat jemand privat hergebracht, und '
             + 'zwar mehrfach.',
@@ -199,6 +213,7 @@ export const ORTE = {
       {
         id: 'f2-becher', u: 0.700, v: 0.705, r: 0.070,
         label: 'Zwei Becher',
+        detail: 'details/f2-buero-f2-becher.jpg',
         clue: 'f2-zwei-becher',
         text: 'Auf dem Sims stehen zwei Emailbecher. In einem ist ein Rest, der '
             + 'schon Haut angesetzt hat; der andere ist ausgespült und '
@@ -226,6 +241,7 @@ export const ORTE = {
       {
         id: 'f2-fenster', u: 0.400, v: 0.455, r: 0.090,
         label: 'Drei erleuchtete Fenster',
+        detail: 'details/f2-siedlung-f2-fenster.jpg',
         clue: 'f2-drei-fenster',
         text: 'Zwei Reihen Häuser, und in genau drei Fenstern brennt Licht — '
             + 'nicht nebeneinander, sondern über die ganze Zeile verteilt. Alle '
@@ -235,6 +251,7 @@ export const ORTE = {
       {
         id: 'f2-lieferwagen', u: 0.720, v: 0.615, r: 0.085,
         label: 'Lieferwagen',
+        detail: 'details/f2-siedlung-f2-lieferwagen.jpg',
         text: 'Ohne Aufschrift, ohne Schnee auf der Scheibe. Er ist vor '
             + 'höchstens einer Stunde gefahren worden. Die Ladefläche ist innen '
             + 'ausgeschlagen mit Decken, die nicht dazugehören.',
@@ -242,6 +259,7 @@ export const ORTE = {
       {
         id: 'f2-zaun', u: 0.500, v: 0.380, r: 0.080,
         label: 'Maschendrahtzaun',
+        detail: 'details/f2-siedlung-f2-zaun.jpg',
         text: 'Am Ende der Straße, und dahinter der Umriss des Werks. Auf '
             + 'halber Höhe ist der Draht aufgetrennt und mit Bindedraht wieder '
             + 'zusammengezogen — von der Siedlungsseite aus, immer wieder.',
@@ -249,6 +267,7 @@ export const ORTE = {
       {
         id: 'f2-schnee', u: 0.290, v: 0.805, r: 0.085,
         label: 'Spuren im Schnee',
+        detail: 'details/f2-siedlung-f2-schnee.jpg',
         text: 'Vom mittleren der drei erleuchteten Häuser führt eine Spur zum '
             + 'Zaun und zurück. Sie ist mehrfach benutzt und immer wieder '
             + 'ausgetreten worden, damit sie wie ein Weg aussieht und nicht wie '
@@ -284,6 +303,7 @@ export const ORTE = {
       {
         id: 'f2-zeuge', u: 0.500, v: 0.510, r: 0.060, kind: 'person',
         label: 'Der Mann, den es nicht gibt',
+        detail: 'details/f2-zeuge.jpg',
         clue: 'f2-zeuge-gefunden',
         text: 'Er sitzt auf der Matratze, in zwei Mänteln, und steht nicht auf. '
             + 'Sein Gesicht kennst du: Es steht auf der Liste der elf, die im '
@@ -293,6 +313,7 @@ export const ORTE = {
       {
         id: 'f2-striche', u: 0.215, v: 0.405, r: 0.085,
         label: 'Strichliste',
+        detail: 'details/f2-haus-f2-striche.jpg',
         text: 'In den Putz geritzt, in Fünferblöcken, über eine halbe Wand. '
             + 'Vierhundertzwanzig Striche. Er zählt nicht die Tage seit der '
             + 'Stilllegung — er zählt die Tage seit seinem eigenen Todesdatum.',
@@ -300,6 +321,7 @@ export const ORTE = {
       {
         id: 'f2-fenster-h', u: 0.705, v: 0.385, r: 0.080,
         label: 'Zugeklebtes Fenster',
+        detail: 'details/f2-haus-f2-fenster-h.jpg',
         text: 'Von innen mit Karton verschlossen, sauber verklebt, mit einem '
             + 'Spalt auf Augenhöhe. Der Spalt zeigt nicht auf die Straße, '
             + 'sondern auf den Zaun.',
@@ -307,6 +329,7 @@ export const ORTE = {
       {
         id: 'f2-tisch', u: 0.480, v: 0.665, r: 0.085,
         label: 'Tisch aus einer Tür',
+        detail: 'details/f2-haus-f2-tisch.jpg',
         text: 'Eine Tür auf zwei Kisten. Darauf ein Radio, ein Blechteller und '
             + 'ein Stapel Zeitungen, alle aus derselben Woche vor einem Jahr. '
             + 'Die oberste ist an einer Stelle durchgelesen bis zum Riss.',
@@ -314,6 +337,7 @@ export const ORTE = {
       {
         id: 'f2-maentel', u: 0.825, v: 0.455, r: 0.075,
         label: 'Mäntel am Nagel',
+        detail: 'details/f2-haus-f2-maentel.jpg',
         text: 'Drei Mäntel an einem Nagel, für einen Mann. Zwei davon sind zu '
             + 'groß und riechen nach Öl. Er trägt nicht nur seine eigenen.',
       },
@@ -338,6 +362,7 @@ export const ORTE = {
       {
         id: 'f2-vorsteher', u: 0.640, v: 0.505, r: 0.060, kind: 'person',
         label: 'Mann am Fenstertisch',
+        detail: 'details/f2-vorsteher.jpg',
         text: 'Er sitzt allein an dem einzigen Tisch, der nicht abgeräumt ist, '
             + 'mit dem Rücken halb zur Tür, und sieht in den verschneiten Hof. '
             + 'Die Mütze liegt neben dem Becher. Er hat nicht aufgesehen, als '
@@ -346,6 +371,7 @@ export const ORTE = {
       {
         id: 'f2-tresen', u: 0.480, v: 0.435, r: 0.085,
         label: 'Ausgabe',
+        detail: 'details/f2-kantine-f2-tresen.jpg',
         text: 'Aus einem der Warmhaltefächer steigt Dampf. Für einen Mann kocht '
             + 'niemand — und die Bleche daneben sind für dreißig Portionen '
             + 'ausgelegt und benutzt worden, nicht vor vier Monaten, sondern '
@@ -373,6 +399,7 @@ export const ORTE = {
       {
         id: 'f2-anschlag', u: 0.150, v: 0.405, r: 0.080,
         label: 'Anschlagbrett',
+        detail: 'details/f2-kantine-f2-anschlag.jpg',
         text: 'Leer bis auf die Reißnägel — und die stecken in einem Raster, '
             + 'das genau die Größe der Blätter hat, die dort gehangen haben. '
             + 'Sie sind alle am selben Tag abgenommen worden.',
@@ -380,6 +407,7 @@ export const ORTE = {
       {
         id: 'f2-tische', u: 0.300, v: 0.650, r: 0.090,
         label: 'Tische',
+        detail: 'details/f2-kantine-f2-tische.jpg',
         text: 'Auf den meisten stehen die Stühle hochgestellt. Auf sechs nicht. '
             + 'Diese sechs sind abgewischt, und auf einem klebt ein Ring von '
             + 'einem Becher, der heute Nacht dort stand.',
@@ -406,12 +434,14 @@ export const ORTE = {
       {
         id: 'f2-pinnwand', u: 0.148, v: 0.390, r: 0.115, kind: 'anklage',
         label: 'Pinnwand',
+        detail: 'details/f2-wohnung-f2-pinnwand.jpg',
         text: 'Der letzte Fall hängt noch daran, mit Nadeln, die du nicht '
             + 'herausgezogen hast. Daneben ist Platz. Es ist immer Platz.',
       },
       {
         id: 'f2-fenster-w', u: 0.498, v: 0.410, r: 0.100,
         label: 'Fenster',
+        detail: 'details/f2-wohnung-f2-fenster-w.jpg',
         text: 'Es schneit in den Kanal. Von hier oben sieht die Stadt aus, als '
             + 'wäre sie zugedeckt worden, und nicht, als hätte sie sich '
             + 'zugedeckt.',
@@ -419,6 +449,7 @@ export const ORTE = {
       {
         id: 'f2-kueche', u: 0.878, v: 0.420, r: 0.085,
         label: 'Küchennische',
+        detail: 'details/f2-wohnung-f2-kueche.jpg',
         text: 'Der Wasserhahn tropft nicht mehr. Bei diesem Frost tropft nichts '
             + 'mehr, und das ist die einzige gute Nachricht dieses Winters.',
       },

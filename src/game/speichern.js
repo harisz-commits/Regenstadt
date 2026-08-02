@@ -30,22 +30,27 @@
 import { SCENES, START } from './scenes.js';
 
 const SCHLUESSEL = 'regenstadt.stand';
+/** Welcher Fall zuletzt gewaehlt wurde — ueberlebt das Neuladen. */
+const FALL_SCHLUESSEL = 'regenstadt.fall';
 /** Bei einem Bruch im Aufbau hochzaehlen — alte Staende werden dann verworfen. */
 const FASSUNG = 1;
 
 /**
- * Alle Gegenstaende des Spiels, nach Kennung.
+ * Alle Gegenstaende des LAUFENDEN Falls, nach Kennung.
  *
- * Einmal aufgebaut statt bei jedem Zuruecklesen: Es sind zwanzig Orte, und die
- * Liste aendert sich zur Laufzeit nicht.
+ * Bewusst eine Funktion und keine Konstante: Die erste Fassung hat die Liste
+ * einmal beim Laden des Moduls gebaut — aus dem Fall, der damals aktiv war.
+ * Nach einem Fallwechsel haette sie die Gegenstaende des alten Falls
+ * enthalten, und jedes Asservat aus dem neuen waere beim Zuruecklesen
+ * lautlos verschwunden. Zwanzig Orte durchzugehen kostet nichts.
  */
-const GEGENSTAENDE = (() => {
+function gegenstaende() {
   const m = new Map();
   for (const ort of Object.values(SCENES)) {
     for (const s of ort.spots) if (s.item) m.set(s.item.id, s.item);
   }
   return m;
-})();
+}
 
 /** Ist ueberhaupt ein Speicher da? Im privaten Fenster mancher Browser nicht. */
 function speicher() {
@@ -93,11 +98,25 @@ export function loeschen() {
 
 export const moeglich = () => speicher() !== null;
 
+/* --- Welcher Fall laeuft -------------------------------------------------
+   Steht getrennt vom Spielstand: Wer den naechsten Fall anfaengt, wirft den
+   alten Stand weg, aber die Wahl muss den Neustart ueberleben. */
+
+export function merkeFall(id) {
+  const s = speicher();
+  if (s) try { s.setItem(FALL_SCHLUESSEL, id); } catch { /* dann eben nicht */ }
+}
+export function gemerkterFall() {
+  const s = speicher();
+  try { return s?.getItem(FALL_SCHLUESSEL) || null; } catch { return null; }
+}
+
 /**
  * Aus dem gesicherten Zustand wieder etwas machen, mit dem die Welt arbeiten
  * kann: Kennungen zurueck in Gegenstaende.
  */
 export function welteinlesen(welt) {
+  const GEGENSTAENDE = gegenstaende();
   return {
     clues: welt?.clues || [],
     taken: welt?.taken || [],

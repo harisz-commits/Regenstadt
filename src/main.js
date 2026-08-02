@@ -6,6 +6,7 @@ import { createInteraction } from './game/interaction.js';
 import { SCENES, START } from './game/scenes.js';
 import { createWorld } from './game/world.js';
 import * as speicher from './game/speichern.js';
+import { fall, setzeFall } from './game/fall.js';
 import { guardViewport, isTouch } from './ui/viewport.js';
 
 // Zoom-Sperren und Geraeteraender setzen, bevor irgendetwas gezeichnet wird.
@@ -188,6 +189,9 @@ addEventListener('pointermove', (e) => {
  * was gerade geladen werden soll.
  */
 async function starten() {
+  // Zuerst den Fall setzen, dann erst den Stand lesen: Der Stand nennt Orte,
+  // die es nur im richtigen Fall gibt.
+  setzeFall(speicher.gemerkterFall() || fall().id);
   const stand = speicher.lesen();
   if (stand && await speicher.frageFortsetzen(stand)) {
     interaction.ladeStand(stand);
