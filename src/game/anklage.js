@@ -168,6 +168,8 @@ export function createAnklage(host) {
   let gewaehlt = null;
   /** Einmal erhoben, bleibt sie erhoben. Das Spiel ist danach vorbei. */
   let vorbei = false;
+  /** Der fertige Ausgang, damit er ein Neuladen übersteht. */
+  let ausgang = null;
 
   const w = host.world;
   const hat = (c) => w.hasClue(c);
@@ -347,24 +349,58 @@ REGELN:
 - Keine Überschrift, keine Aufzählung, keine Anführungszeichen um den Text.`;
   }
 
-  async function erhebe(id) {
-    if (vorbei) return;
-    vorbei = true;
-    const urteil = bewerte(id);
-    const m = MARKEN[urteil.art];
-
+  /**
+   * Das Ende hinschreiben.
+   *
+   * Eigene Funktion, weil sie zweimal gebraucht wird: einmal frisch nach der
+   * Anklage, einmal beim Zurueckholen eines gesicherten Standes. Ein
+   * abgeschlossener Fall soll nach dem Neuladen nicht wieder offen sein — und
+   * der Nachspann darf dafuer kein zweites Mal beim Modell bestellt werden,
+   * sonst stuende beim naechsten Aufmachen ein anderer da.
+   *
+   * @returns {HTMLElement} der Absatz, in den der Nachspann kommt
+   */
+  function zeigeEnde(art, id, bilanzText) {
+    const m = MARKEN[art];
     fuss.innerHTML = '';
     sub.textContent = '';
     rumpf.innerHTML = '';
 
     const ende = document.createElement('div');
-    ende.className = 'ende ' + urteil.art;
+    ende.className = 'ende ' + art;
     ende.innerHTML = '<div class="marke"></div><h1></h1><p class="laedt">Der Bericht wird geschrieben …</p>';
     ende.querySelector('.marke').textContent = m.marke;
     ende.querySelector('h1').textContent = m.titel;
     rumpf.appendChild(ende);
 
-    const text = ende.querySelector('p');
+    const bilanz = document.createElement('div');
+    bilanz.className = 'bilanz';
+    bilanz.textContent = bilanzText;
+    ende.appendChild(bilanz);
+
+    const neu = document.createElement('button');
+    neu.className = 'tat';
+    neu.type = 'button';
+    neu.textContent = 'Von vorn';
+    neu.onclick = () => host.neuAnfangen?.();
+    fuss.appendChild(neu);
+
+    return ende.querySelector('p');
+  }
+
+  /** Die Zeile unter dem Nachspann: was der Fall am Ende wert war. */
+  function bilanzZeile(id) {
+    const belegt = LOESUNG.beweise.filter((b) => hat(b.clue)).length;
+    return `${host.getNotes().length} Einträge in der Akte · ${belegt} von `
+         + `${LOESUNG.beweise.length} tragenden Belegen · angeklagt: ${CHARACTERS[id].name}`;
+  }
+
+  async function erhebe(id) {
+    if (vorbei) return;
+    vorbei = true;
+    const urteil = bewerte(id);
+    const bilanz = bilanzZeile(id);
+    const text = zeigeEnde(urteil.art, id, bilanz);
 
     let erzaehlt = NOTFALL[urteil.art];
     try {
@@ -400,20 +436,10 @@ REGELN:
     text.classList.remove('laedt');
     text.textContent = erzaehlt;
 
-    const bilanz = document.createElement('div');
-    bilanz.className = 'bilanz';
-    const belegt = LOESUNG.beweise.filter((b) => hat(b.clue)).length;
-    bilanz.textContent =
-      `${host.getNotes().length} Einträge in der Akte · ${belegt} von `
-      + `${LOESUNG.beweise.length} tragenden Belegen · angeklagt: ${CHARACTERS[id].name}`;
-    ende.appendChild(bilanz);
-
-    const neu = document.createElement('button');
-    neu.className = 'tat';
-    neu.type = 'button';
-    neu.textContent = 'Von vorn';
-    neu.onclick = () => location.reload();
-    fuss.appendChild(neu);
+    // Erst JETZT sichern: Vorher gab es keinen Nachspann, und ein gesicherter
+    // Fall ohne Bericht waere ein Ende, das sich nicht ansehen laesst.
+    ausgang = { art: urteil.art, wer: id, text: erzaehlt, bilanz };
+    host.onEnde?.(ausgang);
   }
 
   /* --- Ein Weg hinaus, solange noch nichts entschieden ist ---------------- */
@@ -435,5 +461,18 @@ REGELN:
     isOpen: () => el.classList.contains('on'),
     /** true, sobald die Anklage erhoben ist — danach ist Schluss. */
     istVorbei: () => vorbei,
+
+    /** Der fertige Ausgang, fürs Sichern. `null`, solange nichts entschieden ist. */
+    ausgang: () => ausgang,
+
+    /** Einen gesicherten Ausgang zurückholen, ohne das Modell erneut zu fragen. */
+    setAusgang(a) {
+      if (!a || !CHARACTERS[a.wer]) return;
+      ausgang = a;
+      vorbei = true;
+      const p = zeigeEnde(a.art, a.wer, a.bilanz);
+      p.classList.remove('laedt');
+      p.textContent = a.text;
+    },
   };
 }

@@ -157,6 +157,33 @@ ein fest geschriebener Text bereit — ein Ende darf nicht an einer Leitung
 haengen. Die Loesung liegt als Daten in `src/game/anklage.js`, damit ein
 generierter Fall spaeter eine eigene mitliefern kann.
 
+### Der Spielstand
+
+Gesichert wird im **Browser**, nicht auf einem Server: `localStorage`, kein
+Konto, keine Anmeldung, keine Datenbank. Das ist hier nicht die billige,
+sondern die richtige Loesung — zwei Leute an zwei Telefonen bekommen so ganz
+von selbst zwei getrennte Ermittlungen, und niemand muss dafuer eine
+E-Mail-Adresse hergeben.
+
+Gespeichert wird nur, was das Spiel nicht selbst weiss. Gegenstaende stehen
+mit ihrer **Kennung** im Stand, nicht mit ihrem Text — der kommt beim
+Zuruecklesen frisch aus `scenes.js`. Sonst laege im Speicher eine alte Fassung
+jeder Beschreibung, und wer morgen einen Satz aendert, saehe ihn bei sich
+selbst nie wieder. Notizen dagegen stammen zum Teil aus den Verhoeren und
+wurden vom Modell geschrieben; die stehen woertlich drin. Ebenso der
+Nachspann: Ein abgeschlossener Fall zeigt nach dem Neuladen **denselben**
+Bericht, nicht einen neu erfundenen.
+
+Beim Start wird gefragt statt still fortgesetzt — wer das Spiel jemandem
+zeigen will, soll nicht mitten in einer fremden Ermittlung landen. Verworfen
+wird in der Akte, mit Rueckfrage.
+
+Zwei Eigenschaften muss man kennen, weil sie sonst wie Fehler aussehen: Der
+Stand haengt an Browser UND Geraet (Chrome und Safari sind zwei
+Ermittlungen), und im privaten Fenster ist er nach dem Schliessen weg.
+
+### Zeit
+
 Die Wartezeit laeuft in **Ortswechseln**, nicht in Sekunden. Eine Uhr zwingt
 zum Warten, ein Zaehler zwingt zum Weitergehen — und wer das Spiel weglegt,
 verliert nichts.
@@ -290,10 +317,12 @@ src/
   game/interaction.js   Hotspot-Ebene, Untersuchungstafel, Akte
   game/characters.js    Figuren: Wesen, Wissen, Geheimnis — und die Anweisung daraus
   game/anklage.js       Der Abschluss: Loesung, Beweislage, drei Enden, Nachspann
+  game/speichern.js     Spielstand im Browser sichern und zuruecklesen
   game/talk.js          Verhoer: Vollbildansicht, Vorhalten, Spuren in die Akte
 api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt serverseitig)
 tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen (166 Zusicherungen)
 tools/abschluss-pruefen.mjs  den Abschluss im echten Browser durchspielen
+tools/stand-pruefen.mjs  pruefen, dass ein Spielstand ein Neuladen ueberlebt
 tools/beschneiden.mjs   eingebrannte schwarze Balken von einer Platte schneiden
 tools/details.mjs       Nahaufnahmen fuer Untersuchungspunkte erzeugen
 tools/verkleinern.mjs   Bilder auf die Groesse bringen, in der sie gezeigt werden

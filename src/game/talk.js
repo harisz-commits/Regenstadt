@@ -409,6 +409,21 @@ export function createTalk(host) {
     /** true, wenn es für diesen Punkt überhaupt eine Figur gibt. */
     has: (spotId) => Boolean(CHARACTERS[spotId]),
 
+    /**
+     * Wie ausgereizt jedes Gespräch ist — fürs Sichern.
+     *
+     * Der Verlauf selbst wird NICHT gesichert: Er lebt ohnehin nur, solange man
+     * bei derselben Figur bleibt, und ein wiederhergestelltes Gespräch, das
+     * mitten in einem Satz weitergeht, wäre seltsamer als ein neues. Was
+     * bleiben muss, ist die Erschöpfung — sonst hat man nach dem Neuladen bei
+     * jeder Figur wieder neun Fragen frei, obwohl längst nichts mehr kommt.
+     */
+    stand: () => [...stand.entries()].map(([id, z]) => [id, { ...z }]),
+    setStand(paare) {
+      stand.clear();
+      for (const [id, z] of paare || []) stand.set(id, { ...z });
+    },
+
     /** Fragen vorladen, solange der Spieler noch die Beschreibung liest. */
     warmUp,
 

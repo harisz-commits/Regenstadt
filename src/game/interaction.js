@@ -17,6 +17,7 @@ import { isTouch } from '../ui/viewport.js';
 import { createTalk } from './talk.js';
 import { createSpinner } from './spinner.js';
 import { createAnklage } from './anklage.js';
+import * as speicher from './speichern.js';
 
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
@@ -241,6 +242,11 @@ const CSS = `
 #akte .item.wartet { border-left-color: rgba(159,180,204,.32); opacity: .6; }
 #akte .item.bereit { border-left-color: rgba(120,240,180,.75); }
 #akte .item.bereit .h { color: #9df3c8; }
+#akte .akte-fuss { margin-top: 26px; display: flex; gap: 11px; flex-wrap: wrap; align-items: center; }
+#akte .akte-fuss button { margin-top: 0; }
+#akte button.gefahr { color: rgba(255,150,150,.8); border-color: rgba(255,120,120,.3); }
+#akte button.gefahr:hover { background: rgba(255,120,120,.14); border-color: rgba(255,120,120,.6); }
+#akte .akte-hinweis { flex-basis: 100%; font-size: 11px; opacity: .42; max-width: 66ch; line-height: 1.7; }
 #akte button { align-self: flex-start; margin-top: 24px; }
 
 #hint-bar {
@@ -375,6 +381,7 @@ export function createInteraction(renderer, host) {
     if (notes.some((n) => n.label === label)) return;
     notes.push({ label, text });
     updateAkteBtn();
+    sichern();
   }
 
   // Das Verhoer traegt seine eigenen Spuren ein und liest die Akte, um
@@ -402,7 +409,32 @@ export function createInteraction(renderer, host) {
       ...notes,
       ...world.items().map((i) => ({ label: i.name, text: i.text })),
     ],
+    onEnde: () => sichern(),
+    neuAnfangen: () => { speicher.loeschen(); location.reload(); },
   });
+
+  /* --- Sichern ------------------------------------------------------------
+     Nach jeder Aenderung, aber gebuendelt: Ein Klick auf „In die Akte" loest
+     mehrere Aenderungen auf einmal aus (Notiz, Spur, Punkte neu gebaut), und
+     dreimal hintereinander in den Speicher zu schreiben ist unnoetig. */
+  let sicherTimer = null;
+  function sichern() {
+    // Solange kein Ort steht, gibt es nichts zu sichern — und ein Stand ohne
+    // Ort wird beim naechsten Start verworfen. Das passiert genau einmal:
+    // `ladeStand` setzt die Welt, bevor der erste Ort geladen ist.
+    if (!currentScene) return;
+    clearTimeout(sicherTimer);
+    sicherTimer = setTimeout(() => {
+      speicher.schreiben({
+        ort: currentScene?.id || null,
+        welt: world.snapshot(),
+        notizen: notes,
+        gesehen: [...seen],
+        gespraeche: talk.stand(),
+        ende: anklage.ausgang(),
+      });
+    }, 400);
+  }
 
   function renderAkte() {
     akte.innerHTML = '<h2>Ermittlungsakte</h2>';
@@ -457,10 +489,41 @@ export function createInteraction(renderer, host) {
       }
     }
 
+    const reihe = document.createElement('div');
+    reihe.className = 'akte-fuss';
     const b = document.createElement('button');
     b.textContent = 'Schließen';
     b.onclick = () => akte.classList.remove('on');
-    akte.appendChild(b);
+    reihe.appendChild(b);
+
+    /* Neu anfangen.
+       Zwei Klicks, weil es nicht rueckgaengig zu machen ist — und ein Knopf
+       neben „Schliessen", der eine halbe Ermittlung wegwirft, wird sonst
+       genau einmal versehentlich getroffen. */
+    const weg = document.createElement('button');
+    weg.className = 'gefahr';
+    weg.textContent = 'Neue Ermittlung';
+    let sicher = false;
+    weg.onclick = () => {
+      if (!sicher) {
+        sicher = true;
+        weg.textContent = 'Alles verwerfen?';
+        setTimeout(() => { if (sicher) { sicher = false; weg.textContent = 'Neue Ermittlung'; } }, 4000);
+        return;
+      }
+      speicher.loeschen();
+      location.reload();
+    };
+    reihe.appendChild(weg);
+
+    const hinweis = document.createElement('div');
+    hinweis.className = 'akte-hinweis';
+    hinweis.textContent = speicher.moeglich()
+      ? 'Der Stand wird auf diesem Gerät gesichert, in diesem Browser. Kein Konto, nichts auf einem Server.'
+      : 'Dieser Browser lässt kein Sichern zu — im privaten Fenster ist der Stand nach dem Schließen weg.';
+    reihe.appendChild(hinweis);
+
+    akte.appendChild(reihe);
   }
   const updateAkteBtn = () => {
     const n = notes.length + world.items().length;
@@ -475,6 +538,7 @@ export function createInteraction(renderer, host) {
   world.onChange(() => {
     updateAkteBtn();
     if (currentScene) buildSpots(currentScene.spots);
+    sichern();
   });
 
   /* --- Steuerungshilfe ---------------------------------------------------- */
@@ -662,6 +726,10 @@ export function createInteraction(renderer, host) {
         // Manche Funde oeffnen einen Sektor auf der Spinner-Karte.
         if (spot.clue) world.addClue(spot.clue);
         b.remove();
+        // Auch dann sichern, wenn die Notiz schon dastand: `seen` hat sich
+        // geaendert, und ohne das taucht „In die Akte" nach dem Neuladen
+        // wieder auf.
+        sichern();
       };
       pAct.appendChild(b);
     }
@@ -787,6 +855,24 @@ export function createInteraction(renderer, host) {
       where.querySelector('.sector').textContent = scene.sector;
       where.querySelector('.place').textContent = scene.name;
       renderer.cam.panX = 0;
+      sichern();
+    },
+
+    /**
+     * Einen gesicherten Stand zuruecklesen.
+     *
+     * Wird VOR dem ersten Ortswechsel aufgerufen — sonst wuerde das Sichern im
+     * Ortswechsel den Stand ueberschreiben, den es gerade laden will.
+     */
+    ladeStand(stand) {
+      notes.length = 0;
+      for (const n of stand.notizen || []) notes.push(n);
+      seen.clear();
+      for (const id of stand.gesehen || []) seen.add(id);
+      talk.setStand(stand.gespraeche);
+      world.restore(speicher.welteinlesen(stand.welt));
+      if (stand.ende) anklage.setAusgang(stand.ende);
+      updateAkteBtn();
     },
     /** Kurze Schwarzblende, damit ein Ortswechsel nicht springt. */
     async fadeOut() {

@@ -128,12 +128,52 @@ export function createWorld() {
       return true;
     },
 
-    /** Nur zum Sichern/Wiederherstellen und fuer Pruefungen. */
+    /* --- Sichern und Wiederherstellen ------------------------------------ */
+
+    /**
+     * Der Zustand als schlichte Daten.
+     *
+     * Gegenstaende stehen nur mit ihrer Kennung drin, nicht als ganze Objekte:
+     * Ihr Text steht in scenes.js, und ein gespeicherter Text wuerde beim
+     * naechsten Mal von dort abweichen, sobald jemand die Beschreibung
+     * aendert. Was das Spiel selbst weiss, wird nicht mitgeschrieben.
+     */
     snapshot: () => ({
       items: [...items.keys()],
       clues: [...clues],
+      taken: [...taken],
       analysen: analysen.map((a) => ({ id: a.id, rest: a.restBewegungen })),
       moves,
     }),
+
+    /**
+     * Einen gesicherten Zustand zuruecklesen.
+     *
+     * Die Gegenstaende kommen als FERTIGE Objekte herein — wer sie aus ihrer
+     * Kennung heraussucht, ist der Aufrufer (siehe speichern.js). Diese Datei
+     * kennt scenes.js nicht und soll sie auch nicht kennen: Der spaeter
+     * generierte Fall bringt eigene Gegenstaende mit.
+     *
+     * @param {{items?: object[], clues?: string[], taken?: string[],
+     *          analysen?: {item: object, rest: number}[], moves?: number}} stand
+     */
+    restore(stand) {
+      items.clear(); clues.clear(); taken.clear();
+      analysen.length = 0;
+      for (const it of stand.items || []) items.set(it.id, it);
+      for (const c of stand.clues || []) clues.add(c);
+      for (const t of stand.taken || []) taken.add(t);
+      for (const a of stand.analysen || []) {
+        if (!a.item?.analysis) continue;
+        analysen.push({
+          id: a.item.id,
+          item: a.item,
+          restBewegungen: a.rest,
+          ergebnis: a.item.analysis,
+        });
+      }
+      moves = stand.moves || 0;
+      emit();
+    },
   };
 }

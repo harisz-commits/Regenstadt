@@ -5,6 +5,7 @@ import { createOverlay } from './ui/overlay.js';
 import { createInteraction } from './game/interaction.js';
 import { SCENES, START } from './game/scenes.js';
 import { createWorld } from './game/world.js';
+import * as speicher from './game/speichern.js';
 import { guardViewport, isTouch } from './ui/viewport.js';
 
 // Zoom-Sperren und Geraeteraender setzen, bevor irgendetwas gezeichnet wird.
@@ -175,7 +176,28 @@ addEventListener('pointermove', (e) => {
   targetMy = (e.clientY / window.innerHeight - 0.5) * 2;
 });
 
-loadLocation(START);
+/**
+ * Wo es losgeht — und ob dort schon jemand war.
+ *
+ * Liegt ein Stand vor, wird gefragt, statt still fortzusetzen: Wer das Spiel
+ * jemandem zeigen will, soll nicht mitten in einer fremden Ermittlung landen,
+ * und wer weiterspielen will, soll dafuer kein Menue suchen muessen.
+ *
+ * Das Zuruecklesen passiert VOR dem ersten Ortswechsel, weil jeder Ortswechsel
+ * den Stand sichert — andersherum wuerde der Startort ueber das ueberschreiben,
+ * was gerade geladen werden soll.
+ */
+async function starten() {
+  const stand = speicher.lesen();
+  if (stand && await speicher.frageFortsetzen(stand)) {
+    interaction.ladeStand(stand);
+    await loadLocation(stand.ort);
+    return;
+  }
+  await loadLocation(START);
+}
+
+starten();
 fit();
 
 let last = performance.now();

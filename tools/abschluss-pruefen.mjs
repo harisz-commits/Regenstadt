@@ -45,6 +45,10 @@ const schritt = (t) => console.log(`  ${t}`);
 const ok = (b, t) => console.log(`${b ? 'ok  ' : 'FEHL'}  ${t}`);
 
 await page.goto(url, { waitUntil: 'load' });
+// Ein Lauf davor kann einen Stand hinterlassen haben. Immer frisch anfangen,
+// sonst prueft der zweite Durchlauf etwas anderes als der erste.
+const neu = page.locator('#weiter .neu');
+if (await neu.count()) await neu.click();
 await page.waitForFunction(() => window.__ready === true, { timeout: 30000 });
 await page.evaluate(() => window.__regenstadt.freeze());
 schritt('Spiel geladen');
