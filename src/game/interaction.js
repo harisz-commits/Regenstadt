@@ -127,6 +127,18 @@ const CSS = `
   display: grid; grid-template-columns: auto 1fr; gap: 0 26px; align-items: start;
 }
 #panel.on { transform: translateY(0); }
+/* Die geschlossene Tafel schluckt Klicks, obwohl sie nicht zu sehen ist.
+   Gemessen, nachdem sie einmal offen war: Auf dem Bild ist sie weg, aber
+   getBoundingClientRect meldet sie weiter an ihrer alten Stelle (595 bis 900
+   von 900), und elementFromPoint trifft dort sie statt des Punktes. Der
+   Compositor hat sie verschoben, die Trefferpruefung im Haupt-Thread nicht.
+   Folge im Spiel: Der erste Klick auf einen Untersuchungspunkt ging durch,
+   danach war das untere Bilddrittel tot.
+   Deckkraft oder Position anzufassen wuerde wieder an Geometrie haengen —
+   pointer-events tut das nicht.
+   (ACHTUNG: keine Backticks in diesem Kommentar, er steht in einem
+   Template-Literal. Genau daran ist der Build hier schon einmal gescheitert.) */
+#panel:not(.on) { pointer-events: none; }
 #panel .shot {
   grid-row: 1 / span 3; width: min(38vw, 340px); aspect-ratio: 4 / 3;
   object-fit: cover; display: none;

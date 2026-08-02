@@ -49,8 +49,24 @@ export async function askModel(body, key) {
   if (typeof system !== 'string' || !Array.isArray(messages) || messages.length === 0) {
     return { status: 400, json: { error: 'system (Text) und messages (Liste) werden gebraucht.' } };
   }
-  if (messages.length > 40) {
-    return { status: 400, json: { error: 'Gesprächsverlauf zu lang.' } };
+  /*
+   * KUERZEN, NICHT ABLEHNEN.
+   *
+   * Hier stand `if (messages.length > 40) return 400`. Gemeldet wurde: nach
+   * dreizehn bis fuenfzehn Fragen an dieselbe Figur blieb das Verhoer mit
+   * „Gespraechsverlauf zu lang" stehen, und jede weitere Frage lief in
+   * dieselbe Wand — eine Sackgasse mitten im Spiel.
+   *
+   * Die Pruefung war schon damals ueberfluessig: Zwei Zeilen tiefer wird der
+   * Verlauf ohnehin auf die letzten Wechsel beschnitten. Sie hat also einen
+   * Aufruf abgewiesen, den sie selbst haette bedienen koennen.
+   *
+   * Was bleibt, ist eine Schranke gegen missbraeuchlich grosse Anfragen. Die
+   * liegt jetzt so hoch, dass sie im Spiel nicht erreichbar ist, und ihre
+   * Meldung ist keine, die je ein Spieler zu sehen bekommt.
+   */
+  if (messages.length > 400) {
+    return { status: 413, json: { error: 'Anfrage zu gross.' } };
   }
 
   const payload = {

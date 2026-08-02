@@ -61,6 +61,11 @@ const CSS = `
   font-size: 13px; line-height: 1.65; color: rgba(255,214,168,.72); font-style: italic;
   max-width: 62ch;
 }
+/* Wie viele Fragen noch — erst kurz vor Schluss, siehe zeigeFragen(). */
+#talk .ask .sug .rest {
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(255,190,116,.6); padding-bottom: 2px;
+}
 #talk .ask .sug.laedt button { opacity: .5; }
 #talk .ask .sug.laedt::after {
   content: 'Weitere Fragen …';
@@ -195,29 +200,40 @@ export function createTalk(host) {
   /**
    * Wann ein Gespräch ausgereizt ist.
    *
-   * Irgendwann dreht man sich im Kreis, und das Modell erfindet lieber etwas,
-   * als nichts zu sagen. Nach neun Fragen ohne Fortschritt sagt der Ermittler
-   * selbst, dass hier nichts mehr kommt.
+   * Neun Fragen am Stück, dann sagt der Ermittler selbst, dass hier nichts mehr
+   * kommt. Erst wenn DRAUSSEN etwas dazukommt, ist wieder etwas zu fragen.
    *
-   * „Fortschritt" heißt: eine [SPUR] aus dem Gespräch — oder eine neue Notiz,
-   * die anderswo dazugekommen ist. Genau deshalb ist die Sperre nicht
-   * endgültig: Wer draußen etwas findet, hat wieder etwas zu fragen.
+   * Gezählt werden ALLE Fragen, nicht nur die fruchtlosen.
+   *
+   * Die erste Fassung zählte nur Fragen ohne neue [SPUR] und setzte bei jeder
+   * Spur auf null zurück. Das klang vernünftig und war es nicht: Bei der ersten
+   * Figur ist anfangs fast jede Antwort neu, also kam laufend eine Spur, also
+   * sprang der Zähler laufend zurück. Gemeldet wurden dreizehn bis fünfzehn
+   * Fragen am Stück — und danach lief das Gespräch in die Längengrenze des
+   * Endpunkts und blieb mit einer Fehlermeldung stehen.
+   *
+   * Auch die eigene Spur zählt deshalb NICHT als Fortschritt von draußen (siehe
+   * `ask`): Sonst verlängert jedes Gespräch sich selbst, und genau das war der
+   * Fehler.
    */
-  const MAX_OHNE_FORTSCHRITT = 9;
-  /** @type {Map<string, {ohne: number, standNotizen: number}>} */
+  const MAX_FRAGEN = 9;
+  /** Ab hier wird angesagt, dass es zu Ende geht. */
+  const WARNUNG_AB = 3;
+  /** @type {Map<string, {gestellt: number, standNotizen: number}>} */
   const stand = new Map();
 
   function zustand(c) {
-    if (!stand.has(c.id)) stand.set(c.id, { ohne: 0, standNotizen: host.getNotes().length });
+    if (!stand.has(c.id)) stand.set(c.id, { gestellt: 0, standNotizen: host.getNotes().length });
     const z = stand.get(c.id);
     // Neues in der Akte macht das Gespräch wieder sinnvoll.
     if (host.getNotes().length > z.standNotizen) {
-      z.ohne = 0;
+      z.gestellt = 0;
       z.standNotizen = host.getNotes().length;
     }
     return z;
   }
-  const istErschoepft = (c) => zustand(c).ohne >= MAX_OHNE_FORTSCHRITT;
+  const offeneFragen = (c) => Math.max(0, MAX_FRAGEN - zustand(c).gestellt);
+  const istErschoepft = (c) => offeneFragen(c) === 0;
 
   function zeigeErschoepft() {
     sug.classList.remove('laedt');
@@ -236,6 +252,21 @@ export function createTalk(host) {
 
   function zeigeFragen(fragen) {
     sug.innerHTML = '';
+
+    /* Vorwarnen, statt die Tuer zuzuschlagen.
+       Neun Fragen sind schnell weg, und ohne Ansage fuehlt sich das Ende des
+       Gespraechs wie ein Fehler an. Erst ab drei uebrigen — davor waere es nur
+       ein Zaehler, der die Aufmerksamkeit vom Gespraech wegzieht. */
+    const uebrig = offeneFragen(char);
+    if (uebrig <= WARNUNG_AB) {
+      const w = document.createElement('div');
+      w.className = 'rest';
+      w.textContent = uebrig === 1
+        ? 'Eine Frage noch, dann ist der Faden hier zu Ende.'
+        : `Noch ${uebrig} Fragen, dann ist hier nichts mehr zu holen.`;
+      sug.appendChild(w);
+    }
+
     fragen.forEach((q, i) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -336,6 +367,9 @@ export function createTalk(host) {
 
   async function ask(question) {
     if (busy || !char) return;
+    // Die Sperre gilt auch fuer die freie Eingabe. Ohne diese Zeile liesse
+    // sich die zehnte Frage tippen, obwohl die Schaltflaechen weg sind.
+    if (istErschoepft(char)) { zeigeErschoepft(); return; }
     setBusy(true);
     const slot = addTurn(question, '');
     slot.innerHTML = '<span class="thinking">…' + char.name + ' überlegt</span>';
@@ -348,7 +382,11 @@ export function createTalk(host) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: buildSystem(char, host.getNotes(), host.getPlace(), host.getInnen?.()),
-          messages: history,
+          // Nur die letzten Wechsel mitschicken. Neun Fragen ergeben achtzehn
+          // Eintraege, das passt ohnehin — aber der Endpunkt kuerzt sowieso auf
+          // die letzten 24, und was er ohnehin wegwirft, muss nicht durch die
+          // Leitung.
+          messages: history.slice(-18),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -362,12 +400,10 @@ export function createTalk(host) {
       slot.textContent = clean;
       history.push({ role: 'model', text: clean });
 
-      // Fortschritt zaehlen, BEVOR die naechsten Fragen geholt werden.
+      // Zaehlen, BEVOR die naechsten Fragen geholt werden — sonst laedt der
+      // Vorlauf noch vier Fragen fuer ein Gespraech, das gerade zu Ende ist.
       const z = zustand(char);
-      if (m) { z.ohne = 0; } else { z.ohne += 1; }
-
-      // Neue Fragen zum neuen Stand — nebenher, damit die Antwort sofort steht.
-      ladeFragen();
+      z.gestellt += 1;
 
       if (m) {
         const spur = m[1].trim();
@@ -376,7 +412,15 @@ export function createTalk(host) {
         const doppelt = spur.toLowerCase().startsWith(char.name.toLowerCase());
         const label = doppelt ? kurz(spur, 46) : `${char.name}: ${kurz(spur, 38)}`;
         host.addNote(label, spur);
+        // Der Stand wird MITGEZOGEN: Was diese Figur selbst preisgegeben hat,
+        // ist kein Fund von draussen und darf das Gespraech nicht verlaengern.
+        // Genau diese Zeile fehlte — jede Spur setzte den Zaehler zurueck.
+        z.standNotizen = host.getNotes().length;
       }
+
+      // Neue Fragen zum neuen Stand. Nebenher, damit die Antwort sofort steht —
+      // aber NACH der Notiz, damit sie die frische Spur schon kennen.
+      ladeFragen();
     } catch (e) {
       slot.classList.add('err');
       slot.textContent =
@@ -421,7 +465,15 @@ export function createTalk(host) {
     stand: () => [...stand.entries()].map(([id, z]) => [id, { ...z }]),
     setStand(paare) {
       stand.clear();
-      for (const [id, z] of paare || []) stand.set(id, { ...z });
+      for (const [id, z] of paare || []) {
+        stand.set(id, {
+          // `ohne` ist der alte Name aus der Fassung, die nur fruchtlose Fragen
+          // zaehlte. Einen gesicherten Stand deswegen wegzuwerfen waere
+          // unhoeflich — er wird uebernommen, auch wenn er niedriger liegt.
+          gestellt: z?.gestellt ?? z?.ohne ?? 0,
+          standNotizen: z?.standNotizen ?? host.getNotes().length,
+        });
+      }
     },
 
     /** Fragen vorladen, solange der Spieler noch die Beschreibung liest. */

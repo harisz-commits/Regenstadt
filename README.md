@@ -182,6 +182,30 @@ Zwei Eigenschaften muss man kennen, weil sie sonst wie Fehler aussehen: Der
 Stand haengt an Browser UND Geraet (Chrome und Safari sind zwei
 Ermittlungen), und im privaten Fenster ist er nach dem Schliessen weg.
 
+### Wann ein Verhoer zu Ende ist
+
+Neun Fragen an eine Figur, dann sagt der Ermittler selbst, dass hier nichts
+mehr kommt. Erst ein Fund DRAUSSEN macht das Gespraech wieder auf. Ab drei
+uebrigen Fragen wird vorgewarnt, damit die Sperre nicht aus dem Nichts kommt.
+
+Gezaehlt werden ALLE Fragen, nicht nur die fruchtlosen. Die erste Fassung
+zaehlte nur Fragen ohne neue `[SPUR]` und setzte bei jeder Spur zurueck. Das
+klang vernuenftig und war es nicht: Bei der ersten Figur ist anfangs fast jede
+Antwort neu, also kam laufend eine Spur, also sprang der Zaehler laufend
+zurueck — gemeldet wurden dreizehn bis fuenfzehn Fragen am Stueck. Auch die
+eigene Spur zaehlt deshalb nicht mehr als Fortschritt; sonst verlaengert jedes
+Gespraech sich selbst.
+
+Dahinter lief das Verhoer in eine zweite Wand: `api/chat.js` lehnte lange
+Verlaeufe mit „Gespraechsverlauf zu lang" ab, statt sie zu kuerzen — obwohl
+zwei Zeilen tiefer ohnehin auf die letzten Wechsel beschnitten wird. Die
+Pruefung hat also einen Aufruf abgewiesen, den sie selbst haette bedienen
+koennen, und das Gespraech blieb mitten im Spiel stehen. Jetzt wird gekuerzt;
+die verbliebene Schranke liegt so hoch, dass sie im Spiel nicht erreichbar ist.
+
+`node tools/verhoer-grenze.mjs` fragt stur dreizehnmal und schaut, wo Schluss
+ist. Das laesst sich nur messen, nicht behaupten.
+
 ### Zeit
 
 Die Wartezeit laeuft in **Ortswechseln**, nicht in Sekunden. Eine Uhr zwingt
@@ -323,6 +347,7 @@ api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt servers
 tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen (166 Zusicherungen)
 tools/abschluss-pruefen.mjs  den Abschluss im echten Browser durchspielen
 tools/stand-pruefen.mjs  pruefen, dass ein Spielstand ein Neuladen ueberlebt
+tools/verhoer-grenze.mjs  pruefen, dass ein Verhoer nach neun Fragen endet
 tools/beschneiden.mjs   eingebrannte schwarze Balken von einer Platte schneiden
 tools/details.mjs       Nahaufnahmen fuer Untersuchungspunkte erzeugen
 tools/verkleinern.mjs   Bilder auf die Groesse bringen, in der sie gezeigt werden
