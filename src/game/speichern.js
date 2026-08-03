@@ -28,10 +28,15 @@
  */
 
 import { SCENES, START } from './scenes.js';
+import { FAELLE } from './fall.js';
 
 const SCHLUESSEL = 'regenstadt.stand';
 /** Welcher Fall zuletzt gewaehlt wurde — ueberlebt das Neuladen. */
 const FALL_SCHLUESSEL = 'regenstadt.fall';
+/** Welche Faelle schon abgeschlossen sind. Schaltet die Fallwahl frei. */
+const FERTIG_SCHLUESSEL = 'regenstadt.abgeschlossen';
+/** Einmalmarke „nicht fragen, sofort starten" — siehe nimmDirekt(). */
+const DIREKT_SCHLUESSEL = 'regenstadt.direkt';
 /** Bei einem Bruch im Aufbau hochzaehlen — alte Staende werden dann verworfen. */
 const FASSUNG = 1;
 
@@ -111,6 +116,78 @@ export function gemerkterFall() {
   try { return s?.getItem(FALL_SCHLUESSEL) || null; } catch { return null; }
 }
 
+/* --- Welche Faelle schon durch sind ---------------------------------------
+   Der Spielstand wird beim Anfangen eines neuen Falls weggeworfen; DASS ein
+   Fall abgeschlossen wurde, muss das ueberleben. Sonst waere der zweite Fall
+   nach dem ersten Durchlauf wieder verschlossen. */
+
+/** Nach dem Nachspann aufrufen. */
+export function merkeAbgeschlossen(id) {
+  const s = speicher();
+  if (!s) return;
+  try {
+    const liste = new Set(abgeschlossene());
+    liste.add(id);
+    s.setItem(FERTIG_SCHLUESSEL, JSON.stringify([...liste]));
+  } catch { /* dann eben nicht */ }
+}
+
+/** @returns {string[]} Kennungen abgeschlossener Faelle */
+export function abgeschlossene() {
+  const s = speicher();
+  try {
+    const roh = s?.getItem(FERTIG_SCHLUESSEL);
+    const l = roh ? JSON.parse(roh) : [];
+    return Array.isArray(l) ? l : [];
+  } catch { return []; }
+}
+
+/**
+ * Einmalmarke: Der naechste Start soll NICHT fragen.
+ *
+ * „Nächster Fall" und „Denselben Fall von vorn" auf dem Abschlussbild laden
+ * die Seite neu — der Spieler hat gerade gewaehlt und soll nicht sofort
+ * dieselbe Frage noch einmal bekommen. Die Marke gilt genau einen Start lang.
+ */
+export function merkeDirekt() {
+  const s = speicher();
+  if (s) try { s.setItem(DIREKT_SCHLUESSEL, '1'); } catch { /* dann eben nicht */ }
+}
+export function nimmDirekt() {
+  const s = speicher();
+  if (!s) return false;
+  try {
+    const da = s.getItem(DIREKT_SCHLUESSEL) === '1';
+    s.removeItem(DIREKT_SCHLUESSEL);
+    return da;
+  } catch { return false; }
+}
+
+/**
+ * Welche Faelle zur Wahl stehen.
+ *
+ * Freigeschaltet ist der erste immer und jeder weitere, sobald der davor
+ * abgeschlossen ist. Der naechste, noch nicht gespielte steht mit in der
+ * Liste — er ist ja das Ziel.
+ *
+ * Wer schon beim zweiten Fall war, hat den ersten hinter sich, auch wenn das
+ * damals niemand aufgeschrieben hat: Der gemerkte Fall zaehlt rueckwirkend
+ * alles davor als erledigt. Sonst stuenden alte Spielstaende ploetzlich vor
+ * einer Wahl, die sie sich laengst verdient haben.
+ */
+export function freigeschaltet() {
+  const fertig = new Set(abgeschlossene());
+  const bisher = FAELLE.findIndex((f) => f.id === gemerkterFall());
+  for (let i = 0; i < bisher; i++) fertig.add(FAELLE[i].id);
+
+  const out = [];
+  for (const f of FAELLE) {
+    out.push({ fall: f, fertig: fertig.has(f.id) });
+    if (!fertig.has(f.id)) break;   // der uebernaechste bleibt zu
+  }
+  return out;
+}
+
 /**
  * Aus dem gesicherten Zustand wieder etwas machen, mit dem die Welt arbeiten
  * kann: Kennungen zurueck in Gegenstaende.
@@ -161,6 +238,21 @@ const CSS = `
 #weiter button:hover { background: rgba(126,190,230,.16); border-color: rgba(126,190,230,.6); }
 #weiter button.ja { color: #ffbe74; border-color: rgba(255,190,116,.45); background: rgba(255,190,116,.08); }
 #weiter button.ja:hover { background: rgba(255,190,116,.18); }
+#weiter .liste {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 30px; width: min(440px, 88vw);
+}
+#weiter .liste button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  text-align: left; text-transform: none; letter-spacing: normal; padding: 15px 18px;
+}
+#weiter .liste .nr { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; opacity: .6; }
+#weiter .liste .ti { font-size: 14px; letter-spacing: .05em; color: #dbe9f7; }
+#weiter .liste button.ja .ti { color: #ffd9a8; }
+#weiter .liste .st { font-size: 11px; opacity: .5; }
+/* Der weisse Standard-Fokusrahmen des Browsers schlaegt in diesem Bild ein
+   Loch. Sichtbar bleiben muss er trotzdem — hier wird er nur eingefaerbt. */
+#weiter button:focus-visible { outline: 1px solid rgba(255,190,116,.75); outline-offset: 3px; }
 `;
 
 /**
@@ -205,6 +297,65 @@ export function frageFortsetzen(stand) {
     el.querySelector('.ja').onclick = () => schliessen(true);
     el.querySelector('.neu').onclick = () => { loeschen(); schliessen(false); };
     el.querySelector('.ja').focus();
+  });
+}
+
+/**
+ * Welchen Fall — gefragt wird nur, wenn es etwas zu wählen gibt.
+ *
+ * Wer den ersten Fall abgeschlossen hat, muss ihn nicht noch einmal fuehren,
+ * um an den zweiten zu kommen. Und wer ihn noch einmal fuehren will, soll das
+ * duerfen: Er geht anders aus, je nachdem, wen man anklagt.
+ *
+ * Solange nur ein Fall freigeschaltet ist, erscheint hier gar nichts — ein
+ * Menue mit einem einzigen Eintrag ist kein Menue, sondern eine Verzoegerung.
+ *
+ * @returns {Promise<string|null>} Kennung des gewaehlten Falls, oder nichts
+ */
+export function frageFall() {
+  const wahl = freigeschaltet();
+  if (wahl.length < 2) return Promise.resolve(null);
+
+  const style = document.createElement('style');
+  style.textContent = CSS;
+  document.head.appendChild(style);
+
+  const el = document.createElement('div');
+  el.id = 'weiter';
+  el.innerHTML = `
+    <div class="t">REGENSTADT</div>
+    <div class="z">Womit fängst du an?</div>
+    <div class="d">Ein abgeschlossener Fall bleibt offen für einen zweiten
+      Durchgang — er geht anders aus, je nachdem, wen du anklagst.</div>
+    <div class="liste"></div>`;
+
+  const liste = el.querySelector('.liste');
+  // Der naechste, noch nicht gespielte Fall ist der hervorgehobene: Wer hier
+  // steht, ist meistens deshalb hier.
+  const naechster = wahl.find((w) => !w.fertig) || wahl[wahl.length - 1];
+  wahl.forEach((w, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (w === naechster) b.className = 'ja';
+    b.innerHTML = '<span class="nr"></span><span class="ti"></span><span class="st"></span>';
+    b.querySelector('.nr').textContent = `Fall ${i + 1}`;
+    b.querySelector('.ti').textContent = w.fall.titel;
+    b.querySelector('.st').textContent = w.fertig
+      ? 'Abgeschlossen — noch einmal führen'
+      : 'Noch nicht geführt';
+    b.dataset.fall = w.fall.id;
+    liste.appendChild(b);
+  });
+  document.body.appendChild(el);
+
+  return new Promise((fertig) => {
+    liste.onclick = (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      el.remove(); style.remove();
+      fertig(b.dataset.fall);
+    };
+    liste.querySelector('button.ja')?.focus();
   });
 }
 

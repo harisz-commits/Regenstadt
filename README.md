@@ -2,12 +2,17 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-ZWEI FAELLE. Fall 1: zwanzig Orte in sechs Sektoren, zehn Figuren, die von einem Sprachmodell
-antworten, eine Beweiskette mit Laborbefund, ein Flugauto, um zwischen den
-Sektoren zu reisen — und ein Ende, das man erreichen kann.
+ZWEI FAELLE. Fall 1 „Elf Totenscheine": zwanzig Orte in sechs Sektoren, zehn
+Figuren, die von einem Sprachmodell antworten, eine Beweiskette mit
+Laborbefund, ein Flugauto, um zwischen den Sektoren zu reisen — und ein Ende,
+das man erreichen kann.
 
-Fall 2 „Die zweite Schicht": sieben Orte in drei Sektoren, vier Figuren,
-Winter statt Dauerregen.
+Fall 2 „Der Chor": achtzehn Orte in sieben Sektoren, neun Figuren, Winter statt
+Dauerregen — und unter dem vierten Becken eines stillgelegten Klaerwerks etwas,
+das dort nicht sein kann.
+
+Wer Fall 1 abgeschlossen hat, kann beim naechsten Neustart waehlen, mit welchem
+er anfaengt (`tools/fallwahl-pruefen.mjs`).
 
 ```
 npm install
@@ -18,7 +23,8 @@ npm run dev        # http://127.0.0.1:5173
 
 Unter `src/faelle/<name>/` liegen Orte, Sektoren, Figuren, Loesung und
 Meldungen. Die Mechanik in `src/game/` liest sie und weiss nicht, welchen Fall
-sie spielt. Fall 2 hat deshalb KEINE Zeile Mechanik gebraucht.
+sie spielt. Fall 2 hat deshalb KEINE Zeile Mechanik gebraucht — auch seine
+zweite Fassung nicht, die aus sieben Orten achtzehn gemacht hat.
 
 Der Kniff sind lebende ES-Modul-Bindungen: `scenes.js` und die anderen fuehren
 ihre Daten als `export let` aus und setzen sie beim Fallwechsel neu. Jeder
@@ -28,7 +34,15 @@ aendert — deshalb hat der Umbau keine Aufrufstelle angefasst.
 ```
 tools/faelle-pruefen.mjs      Regeln, die fuer JEDEN Fall gelten
 tools/fallwechsel-pruefen.mjs der Uebergang im echten Browser
+tools/fallwahl-pruefen.mjs    die Fallwahl beim Neustart
 ```
+
+`faelle-pruefen.mjs` prueft nicht nur, dass jeder Hinweis irgendwo herkommt,
+sondern SIMULIERT den Fall bis zum Stillstand: Was ist erreichbar, wenn man
+alles nimmt, was mit dem Erreichten schon zu bekommen ist? Ein Gestaendnis,
+dessen Bedingung nur aus einem spaeteren Gestaendnis derselben Figur faellt,
+ist eine Schlaufe, aus der niemand herauskommt — und beim Spielen faellt so
+etwas erst auf, wenn man an genau die Stelle kommt.
 
 **F1** öffnet die Bildsteuerung mit allen Reglern und der Frame-Zeit-Kurve.
 
@@ -397,6 +411,7 @@ api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt servers
 tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen (166 Zusicherungen)
 tools/abschluss-pruefen.mjs  den Abschluss im echten Browser durchspielen
 tools/stand-pruefen.mjs  pruefen, dass ein Spielstand ein Neuladen ueberlebt
+tools/fallwahl-pruefen.mjs  pruefen, dass die Fallwahl beim Neustart stimmt
 tools/verhoer-grenze.mjs  pruefen, dass ein Verhoer nach neun Fragen endet
 tools/beschneiden.mjs   eingebrannte schwarze Balken von einer Platte schneiden
 tools/details.mjs       Nahaufnahmen fuer Untersuchungspunkte erzeugen

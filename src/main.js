@@ -192,12 +192,28 @@ async function starten() {
   // Zuerst den Fall setzen, dann erst den Stand lesen: Der Stand nennt Orte,
   // die es nur im richtigen Fall gibt.
   setzeFall(speicher.gemerkterFall() || fall().id);
+  // Kommt der Start von einem Knopf, auf dem gerade gewaehlt wurde („Nächster
+  // Fall", „Denselben Fall von vorn"), wird nicht noch einmal gefragt. Die
+  // Marke gilt genau diesen einen Start lang.
+  const direkt = speicher.nimmDirekt();
   const stand = speicher.lesen();
   if (stand && await speicher.frageFortsetzen(stand)) {
     interaction.ladeStand(stand);
     await loadLocation(stand.ort);
     return;
   }
+
+  // Neue Ermittlung: Sind mehrere Faelle freigeschaltet, wird gewaehlt.
+  if (!direkt) {
+    const gewaehlt = await speicher.frageFall();
+    if (gewaehlt && gewaehlt !== fall().id) {
+      setzeFall(gewaehlt);
+      speicher.merkeFall(gewaehlt);
+      speicher.loeschen();
+    }
+  }
+  // START ist eine lebende Bindung aus scenes.js und zeigt nach setzeFall()
+  // bereits auf den Startort des gewaehlten Falls — siehe game/fall.js.
   await loadLocation(START);
 }
 

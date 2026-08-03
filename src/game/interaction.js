@@ -19,6 +19,7 @@ import { createSpinner } from './spinner.js';
 import { createAnklage } from './anklage.js';
 import * as speicher from './speichern.js';
 import { createMeldung } from './meldung.js';
+import { fall } from './fall.js';
 
 const CSS = `
 #hs-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
@@ -467,14 +468,19 @@ export function createInteraction(renderer, host) {
       ...notes,
       ...world.items().map((i) => ({ label: i.name, text: i.text })),
     ],
-    onEnde: () => sichern(),
-    neuAnfangen: () => { speicher.loeschen(); location.reload(); },
+    // Dass ein Fall durch ist, muss den weggeworfenen Spielstand ueberleben —
+    // daran haengt die Fallwahl beim naechsten Neustart.
+    onEnde: () => { speicher.merkeAbgeschlossen(fall().id); sichern(); },
+    neuAnfangen: () => { speicher.loeschen(); speicher.merkeDirekt(); location.reload(); },
     // Den naechsten Fall anfangen: Der Stand des alten wird verworfen, der
     // gewuenschte Fall vorgemerkt, dann neu geladen. Ueber den Speicher und
     // nicht ueber setzeFall im laufenden Bild, weil sonst mitten im Spiel
     // Platten, Punkte, Figuren und Karte gleichzeitig wechseln muessten —
     // ein Neustart ist hier ehrlicher als ein Umbau bei laufendem Betrieb.
-    naechsterFall: (id) => { speicher.loeschen(); speicher.merkeFall(id); location.reload(); },
+    naechsterFall: (id) => {
+      speicher.loeschen(); speicher.merkeFall(id); speicher.merkeDirekt();
+      location.reload();
+    },
   });
 
   // Meldungen: was sich woanders geaendert hat. Bleiben stehen, bis sie

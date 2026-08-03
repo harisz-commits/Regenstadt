@@ -84,7 +84,13 @@ if (arg('backdrop', '0') === '1') {
    Werkzeug nebenbei genau den Pfad, den ein Spieler nimmt. */
 const fallId = arg('fall', null);
 if (fallId) {
-  await page.evaluate((id) => localStorage.setItem('regenstadt.fall', id), fallId);
+  await page.evaluate((id) => {
+    localStorage.setItem('regenstadt.fall', id);
+    // Dieselbe Einmalmarke, die auch der Knopf „Nächster Fall" setzt: Sonst
+    // erscheint beim Start die Fallwahl und wartet auf einen Klick — das
+    // Werkzeug haengt dann in waitForFunction, weil noch kein Ort geladen ist.
+    localStorage.setItem('regenstadt.direkt', '1');
+  }, fallId);
   await page.reload({ waitUntil: 'load' });
   const neu = page.locator('#weiter .neu');
   if (await neu.count()) await neu.click();

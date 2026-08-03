@@ -212,3 +212,47 @@ Zeitpunkten, den Regen durch Differenz gegen eine regenfreie Aufnahme
 freigestellt, und die Verschiebung per Kreuzkorrelation bestimmt. Ergebnis
 +9 px bei 0,05 s, also nach unten. Ohne das Freistellen misst man nur den
 unbewegten Hintergrund und bekommt immer 0 heraus.
+
+## Fall 2 wurde erweitert, nicht ersetzt
+
+Die zweite Fassung von Fall 2 sollte deutlich groesser werden und eine ganz
+andere Sorte Geschichte erzaehlen — keine zweite Verwaltungsaffaere. Der
+naheliegende Weg waere gewesen, die sieben vorhandenen Orte wegzuwerfen und
+achtzehn neue zu bauen.
+
+Dagegen sprach etwas Handfestes: Ein Ort ist nicht seine Geschichte. Das
+Klaerbecken, die Maschinenhalle, das Werksbuero, die Siedlung — das sind
+Platten, Nahaufnahmen und geprueft gesetzte Punkte, und keines davon widerspricht
+der neuen Geschichte. Was sich geaendert hat, ist die Antwort auf die Frage,
+WOFUER nachts gearbeitet wurde. Die Nachtschicht hat nicht Wasser geklaert,
+sondern gegraben.
+
+Deshalb sind elf Orte neu und sieben geblieben, mit umgeschriebenen Texten.
+Der Weg nach unten fuehrt dadurch durch lauter gewoehnliche Raeume, und genau
+davon lebt die Wendung: Ein Schacht unter einem Klaerwerk ist nur dann
+unheimlich, wenn das Klaerwerk vorher langweilig war.
+
+Drei Platten kommen aus Fall 1 zurueck (Wohnung, Leichenhalle, Archiv). Die
+Leichenhalle musste trotzdem neu erzeugt werden — in der Fassung aus Fall 1
+steht niemand darin, und ein Personenpunkt auf einem Bild ohne Person ist
+genau der Fehler, ueber den beim letzten Durchlauf gestolpert wurde.
+
+## Die Fallwahl fragt nur, wenn es etwas zu waehlen gibt
+
+Wer Fall 1 abgeschlossen hat, soll Fall 2 anfangen koennen, ohne den ersten
+noch einmal zu fuehren. Das ist eine Zeile Logik und drei Faelle, die man
+leicht verwechselt:
+
+  1. Beim allerersten Start gibt es nichts zu waehlen. Ein Menue mit einem
+     Eintrag ist keine Wahl, sondern eine Verzoegerung.
+  2. Nach „Nächster Fall" darf nicht gefragt werden. Der Spieler hat gerade
+     gewaehlt; dieselbe Frage sofort noch einmal zu stellen sieht aus, als
+     waere der Klick verlorengegangen. Dafuer gibt es eine Einmalmarke im
+     Browserspeicher, die genau einen Start lang gilt.
+  3. Bei „Neu beginnen" mit abgeschlossenem Fall muss gefragt werden.
+
+Dass ein Fall durch ist, steht getrennt vom Spielstand: Der Stand wird beim
+Anfangen eines neuen Falls weggeworfen, die Freischaltung darf das nicht
+mitnehmen. Und wer schon beim zweiten Fall war, bekommt den ersten
+rueckwirkend als erledigt angerechnet — sonst stuenden aeltere Staende vor
+einer Wahl, die sie sich laengst verdient haben.

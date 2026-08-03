@@ -1,9 +1,12 @@
 /**
- * FALL 2 — „Die zweite Schicht".
+ * FALL 2 — „Der Chor".
  *
  * Dieselbe Form wie Fall 1: Orte, Sektoren, Figuren, Loesung, Meldungen. Die
  * Mechanik in src/game/ musste dafuer nicht angefasst werden — genau dafuer
- * war der Umbau auf das Fallformat da.
+ * war der Umbau auf das Fallformat da. Auch nicht fuer die zweite Fassung:
+ * aus sieben Orten wurden achtzehn, aus vier Figuren neun, und aus einem Fall
+ * ueber unbezahlte Nachtarbeit einer darueber, wofuer sie geleistet wurde.
+ * Geaendert hat sich dabei kein einziger Aufruf im Spiel.
  */
 
 import { ORTE } from './orte.js';
@@ -14,7 +17,7 @@ import { MELDUNGEN } from './meldungen.js';
 
 export const FALL = {
   id: 'fall-2',
-  titel: 'Die zweite Schicht',
+  titel: 'Der Chor',
   start: 'f2-becken',
   praemisse: PRAEMISSE,
   orte: ORTE,
