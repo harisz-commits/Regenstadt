@@ -312,6 +312,7 @@ const CSS = `
   text-shadow: 0 1px 6px rgba(0,0,0,.9);
 }
 #hint-bar.on { opacity: 1; }
+#hint-bar .fassung { display: block; margin-top: 6px; opacity: .45; letter-spacing: .1em; }
 
 /* Schwarzblende beim Ortswechsel */
 #fade {
@@ -411,6 +412,15 @@ export function createInteraction(renderer, host) {
   hintBar.textContent = touch
     ? 'Leuchtpunkte zeigen, wo es etwas gibt · Pfeile führen weiter · ziehen zum Umsehen'
     : 'Leuchtpunkte zeigen, wo es etwas gibt · erlischt einer, ist dort nichts mehr';
+  /* Die Kennung des laufenden Standes — siehe vite.config.js.
+     Ein gemeldeter Fehler war zum Zeitpunkt der Meldung laengst behoben und
+     veroeffentlicht; im Browser lief nur noch die alte Seite. Von aussen war
+     das nicht zu unterscheiden. Jetzt beantwortet ein Bildschirmfoto die
+     Frage von selbst. */
+  const stempel = document.createElement('span');
+  stempel.className = 'fassung';
+  stempel.textContent = `Fassung ${__FASSUNG__} · ${__GEBAUT__}`;
+  hintBar.appendChild(stempel);
   document.body.appendChild(hintBar);
 
   /* --- Akte -------------------------------------------------------------- */

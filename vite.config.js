@@ -1,5 +1,29 @@
 import { defineConfig, loadEnv } from 'vite';
+import { execSync } from 'node:child_process';
 import { askModel } from './api/chat.js';
+
+/**
+ * Welche Fassung laeuft da eigentlich?
+ *
+ * Gemeldet wurde ein Fehler, der zu dem Zeitpunkt schon behoben und
+ * veroeffentlicht war — nur lief im Browser noch die alte Seite. Das liess
+ * sich von aussen nicht unterscheiden: Ein Bildschirmfoto sieht gleich aus,
+ * egal welches Buendel dahintersteckt.
+ *
+ * Deshalb steht die Kennung des Standes jetzt IM SPIEL, in der Hilfezeile
+ * unter dem Fragezeichen. Damit beantwortet ein Bildschirmfoto die Frage
+ * „veroeffentlicht oder nur im Zwischenspeicher?" von selbst.
+ */
+function fassung() {
+  const versuche = [
+    () => execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(),
+    // Auf Vercel gibt es kein vollstaendiges Arbeitsverzeichnis, aber die
+    // Umgebung nennt den Commit.
+    () => (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 7),
+  ];
+  for (const v of versuche) { try { const s = v(); if (s) return s; } catch { /* weiter */ } }
+  return 'lokal';
+}
 
 /**
  * Im Entwicklungsbetrieb bildet dieses Plugin denselben Endpunkt nach, den
@@ -53,6 +77,10 @@ export default defineConfig(({ mode }) => {
     preview: { host: '127.0.0.1', port: 4173 },
     build: { target: 'es2022', assetsInlineLimit: 0 },
     assetsInclude: ['**/*.glsl'],
+    define: {
+      __FASSUNG__: JSON.stringify(fassung()),
+      __GEBAUT__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')),
+    },
     plugins: [chatEndpoint(env)],
   };
 });
