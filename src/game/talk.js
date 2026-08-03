@@ -272,6 +272,28 @@ export function createTalk(host) {
       stand.set(c.id, { gestellt: 0, standNotizen: host.getNotes().length, gefragt: [], gesagt: [] });
     }
     const z = stand.get(c.id);
+
+    /* HIER WIRD EIN UNVOLLSTAENDIGER EINTRAG GEHEILT, UND ZWAR IMMER.
+     *
+     * Gemeldet aus dem Spiel: „Keine Antwort — undefined is not an object
+     * (evaluating 'd.gefragt.push')", und zwar zuverlaessig nach einer
+     * laengeren Pause. Die Pause war nicht die Ursache, sie war nur der
+     * Anlass: Wer das Handy weglegt, kommt auf eine neu geladene Seite
+     * zurueck, und beim Neuladen wird der Gespraechsstand zurueckgelesen.
+     * `setStand` hat dabei nur `gestellt` und `standNotizen` uebernommen —
+     * `gefragt` und `gesagt` fielen weg. Der Eintrag EXISTIERTE danach, also
+     * hat ihn auch niemand mehr angelegt, und die erste Frage lief in ein
+     * `undefined.push`.
+     *
+     * Die Reparatur steht bewusst hier und nicht nur in `setStand`: Diese
+     * Funktion ist der einzige Weg an einen Eintrag, und was hier
+     * herauskommt, hat garantiert die richtige Form — egal, aus welcher
+     * Fassung des Spiels der gesicherte Stand stammt. */
+    if (typeof z.gestellt !== 'number') z.gestellt = 0;
+    if (typeof z.standNotizen !== 'number') z.standNotizen = host.getNotes().length;
+    if (!Array.isArray(z.gefragt)) z.gefragt = [];
+    if (!Array.isArray(z.gesagt)) z.gesagt = [];
+
     // Neues in der Akte macht das Gespräch wieder sinnvoll.
     if (host.getNotes().length > z.standNotizen) {
       z.gestellt = 0;
@@ -625,6 +647,11 @@ export function createTalk(host) {
      * mitten in einem Satz weitergeht, wäre seltsamer als ein neues. Was
      * bleiben muss, ist die Erschöpfung — sonst hat man nach dem Neuladen bei
      * jeder Figur wieder neun Fragen frei, obwohl längst nichts mehr kommt.
+     *
+     * Und es müssen die GESTELLTEN FRAGEN bleiben. Die erste Fassung hat sie
+     * beim Zurücklesen weggelassen; das hat nicht nur dieselben Fragen wieder
+     * auftauchen lassen, sondern jedes Gespräch nach einem Neuladen mit
+     * „undefined is not an object" abgebrochen. Siehe `zustand()`.
      */
     stand: () => [...stand.entries()].map(([id, z]) => [id, { ...z }]),
     setStand(paare) {
@@ -636,6 +663,10 @@ export function createTalk(host) {
           // unhoeflich — er wird uebernommen, auch wenn er niedriger liegt.
           gestellt: z?.gestellt ?? z?.ohne ?? 0,
           standNotizen: z?.standNotizen ?? host.getNotes().length,
+          // Beides sind Zeichenketten-Listen. Was aus einem fremden oder
+          // aelteren Stand kommt, wird gefiltert statt geglaubt.
+          gefragt: Array.isArray(z?.gefragt) ? z.gefragt.filter((s) => typeof s === 'string') : [],
+          gesagt: Array.isArray(z?.gesagt) ? z.gesagt.filter((s) => typeof s === 'string') : [],
         });
       }
     },

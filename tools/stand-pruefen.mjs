@@ -126,6 +126,65 @@ ok(await page.locator('#hs-layer .hs[aria-label="Kistenstapel"]').count() === 0,
 ok(await page.locator('#hs-layer .hs[aria-label="Leuchtreklame"]').count() === 1,
    'Ein unerledigter Punkt am selben Ort leuchtet weiter');
 
+/* --- Ein Gespraech ueber das Neuladen hinweg -----------------------------
+   Gemeldet aus dem Spiel: „Keine Antwort — undefined is not an object
+   (evaluating 'd.gefragt.push')", zuverlaessig nach einer laengeren Pause.
+   Die Pause war nur der Anlass — wer das Handy weglegt, kommt auf eine neu
+   geladene Seite zurueck. Die Ursache war, dass beim Zuruecklesen des
+   Gespraechsstandes die Liste der gestellten Fragen wegfiel; der Eintrag
+   existierte danach, war aber unvollstaendig, und die erste Frage lief in ein
+   `undefined.push`.
+
+   Der Test muss deshalb WIRKLICH fragen, und zwar nach dem Neuladen. Ein
+   Blick auf die gesicherten Daten haette den Fehler nicht gefunden: dort
+   stand alles drin. */
+async function frageEtwas(ort, punktLabel) {
+  await page.evaluate((o) => window.__regenstadt.goTo(o), ort);
+  await page.waitForTimeout(1200);
+  await page.locator(`#hs-layer .hs[aria-label="${punktLabel}"]`).click({ force: true });
+  await page.waitForSelector('#panel.on');
+  await page.locator('#panel button', { hasText: 'Ansprechen' }).click();
+  await page.waitForSelector('#talk.on');
+  /* Auf Fragen ODER eine Stoerung warten. Nur auf Schaltflaechen zu warten
+     laesst den Test 45 Sekunden lang haengen, wenn das Modell einmal nichts
+     Brauchbares liefert — und meldet dann einen Zeitfehler statt der Sache,
+     um die es geht. */
+  await page.waitForFunction(() => {
+    const s = document.querySelector('#talk .sug');
+    return Boolean(s && !s.classList.contains('laedt')
+      && (s.querySelector('button') || s.querySelector('.aus') || s.querySelector('.stoerung')));
+  }, { timeout: 60000 });
+  if (!await page.locator('#talk .sug button').count()) {
+    const grund = (await page.locator('#talk .sug').innerText()).replace(/\s+/g, ' ');
+    await page.keyboard.press('Escape');
+    return `KEINE FRAGEN: ${grund}`;
+  }
+  await page.locator('#talk .sug button').first().click();
+  // Auf die Antwort warten: der Platzhalter „… überlegt" muss verschwinden.
+  await page.waitForFunction(
+    () => !document.querySelector('#talk .thinking'), { timeout: 60000 });
+  await page.waitForTimeout(400);
+  const text = await page.locator('#talk .log').innerText();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  return text;
+}
+
+const vorReload = await frageEtwas('bar', 'Wirtin');
+ok(!/undefined|is not an object|Keine Antwort/i.test(vorReload),
+   'Vor dem Neuladen antwortet die Figur');
+
+// Ortswechsel, damit der Gespraechsstand gesichert wird.
+await page.evaluate(() => window.__regenstadt.goTo('alley'));
+await page.waitForTimeout(1400);
+
+ok(await laden(), 'Der Stand mit dem Gespräch wird beim Neuladen angeboten');
+const nachReload = await frageEtwas('bar', 'Wirtin');
+ok(!/undefined|is not an object/i.test(nachReload),
+   'Nach dem Neuladen läuft das Gespräch ohne Fehler weiter');
+ok(!/Keine Antwort/i.test(nachReload),
+   `Nach dem Neuladen kommt eine echte Antwort${/Keine Antwort/.test(nachReload) ? ': ' + nachReload.slice(-160) : ''}`);
+
 /* --- Verwerfen ----------------------------------------------------------- */
 await page.locator('#topbar .right:not(.karte):not(.help)').click();
 await page.waitForSelector('#akte.on');
