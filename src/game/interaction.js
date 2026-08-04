@@ -147,6 +147,33 @@ const CSS = `
 #hs-layer.reveal .hs .mark { opacity: .95; }
 #hs-layer.touch .hs.active .mark { opacity: 1; }
 
+/* --- Was neben dem Schirm liegt -----------------------------------------
+   Im Hochformat zeigt die Platte ein knappes Viertel des Ortes. Diese Marke
+   sagt, dass dort draussen noch etwas ist, und wie viel. */
+#hs-layer .rand {
+  /* Ueber den Punkten, nicht darunter: Die Punkte werden bei jedem Ortswechsel
+     neu angehaengt und liegen dadurch spaeter im Baum. Ohne z-index fing ein
+     Punkt, der zufaellig am Rand steht, den Druck auf die Randmarke ab — und
+     die Marke reagierte scheinbar grundlos nicht mehr. */
+  position: absolute; z-index: 3; top: 50%; transform: translateY(-50%);
+  display: none; align-items: center; gap: 7px;
+  padding: 15px 11px; cursor: pointer; pointer-events: auto;
+  background: rgba(4,6,10,.62); border: 1px solid rgba(126,190,230,.30);
+  color: #cfe6ff;
+  font: 11px/1 ui-monospace, "SFMono-Regular", Menlo, monospace; letter-spacing: .1em;
+  animation: randpuls 2.6s ease-in-out infinite;
+}
+#hs-layer .rand.on { display: flex; }
+#hs-layer .rand.links { left: 8px; }
+#hs-layer .rand.rechts { right: 8px; }
+#hs-layer .rand .pf { font-size: 20px; line-height: 1; opacity: .9; }
+#hs-layer .rand .n { opacity: .6; }
+#hs-layer .rand:hover { background: rgba(126,190,230,.16); }
+@keyframes randpuls {
+  0%, 100% { border-color: rgba(126,190,230,.28); }
+  50%      { border-color: rgba(126,190,230,.66); }
+}
+
 #hs-label {
   position: fixed; z-index: 14; pointer-events: none; transform: translate(-50%, 0);
   font: 11px/1 ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -887,7 +914,10 @@ export function createInteraction(renderer, host) {
   }
 
   function buildSpots(spots) {
-    layer.innerHTML = '';
+    /* Nur die Punkte wegraeumen, nicht die ganze Ebene: In ihr haengen auch
+       die Randmarken, und `innerHTML = ''` hat sie beim ersten Ortswechsel
+       mitgenommen — sie waren dann fuer den Rest des Spiels weg. */
+    for (const el of layer.querySelectorAll('.hs')) el.remove();
     hovered = null;
     hoverAmt = 0;
     renderer.hover[3] = 0;
@@ -921,6 +951,58 @@ export function createInteraction(renderer, host) {
     });
   }
 
+  /* --- Was neben dem Schirm liegt ------------------------------------------
+     Die Platte deckt den Anzeigebereich immer vollstaendig, die schmalere
+     Seite wird beschnitten (siehe renderer.uvScale). Auf einem Handy im
+     Hochformat bleibt davon ein knappes Viertel uebrig — von acht Punkten in
+     der Werkssiedlung stand genau EINER auf dem Schirm. Gemessen:
+
+       quer  1400x800   8 von 8 Punkten sichtbar
+       hoch   393x852   1 von 8 Punkten sichtbar
+
+     Schieben konnte man immer, und die Hilfezeile sagt es auch. Aber niemand
+     schiebt in eine Richtung, in der er nichts vermutet. Deshalb steht jetzt
+     am Rand, DASS dort noch etwas ist — mit der Anzahl. Ein Druck darauf
+     schiebt hin. */
+  const raender = { links: null, rechts: null };
+  for (const seite of ['links', 'rechts']) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `rand ${seite}`;
+    b.innerHTML = '<span class="pf"></span><span class="n"></span>';
+    b.querySelector('.pf').textContent = seite === 'links' ? '‹' : '›';
+    b.setAttribute('aria-label',
+      seite === 'links' ? 'Nach links umsehen' : 'Nach rechts umsehen');
+    b.onclick = () => schiebe(seite === 'links' ? -1 : 1);
+    layer.appendChild(b);
+    raender[seite] = b;
+  }
+
+  /** Sanft zur Seite schieben — eine halbe Schirmbreite je Druck. */
+  let panZiel = null;
+  function schiebe(richtung) {
+    const lim = renderer.panLimit();
+    if (lim <= 0.0005) return;
+    const schritt = renderer.uvScale()[0] * 0.5;
+    /* Vom ZIEL aus weiterrechnen, nicht vom aktuellen Bild: Wer zweimal
+       hintereinander drueckt, waehrend die Fahrt noch laeuft, kam sonst nur
+       eine halbe Strecke weit — der zweite Druck rechnete von einer Stelle,
+       die gerade erst durchfahren wurde. */
+    const von = panZiel ?? renderer.cam.panX;
+    panZiel = Math.max(-lim, Math.min(lim, von + richtung * schritt));
+  }
+
+  function zeigeRand(links, rechts) {
+    // Nur zeigen, wenn ueberhaupt geschoben werden kann.
+    const moeglich = renderer.panLimit() > 0.0005 && !panel.classList.contains('on');
+    for (const [seite, n] of [['links', links], ['rechts', rechts]]) {
+      const b = raender[seite];
+      const an = moeglich && n > 0;
+      b.classList.toggle('on', an);
+      if (an) b.querySelector('.n').textContent = String(n);
+    }
+  }
+
   /* --- Seitliches Umsehen -------------------------------------------------- */
   let dragging = false;
   let lastX = 0;
@@ -940,7 +1022,12 @@ export function createInteraction(renderer, host) {
     lastX = e.clientX;
     // Gezogen wird nur, wenn der Druck im Bild beginnt — nicht auf der Tafel
     // oder der Kopfzeile.
-    dragging = stageEl.contains(e.target) || layer.contains(e.target);
+    /* Die Randmarken liegen in derselben Ebene wie die Punkte. Ohne diese
+       Ausnahme gilt schon ihr Antippen als Ziehbeginn — und die winzige
+       Zeigerbewegung beim Klicken bricht die gerade gestartete Fahrt sofort
+       wieder ab. */
+    const aufRand = e.target?.closest?.('.rand');
+    dragging = !aufRand && (stageEl.contains(e.target) || layer.contains(e.target));
   }, true);
   addEventListener('pointermove', (e) => {
     if (!dragging) return;
@@ -950,6 +1037,8 @@ export function createInteraction(renderer, host) {
     const lim = renderer.panLimit();
     if (lim <= 0.0005) return;
     const perPx = renderer.uvScale()[0] / Math.max(1, renderer.cssWidth);
+    // Wer selbst schiebt, hat das Kommando — eine laufende Fahrt bricht ab.
+    panZiel = null;
     renderer.cam.panX = Math.max(-lim, Math.min(lim, renderer.cam.panX - dx * perPx));
   });
   for (const ev of ['pointerup', 'pointercancel']) {
@@ -983,6 +1072,7 @@ export function createInteraction(renderer, host) {
       where.querySelector('.sector').textContent = scene.sector;
       where.querySelector('.place').textContent = scene.name;
       renderer.cam.panX = 0;
+      panZiel = null;
       sichern();
     },
 
@@ -1014,7 +1104,25 @@ export function createInteraction(renderer, host) {
 
     update(dt) {
       const h = renderer.cssHeight || 1;
+      const w = renderer.cssWidth || 1;
       const plateH = renderer.plateScreenHeight();
+
+      // Ein Druck auf die Randmarke schiebt nicht sprunghaft, sondern faehrt
+      // hinueber: Ein Schnitt sieht aus, als waere man woanders.
+      if (panZiel !== null) {
+        const d = panZiel - renderer.cam.panX;
+        if (Math.abs(d) < 0.0004) { renderer.cam.panX = panZiel; panZiel = null; }
+        else renderer.cam.panX += d * (1 - Math.pow(0.0002, dt));
+      }
+      /* Wie viel vom Ort gerade NEBEN dem Schirm liegt.
+         Auf einem hochkant gehaltenen Handy sieht man von einer 16:9-Platte
+         gut ein Viertel. Der Rest ist da, aber unsichtbar — und wer nicht
+         weiss, dass er schieben kann, haelt den Ort fuer leer. Genau das
+         wurde gemeldet: eine Meldung schickte in die Siedlung, und dort
+         „war nichts". Es war etwas: bei u = 0,885, also weit rechts
+         ausserhalb des Schirms. */
+      let linksDraussen = 0;
+      let rechtsDraussen = 0;
       for (const { spot, el } of nodes) {
         const [x, y] = renderer.plateUvToScreen(spot.u, spot.v);
         // Maßstab ist die Höhe der PLATTE auf dem Schirm, nicht die
@@ -1024,7 +1132,10 @@ export function createInteraction(renderer, host) {
         el.style.top = `${y}px`;
         el.style.width = `${px}px`;
         el.style.height = `${px}px`;
+        if (x < px * 0.5) linksDraussen += 1;
+        else if (x > w - px * 0.5) rechtsDraussen += 1;
       }
+      zeigeRand(linksDraussen, rechtsDraussen);
 
       const target = hovered ? 1 : 0;
       hoverAmt += (target - hoverAmt) * (1 - Math.pow(0.0015, dt));

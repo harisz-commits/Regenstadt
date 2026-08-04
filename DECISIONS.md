@@ -291,3 +291,37 @@ also genau dann, wenn eine Pruefung ihn am wenigsten sehen kann. Dagegen steht
 jetzt `tools/anweisung-pruefen.mjs`: Es rechnet fuer JEDE Figur JEDES Falls
 mit der vollstaendigen Akte, einem vollen Gespraechsverlauf und einer langen
 Fragenliste — ohne Modell, ohne Browser, in Millisekunden.
+
+## Am Rand steht, was neben dem Schirm liegt
+
+Gemeldet aus dem Spiel: „Was soll der Hinweis mit der Siedlung, ein Licht ist
+ausgegangen — aber da ist weder eine neue Person noch sonst etwas."
+
+Es war etwas da: ein neuer Punkt bei u = 0,885. Nur lag der auf einem hochkant
+gehaltenen Handy weit ausserhalb des Schirms. Die Platte deckt den
+Anzeigebereich immer vollstaendig, die schmalere Seite wird beschnitten — im
+Querformat geht das auf, im Hochformat bleibt ein knappes Viertel des Ortes
+uebrig. Gemessen in der Werkssiedlung:
+
+    quer  1400x800   8 von 8 Punkten sichtbar
+    hoch   393x852   1 von 8 Punkten sichtbar
+
+Schieben ging die ganze Zeit, und die Hilfezeile sagt es auch. Das genuegt
+nicht: NIEMAND SCHIEBT IN EINE RICHTUNG, IN DER ER NICHTS VERMUTET. Eine
+Meldung, die irgendwohin schickt, und ein Ort, der leer aussieht — das liest
+sich als Fehler im Spiel, nicht als Aufforderung, den Finger zu bewegen.
+
+Jetzt steht am Bildrand eine Marke mit der ANZAHL der Punkte, die dort draussen
+liegen, und ein Druck darauf faehrt hin. Sie erscheint nur, wenn sich
+ueberhaupt schieben laesst, und verschwindet, sobald nichts mehr daneben liegt
+— im Querformat sieht man sie nie.
+
+Zwei Fallen steckten in der Umsetzung, beide erst durch Messen gefunden:
+
+  1. `buildSpots()` hat die Punktebene mit `innerHTML = ''` geleert. Damit
+     waren die Randmarken nach dem ersten Ortswechsel weg.
+  2. Die Punkte werden bei jedem Ortswechsel neu angehaengt und liegen dadurch
+     spaeter im Baum. Ohne `z-index` fing ein Punkt, der zufaellig am Rand
+     stand, den Druck auf die Randmarke ab — die Marke reagierte scheinbar
+     grundlos nicht mehr, aber nur an manchen Orten und nur nach dem zweiten
+     Druck.
