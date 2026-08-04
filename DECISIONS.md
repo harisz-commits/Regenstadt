@@ -256,3 +256,38 @@ Anfangen eines neuen Falls weggeworfen, die Freischaltung darf das nicht
 mitnehmen. Und wer schon beim zweiten Fall war, bekommt den ersten
 rueckwirkend als erledigt angerechnet — sonst stuenden aeltere Staende vor
 einer Wahl, die sie sich laengst verdient haben.
+
+## Die Akte wird gedeckelt, nie die Regeln
+
+Gemeldet aus dem Spiel: Mitten in Fall 2 war ploetzlich aus JEDER Figur
+„gerade nichts mehr herauszuholen" — auch aus denen, die man eben erst
+getroffen hatte. Das sieht nach einem Fehler im Verhoer aus. Es war einer in
+der Laenge:
+
+    10 Akteneintraege →  4709 Zeichen Anweisung
+    40 Akteneintraege → 11762 Zeichen
+    84 Akteneintraege → 22445 Zeichen
+
+Die Serverfunktion beschnitt die Anweisung bei 12000 Zeichen, und zwar HINTEN
+— genau dort, wo steht, in welcher FORM das Modell antworten soll. Ab rund
+vierzig Eintraegen kam dieser Absatz nicht mehr an; das Modell schrieb Prosa,
+der Parser fand null Zeilen mit „- ", und das Spiel meldete eine erschoepfte
+Figur. Gemessen mit voller Akte: 0 brauchbare Fragen vorher, 4 bis 6 nachher.
+
+DREI TEILE DER ANWEISUNG WACHSEN MIT DER ZEIT: die Akte, der
+Gespraechsverlauf und die Liste der schon gestellten Fragen. Jeder davon hat
+jetzt ein Budget. Der feste Teil — die Regeln — hat keins und kommt dadurch
+immer an. Was weggelassen wird, wird nicht verschwiegen, sondern gezaehlt
+(„17 aeltere Eintraege stehen ebenfalls in der Akte"), sonst haelt das Modell
+seine Sicht fuer vollstaendig.
+
+Die Schranke im Server steht weiterhin da, aber bei 20000 statt 12000: Sie
+soll missbraeuchlich grosse Anfragen abwehren, nicht im normalen Spiel
+zuschlagen.
+
+WARUM DAS KEINE PRUEFUNG GEFUNDEN HAT: Alle Verhoerpruefungen laufen mit drei,
+vier Akteneintraegen. Der Fehler beginnt erst nach einer Stunde Spielzeit —
+also genau dann, wenn eine Pruefung ihn am wenigsten sehen kann. Dagegen steht
+jetzt `tools/anweisung-pruefen.mjs`: Es rechnet fuer JEDE Figur JEDES Falls
+mit der vollstaendigen Akte, einem vollen Gespraechsverlauf und einer langen
+Fragenliste — ohne Modell, ohne Browser, in Millisekunden.

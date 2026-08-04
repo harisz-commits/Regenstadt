@@ -69,8 +69,25 @@ export async function askModel(body, key) {
     return { status: 413, json: { error: 'Anfrage zu gross.' } };
   }
 
+  /*
+   * DIE ANWEISUNG WIRD HINTEN ABGESCHNITTEN — und hinten stehen die Regeln.
+   *
+   * Hier stand 12000. Gemeldet aus dem Spiel: Mitten in Fall 2 war ploetzlich
+   * aus JEDER Figur „gerade nichts mehr herauszuholen", auch aus denen, die
+   * man eben erst getroffen hatte. Die Anweisung fuer die Vorschlagsfragen
+   * waechst mit der Akte; bei rund vierzig Eintraegen ueberschritt sie diese
+   * Marke, und weggeschnitten wurde ausgerechnet der Absatz, der das
+   * Ausgabeformat vorschreibt. Das Modell schrieb daraufhin Prosa, der Parser
+   * fand null Fragen — und das Spiel meldete eine erschoepfte Figur.
+   *
+   * Die eigentliche Reparatur steht in characters.js: Dort bekommt die Akte
+   * ein Budget, damit die Regeln IMMER mitgehen. Diese Schranke bleibt als
+   * Schutz gegen missbraeuchlich grosse Anfragen — aber so weit oben, dass
+   * sie im Spiel nicht mehr erreicht wird. Gemessen liegt die laengste
+   * Anweisung beider Faelle bei rund 10 000 Zeichen.
+   */
   const payload = {
-    system_instruction: { parts: [{ text: system.slice(0, 12000) }] },
+    system_instruction: { parts: [{ text: system.slice(0, 20000) }] },
     contents: messages.slice(-24).map((m) => ({
       role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: String(m.text).slice(0, 4000) }],

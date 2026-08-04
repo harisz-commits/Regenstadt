@@ -44,6 +44,62 @@ export function offeneGestaendnisse(c, erfuellt, schonGesagt = new Set()) {
 }
 
 /**
+ * Wie viele Zeichen die Akte in einer Anweisung belegen darf.
+ *
+ * Der feste Teil der Anweisung ist rund 2400 Zeichen gross, dazu kommen
+ * Gespraechsverlauf, die Liste der schon gestellten Fragen und — bei einer
+ * Figur wie dem Kurator — ein langes Geheimnis. Gemessen bleibt die ganze
+ * Anweisung mit diesem Budget im schlimmsten Fall unter 10 000 Zeichen und
+ * damit deutlich unter der Schranke der Serverfunktion.
+ *
+ * Nachgemessen wird das nicht von Hand, sondern von
+ * tools/anweisung-pruefen.mjs — fuer jede Figur jedes Falls, mit voller Akte.
+ */
+const AKTE_BUDGET = 4200;
+/** Und wie lang eine einzelne Zeile darin werden darf. */
+const EINTRAG_MAX = 220;
+
+/** Einen Text am Satzende kuerzen, nicht mitten im Wort. */
+function kuerze(text, max) {
+  const t = String(text || '').trim();
+  if (t.length <= max) return t;
+  const s = t.slice(0, max);
+  const p = Math.max(s.lastIndexOf('. '), s.lastIndexOf('! '), s.lastIndexOf('? '));
+  return p > max * 0.55 ? s.slice(0, p + 1) : `${s.trimEnd()} …`;
+}
+
+/**
+ * Die Akte als Block fuer eine Anweisung — gedeckelt.
+ *
+ * Gefuellt wird VON HINTEN: Was zuletzt gefunden wurde, treibt das Gespraech,
+ * und der Anfang der Ermittlung ist meistens laengst abgehakt. Was nicht mehr
+ * hineinpasst, wird nicht verschwiegen, sondern gezaehlt — sonst haelt das
+ * Modell die Akte fuer vollstaendig und wundert sich ueber Vorhalte, die der
+ * Spieler aus aelteren Funden zieht.
+ *
+ * @param {{label: string, text: string}[]} notes
+ * @param {string} leer Was dasteht, wenn die Akte leer ist
+ */
+function akteBlock(notes, leer) {
+  if (!notes?.length) return leer;
+  const zeilen = [];
+  let rest = AKTE_BUDGET;
+  for (let i = notes.length - 1; i >= 0; i--) {
+    const z = `- ${notes[i].label}: ${kuerze(notes[i].text, EINTRAG_MAX)}`;
+    if (z.length + 1 > rest) break;
+    rest -= z.length + 1;
+    zeilen.push(z);
+  }
+  zeilen.reverse();
+  const weg = notes.length - zeilen.length;
+  if (weg > 0) {
+    zeilen.unshift(`- (${weg} ältere Einträge stehen ebenfalls in der Akte, hier `
+                 + 'aus Platzgründen weggelassen)');
+  }
+  return zeilen.join('\n');
+}
+
+/**
  * Baut die Anweisung, die dem Spieler VORSCHLAGSFRAGEN schreibt.
  *
  * Der erste Versuch hat die Fragen aus Bausteinen gesetzt: „Vorhalten: " plus
@@ -67,21 +123,50 @@ export function offeneGestaendnisse(c, erfuellt, schonGesagt = new Set()) {
  * @param {object} c Figur
  * @param {{label: string, text: string}[]} notes Akte
  * @param {string} place Ort
+ *
+ * WIE VIEL AKTE IN EINE ANWEISUNG PASST — und warum das eine Grenze braucht.
+ *
+ * Gemeldet aus dem Spiel: Mitten in Fall 2 war ploetzlich aus JEDER Figur
+ * „gerade nichts mehr herauszuholen", auch aus denen, die man eben erst
+ * getroffen hatte. Gemessen war die Ursache in zwei Minuten:
+ *
+ *     10 Akteneintraege →  4709 Zeichen Anweisung
+ *     40 Akteneintraege → 11762 Zeichen
+ *     84 Akteneintraege → 22445 Zeichen   (die Haelfte faellt weg)
+ *
+ * Die Serverfunktion schneidet die Anweisung bei einer festen Laenge ab — und
+ * zwar HINTEN, wo die Formatregeln stehen. Ab rund vierzig Eintraegen wusste
+ * das Modell also nicht mehr, dass es Zeilen mit „- " liefern soll; es
+ * schrieb Prosa, der Parser fand null brauchbare Fragen, und das Spiel sagte
+ * „nichts mehr herauszuholen". Nicht die Figur war erschoepft, sondern die
+ * Anweisung war gekoepft.
+ *
+ * Deshalb ist die Akte jetzt das, was gedeckelt wird, nie die Regeln: Sie
+ * bekommt ein festes Zeichenbudget, wird von hinten gefuellt (das zuletzt
+ * Gefundene treibt das Gespraech) und sagt offen, wie viel sie weglaesst.
+ * Der Rest der Anweisung hat feste Groesse und kommt dadurch immer an.
  * @param {{role: string, text: string}[]} verlauf bisheriges Gespräch
  * @param {string[]} schonGefragt alle je gestellten Fragen an DIESE Figur
  * @param {object[]} gestaendnisse was diese Figur JETZT preisgeben könnte
  */
 export function buildFragen(c, notes, place, verlauf, schonGefragt = [], gestaendnisse = []) {
-  const wissen = notes.length
-    ? notes.map((n) => `- ${n.label}: ${n.text}`).join('\n')
-    : '- noch nichts';
+  const wissen = akteBlock(notes, '- noch nichts');
 
+  /* Der dritte Teil, der mit der Zeit waechst. Fuer die naechste Frage zaehlt,
+     was gerade gesagt wurde — nicht der Wortlaut von vor fuenf Runden. */
   const bisher = verlauf.length
-    ? verlauf.slice(-8).map((m) => (m.role === 'user' ? 'ERMITTLER: ' : `${c.name.toUpperCase()}: `) + m.text).join('\n')
+    ? verlauf.slice(-6).map((m) =>
+      (m.role === 'user' ? 'ERMITTLER: ' : `${c.name.toUpperCase()}: `) + kuerze(m.text, 240)).join('\n')
     : '(noch nichts gesagt)';
 
+  /* Auch diese Liste waechst mit dem Spiel und muss gedeckelt werden — aus
+     demselben Grund wie die Akte. Die juengsten Fragen zaehlen: Was vor
+     zwanzig Runden gefragt wurde, formuliert das Modell ohnehin nicht mehr
+     genauso. Und die Absicherung dagegen liegt nicht hier, sondern in
+     talk.js: Dort wird JEDE zurueckkommende Frage gegen die vollstaendige
+     Liste geprueft und aussortiert. */
   const gesperrt = schonGefragt.length
-    ? schonGefragt.map((q) => `- ${q}`).join('\n')
+    ? schonGefragt.slice(-20).map((q) => `- ${kuerze(q, 120)}`).join('\n')
     : '- (noch keine)';
 
   // Ohne Akte gibt es nichts vorzuhalten — dann ist Abtasten die einzige
@@ -172,9 +257,7 @@ WEITERE REGELN:
  * @param {object[]} gestaendnisse Was diese Figur jetzt preisgeben KÖNNTE
  */
 export function buildSystem(c, notes, place, drinnen = false, gestaendnisse = []) {
-  const known = notes.length
-    ? notes.map((n) => `- ${n.label}: ${n.text}`).join('\n')
-    : '- nichts';
+  const known = akteBlock(notes, '- nichts');
 
   /*
    * Geständnisse als Daten.

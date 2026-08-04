@@ -410,6 +410,8 @@ src/
 api/chat.js             Endpunkt fuer die Figurenrede (Schluessel bleibt serverseitig)
 tools/welt-pruefen.mjs  Ermittlungslogik ohne Browser pruefen (166 Zusicherungen)
 tools/abschluss-pruefen.mjs  den Abschluss im echten Browser durchspielen
+tools/anweisung-pruefen.mjs  pruefen, dass keine Anweisung zu lang wird
+tools/fragen-messen.mjs  zaehlen, wie viele Fragen bei voller Akte ankommen
 tools/stand-pruefen.mjs  pruefen, dass ein Spielstand ein Neuladen ueberlebt
 tools/fallwahl-pruefen.mjs  pruefen, dass die Fallwahl beim Neustart stimmt
 tools/verhoer-grenze.mjs  pruefen, dass ein Verhoer nach neun Fragen endet
