@@ -1,12 +1,10 @@
 /**
  * Prueft die Fallwahl beim Neustart.
  *
- * Wer den ersten Fall abgeschlossen hat, soll den zweiten anfangen koennen,
- * ohne den ersten noch einmal zu fuehren. Das klingt einfach und hat drei
- * Faelle, die man leicht verwechselt:
+ * Alle drei Faelle sollen vom ersten Start an direkt waehlbar sein. Dabei
+ * gibt es drei Startwege, die man leicht verwechselt:
  *
- *   1. Beim allerersten Start gibt es NICHTS zu waehlen — ein Menue mit einem
- *      Eintrag ist eine Verzoegerung, keine Wahl.
+ *   1. Beim allerersten Start stehen ALLE Faelle zur Wahl.
  *   2. Nach „Nächster Fall" darf NICHT gefragt werden. Der Spieler hat gerade
  *      gewaehlt; die Frage sofort noch einmal zu stellen, sieht aus, als waere
  *      der Klick verlorengegangen. Dafuer gibt es die Einmalmarke in
@@ -27,7 +25,8 @@ const url = arg('url', 'http://127.0.0.1:4173/');
 let schlecht = 0;
 const ok = (b, t) => { if (!b) schlecht++; console.log(`${b ? 'ok  ' : 'FEHL'}  ${t}`); };
 
-const [F1, F2] = FAELLE;
+const [F1, F2, F3] = FAELLE;
+ok(Boolean(F3), 'Es gibt einen dritten Fall');
 
 const browser = await chromium.launch({
   executablePath: '/opt/pw-browsers/chromium',
@@ -39,10 +38,13 @@ page.on('pageerror', (e) => { schlecht++; console.log('SEITENFEHLER', String(e))
 const wahl = () => page.locator('#weiter .liste button');
 const ortJetzt = async () => (await page.locator('#topbar .place').textContent())?.trim();
 
-/* --- 1. Erster Start: keine Wahl ---------------------------------------- */
+/* --- 1. Erster Start: alle drei Faelle zur Wahl ------------------------- */
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForTimeout(500);
-ok(await wahl().count() === 0, 'Beim ersten Start wird nicht nach dem Fall gefragt');
+ok(await wahl().count() === 3, `Beim ersten Start stehen drei Faelle zur Wahl (${await wahl().count()})`);
+ok(await page.locator(`#weiter .liste button[data-fall="${F3.id}"]`).count() === 1,
+   `Fall 3 steht sofort zur Wahl: "${F3.titel}"`);
+await page.locator(`#weiter .liste button[data-fall="${F1.id}"]`).click();
 await page.waitForFunction(() => window.__ready === true, { timeout: 40000 });
 ok(await ortJetzt() === F1.orte[F1.start].name, `Es beginnt Fall 1 in „${F1.orte[F1.start].name}"`);
 
@@ -53,7 +55,7 @@ await page.evaluate((id) => {
 }, F1.id);
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForTimeout(600);
-ok(await wahl().count() === 2, `Jetzt stehen beide Fälle zur Wahl (${await wahl().count()})`);
+ok(await wahl().count() === 3, `Jetzt stehen alle drei Fälle zur Wahl (${await wahl().count()})`);
 const beschriftung = await wahl().allTextContents();
 ok(beschriftung.some((t) => t.includes(F2.titel)), `Der zweite Fall steht mit Titel da: „${F2.titel}"`);
 ok(beschriftung.some((t) => t.includes('Abgeschlossen')), 'Der gespielte Fall ist als abgeschlossen erkennbar');
@@ -79,14 +81,32 @@ const neu = page.locator('#weiter .neu');
 ok(await neu.count() === 1, 'Bei laufender Ermittlung wird zuerst nach Fortsetzen gefragt');
 await neu.click();
 await page.waitForTimeout(400);
-ok(await wahl().count() === 2, 'Nach „Neu beginnen" steht die Fallwahl');
+ok(await wahl().count() === 3, 'Nach „Neu beginnen" stehen alle drei Fälle zur Wahl');
 await page.locator('#weiter .liste button').first().click();
 await page.waitForFunction(() => window.__ready === true, { timeout: 40000 });
 await page.waitForTimeout(600);
 ok(await ortJetzt() === F1.orte[F1.start].name,
    `Der erste Fall lässt sich noch einmal führen (${await ortJetzt()})`);
 
-/* --- 5. Die Einmalmarke unterdrueckt genau einen Start -------------------- */
+/* --- 5. Nach Fall 2 steht auch Fall 3 zur Wahl --------------------------- */
+await page.evaluate(([f1, f2]) => {
+  localStorage.setItem('regenstadt.abgeschlossen', JSON.stringify([f1, f2]));
+  localStorage.removeItem('regenstadt.stand');
+  localStorage.removeItem('regenstadt.direkt');
+}, [F1.id, F2.id]);
+await page.goto(url, { waitUntil: 'load' });
+await page.waitForTimeout(600);
+ok(await wahl().count() === 3, `Nach Fall 2 stehen drei Fälle zur Wahl (${await wahl().count()})`);
+const dritter = page.locator(`#weiter .liste button[data-fall="${F3.id}"]`);
+ok(await dritter.count() === 1, `Fall 3 steht mit Titel da: „${F3.titel}"`);
+ok((await page.locator('#weiter .liste button.ja .ti').textContent())?.trim() === F3.titel,
+   'Der dritte, noch nicht geführte Fall ist hervorgehoben');
+await dritter.click();
+await page.waitForFunction(() => window.__ready === true, { timeout: 40000 });
+await page.waitForTimeout(600);
+ok(await ortJetzt() === F3.orte[F3.start].name, `Fall 3 beginnt in „${F3.orte[F3.start].name}"`);
+
+/* --- 6. Die Einmalmarke unterdrueckt genau einen Start -------------------- */
 await page.evaluate(() => {
   localStorage.removeItem('regenstadt.stand');
   localStorage.setItem('regenstadt.direkt', '1');

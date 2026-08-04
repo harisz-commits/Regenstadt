@@ -2,7 +2,7 @@
 
 Ein Neo-Noir Point-and-Click Adventure. Feste Kunstrichtung, variabler Inhalt.
 
-ZWEI FAELLE. Fall 1 „Elf Totenscheine": zwanzig Orte in sechs Sektoren, zehn
+DREI FAELLE. Fall 1 „Elf Totenscheine": zwanzig Orte in sechs Sektoren, zehn
 Figuren, die von einem Sprachmodell antworten, eine Beweiskette mit
 Laborbefund, ein Flugauto, um zwischen den Sektoren zu reisen — und ein Ende,
 das man erreichen kann.
@@ -11,8 +11,16 @@ Fall 2 „Der Chor": achtzehn Orte in sieben Sektoren, neun Figuren, Winter stat
 Dauerregen — und unter dem vierten Becken eines stillgelegten Klaerwerks etwas,
 das dort nicht sein kann.
 
-Wer Fall 1 abgeschlossen hat, kann beim naechsten Neustart waehlen, mit welchem
-er anfaengt (`tools/fallwahl-pruefen.mjs`).
+Fall 3 „Das Nulllicht": einundzwanzig neue Orte in sieben anfliegbaren
+Sektoren, zehn Figuren und eine ausserirdische Maschine, die Erinnerungen aus
+Menschen loest, in schwarzem Glas speichert und in fremde Traeger schreibt.
+Von der versiegelten Gondel auf dem Wolkenhafen fuehrt der Fall ueber Markt,
+Glasgaerten, Antennenfeld, Nullklinik und versunkene Werft bis zum
+Kontinuitaetsinstitut ueber der Stadt.
+
+Alle drei Faelle stehen schon beim ersten Start zur Wahl. Abgeschlossene Faelle
+bleiben markiert und koennen jederzeit erneut gespielt werden
+(`tools/fallwahl-pruefen.mjs`).
 
 ```
 npm install
@@ -35,6 +43,7 @@ aendert — deshalb hat der Umbau keine Aufrufstelle angefasst.
 tools/faelle-pruefen.mjs      Regeln, die fuer JEDEN Fall gelten
 tools/fallwechsel-pruefen.mjs der Uebergang im echten Browser
 tools/fallwahl-pruefen.mjs    die Fallwahl beim Neustart
+tools/fall3-pruefen.mjs       20+ neue Orte, 7+ Flugziele, eigene Platte je Ort
 ```
 
 `faelle-pruefen.mjs` prueft nicht nur, dass jeder Hinweis irgendwo herkommt,

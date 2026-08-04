@@ -203,7 +203,7 @@ async function starten() {
     return;
   }
 
-  // Neue Ermittlung: Sind mehrere Faelle freigeschaltet, wird gewaehlt.
+  // Neue Ermittlung: Alle vorhandenen Faelle stehen zur Wahl.
   if (!direkt) {
     const gewaehlt = await speicher.frageFall();
     if (gewaehlt && gewaehlt !== fall().id) {

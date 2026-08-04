@@ -33,7 +33,7 @@ import { FAELLE } from './fall.js';
 const SCHLUESSEL = 'regenstadt.stand';
 /** Welcher Fall zuletzt gewaehlt wurde — ueberlebt das Neuladen. */
 const FALL_SCHLUESSEL = 'regenstadt.fall';
-/** Welche Faelle schon abgeschlossen sind. Schaltet die Fallwahl frei. */
+/** Welche Faelle schon abgeschlossen sind. Markiert sie in der Fallwahl. */
 const FERTIG_SCHLUESSEL = 'regenstadt.abgeschlossen';
 /** Einmalmarke „nicht fragen, sofort starten" — siehe nimmDirekt(). */
 const DIREKT_SCHLUESSEL = 'regenstadt.direkt';
@@ -118,8 +118,8 @@ export function gemerkterFall() {
 
 /* --- Welche Faelle schon durch sind ---------------------------------------
    Der Spielstand wird beim Anfangen eines neuen Falls weggeworfen; DASS ein
-   Fall abgeschlossen wurde, muss das ueberleben. Sonst waere der zweite Fall
-   nach dem ersten Durchlauf wieder verschlossen. */
+   Fall abgeschlossen wurde, muss das ueberleben, damit die Fallwahl den
+   Abschlussstatus weiterhin anzeigen kann. */
 
 /** Nach dem Nachspann aufrufen. */
 export function merkeAbgeschlossen(id) {
@@ -166,26 +166,13 @@ export function nimmDirekt() {
 /**
  * Welche Faelle zur Wahl stehen.
  *
- * Freigeschaltet ist der erste immer und jeder weitere, sobald der davor
- * abgeschlossen ist. Der naechste, noch nicht gespielte steht mit in der
- * Liste — er ist ja das Ziel.
+ * Alle Faelle stehen von Anfang an zur Wahl. Der Abschlussstatus dient nur
+ * der Orientierung und sperrt keinen spaeteren Fall.
  *
- * Wer schon beim zweiten Fall war, hat den ersten hinter sich, auch wenn das
- * damals niemand aufgeschrieben hat: Der gemerkte Fall zaehlt rueckwirkend
- * alles davor als erledigt. Sonst stuenden alte Spielstaende ploetzlich vor
- * einer Wahl, die sie sich laengst verdient haben.
  */
 export function freigeschaltet() {
   const fertig = new Set(abgeschlossene());
-  const bisher = FAELLE.findIndex((f) => f.id === gemerkterFall());
-  for (let i = 0; i < bisher; i++) fertig.add(FAELLE[i].id);
-
-  const out = [];
-  for (const f of FAELLE) {
-    out.push({ fall: f, fertig: fertig.has(f.id) });
-    if (!fertig.has(f.id)) break;   // der uebernaechste bleibt zu
-  }
-  return out;
+  return FAELLE.map((fall) => ({ fall, fertig: fertig.has(fall.id) }));
 }
 
 /**
@@ -301,14 +288,10 @@ export function frageFortsetzen(stand) {
 }
 
 /**
- * Welchen Fall — gefragt wird nur, wenn es etwas zu wählen gibt.
+ * Welchen Fall — alle vorhandenen Faelle stehen sofort zur Wahl.
  *
- * Wer den ersten Fall abgeschlossen hat, muss ihn nicht noch einmal fuehren,
- * um an den zweiten zu kommen. Und wer ihn noch einmal fuehren will, soll das
- * duerfen: Er geht anders aus, je nachdem, wen man anklagt.
- *
- * Solange nur ein Fall freigeschaltet ist, erscheint hier gar nichts — ein
- * Menue mit einem einzigen Eintrag ist kein Menue, sondern eine Verzoegerung.
+ * Wer einen Fall noch einmal fuehren will, darf das ebenfalls: Er geht anders
+ * aus, je nachdem, wen man anklagt.
  *
  * @returns {Promise<string|null>} Kennung des gewaehlten Falls, oder nichts
  */
@@ -325,8 +308,8 @@ export function frageFall() {
   el.innerHTML = `
     <div class="t">REGENSTADT</div>
     <div class="z">Womit fängst du an?</div>
-    <div class="d">Ein abgeschlossener Fall bleibt offen für einen zweiten
-      Durchgang — er geht anders aus, je nachdem, wen du anklagst.</div>
+    <div class="d">Alle Fälle stehen jederzeit zur Wahl. Ein abgeschlossener
+      Fall bleibt offen für einen zweiten Durchgang.</div>
     <div class="liste"></div>`;
 
   const liste = el.querySelector('.liste');

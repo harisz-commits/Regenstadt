@@ -28,9 +28,10 @@
 
 import { FALL as FALL1 } from '../faelle/fall1/index.js';
 import { FALL as FALL2 } from '../faelle/fall2/index.js';
+import { FALL as FALL3 } from '../faelle/fall3/index.js';
 
 /** Alle Fälle, in Spielreihenfolge. */
-export const FAELLE = [FALL1, FALL2];
+export const FAELLE = [FALL1, FALL2, FALL3];
 
 /** @type {Fall} */
 let aktiv = FAELLE[0];
