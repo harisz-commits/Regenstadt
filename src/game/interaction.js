@@ -206,15 +206,22 @@ const CSS = `
    (ACHTUNG: keine Backticks in diesem Kommentar, er steht in einem
    Template-Literal. Genau daran ist der Build hier schon einmal gescheitert.) */
 #panel:not(.on) { pointer-events: none; }
-#panel .shot {
+#panel .shot-frame {
   grid-row: 1 / span 3; width: min(38vw, 340px); aspect-ratio: 4 / 3;
-  object-fit: cover; display: none;
+  position: relative; overflow: hidden; display: none;
   border: 1px solid rgba(126,190,230,.22);
   box-shadow: 0 10px 40px rgba(0,0,0,.75);
   opacity: 0; transition: opacity .4s ease;
 }
-#panel.has-shot .shot { display: block; }
-#panel.has-shot .shot.ready { opacity: 1; }
+#panel .shot, #panel .scene-detail {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+#panel .shot { object-fit: cover; }
+#panel .scene-detail {
+  display: none; background-repeat: no-repeat; background-color: #070a0e;
+}
+#panel.has-shot .shot-frame { display: block; }
+#panel.has-shot .shot-frame.ready { opacity: 1; }
 #panel:not(.has-shot) .ttl,
 #panel:not(.has-shot) .body,
 #panel:not(.has-shot) .act { grid-column: 1 / -1; }
@@ -351,7 +358,7 @@ const CSS = `
 @media (max-width: 820px) {
   #panel { font-size: 15px; line-height: 1.7; padding-left: 18px; padding-right: 18px;
            grid-template-columns: 1fr; gap: 0; }
-  #panel .shot { grid-row: auto; width: 100%; max-width: 420px; margin-bottom: 16px; }
+  #panel .shot-frame { grid-row: auto; width: 100%; max-width: 420px; margin-bottom: 16px; }
   #panel .body { max-width: none; }
   #panel button, #akte button { padding: 12px 18px; font-size: 12px; }
   #topbar .place { font-size: 12px; }
@@ -362,7 +369,7 @@ const CSS = `
   #hint-bar { letter-spacing: .12em; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #panel, #fade, #panel .shot { transition: none; }
+  #panel, #fade, #panel .shot-frame { transition: none; }
   #hs-layer .hs.exit .mark { animation: none; }
   #hs-layer .hs:not(.exit) .mark { animation: none; transform: translate(-50%, -50%); }
 }
@@ -418,13 +425,16 @@ export function createInteraction(renderer, host) {
   const panel = document.createElement('div');
   panel.id = 'panel';
   panel.innerHTML =
-    '<img class="shot" alt="" /><div class="ttl"></div><p class="body"></p><div class="act"></div>';
+    '<div class="shot-frame"><img class="shot" alt="" /><div class="scene-detail"></div></div>'
+    + '<div class="ttl"></div><p class="body"></p><div class="act"></div>';
   document.body.appendChild(panel);
+  const pShotFrame = panel.querySelector('.shot-frame');
   const pShot = panel.querySelector('.shot');
+  const pSceneDetail = panel.querySelector('.scene-detail');
   const pTtl = panel.querySelector('.ttl');
   const pBody = panel.querySelector('.body');
   const pAct = panel.querySelector('.act');
-  pShot.addEventListener('load', () => pShot.classList.add('ready'));
+  pShot.addEventListener('load', () => pShotFrame.classList.add('ready'));
 
   const akte = document.createElement('div');
   akte.id = 'akte';
@@ -696,13 +706,32 @@ export function createInteraction(renderer, host) {
 
     // Nahaufnahme: dafür ist das Untersuchen da — es soll etwas passieren,
     // nicht nur ein Satz erscheinen.
-    pShot.classList.remove('ready');
+    pShotFrame.classList.remove('ready');
     if (spot.detail) {
       panel.classList.add('has-shot');
+      pSceneDetail.style.display = 'none';
+      pShot.style.display = 'block';
       pShot.src = base + spot.detail;
       pShot.alt = spot.label;
+    } else if (spot.detailFocus && currentScene?.backdrop) {
+      /* Fall 3 nutzt fuer jede Untersuchung einen fokussierten Ausschnitt der
+         verlustfreien Ortsplatte. Das ist kein blosses Textfenster mehr: Der
+         Klick schneidet sichtbar an den Gegenstand heran, wie die handgemalten
+         Nahaufnahmen der ersten beiden Faelle. */
+      const { u, v, zoom = 2.5 } = spot.detailFocus;
+      panel.classList.add('has-shot');
+      pShot.style.display = 'none';
+      pShot.removeAttribute('src');
+      pSceneDetail.style.display = 'block';
+      pSceneDetail.style.backgroundImage = `url("${base}plates/${currentScene.backdrop}.png")`;
+      pSceneDetail.style.backgroundSize = `${zoom * 100}% auto`;
+      pSceneDetail.style.backgroundPosition = `${u * 100}% ${v * 100}%`;
+      requestAnimationFrame(() => pShotFrame.classList.add('ready'));
     } else {
       panel.classList.remove('has-shot');
+      pShot.style.display = 'none';
+      pSceneDetail.style.display = 'none';
+      pSceneDetail.style.backgroundImage = '';
       pShot.removeAttribute('src');
     }
 

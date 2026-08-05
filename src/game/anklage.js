@@ -192,6 +192,7 @@ export function createAnklage(host) {
       b.className = gewaehlt === c.id ? 'gewaehlt' : '';
       b.innerHTML = '<img alt="" /><div><div class="n"></div><div class="r"></div></div>';
       b.querySelector('img').src = base + c.portrait;
+      b.querySelector('img').style.objectPosition = c.portraitPosition || '50% 50%';
       b.querySelector('.n').textContent = c.name;
       b.querySelector('.r').textContent = c.role;
       b.onclick = () => { gewaehlt = gewaehlt === c.id ? null : c.id; zeigeAuswahl(); };

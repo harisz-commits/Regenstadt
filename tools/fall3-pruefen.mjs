@@ -4,7 +4,7 @@
  *   node tools/fall3-pruefen.mjs
  */
 
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { FAELLE } from '../src/game/fall.js';
 
@@ -37,7 +37,21 @@ if (F3) {
   for (const p of platten) {
     const da = ['jpg', 'png'].some((ext) => existsSync(join('public', 'plates', `${p}.${ext}`)));
     ok(da, `Bilddatei für „${p}" vorhanden`);
+    const png = join('public', 'plates', `${p}.png`);
+    ok(existsSync(png), `Verlustfreie Hauptkulisse für „${p}" vorhanden`);
+    if (existsSync(png)) ok(statSync(png).size > 1024 * 1024, `Hauptkulisse „${p}" ist nicht stark komprimiert`);
   }
+
+  const untersuchbar = orte.flatMap((ort) =>
+    ort.spots.filter((spot) => spot.kind !== 'exit').map((spot) => ({ ort, spot })));
+  const proOrt = orte.map((ort) => ort.spots.filter((spot) => spot.kind !== 'exit').length);
+  ok(proOrt.every((n) => n >= 5), `Jeder Ort hat mindestens 5 Untersuchungen (Minimum ${Math.min(...proOrt)})`);
+  ok(untersuchbar.length / orte.length >= 4.7,
+     `Szenendichte entspricht Fall 1/2 (${(untersuchbar.length / orte.length).toFixed(1)} je Ort)`);
+  ok(untersuchbar.every(({ spot }) => spot.detail || spot.detailFocus),
+     `Jede der ${untersuchbar.length} Untersuchungen hat eine Bildreaktion`);
+  ok(Object.values(F3.figuren).every((figur) => figur.portrait.startsWith('plates/f3-')),
+     'Keine Figur aus Fall 1 oder 2 als Portraet wiederverwendet');
 
   const fremdText = JSON.stringify({ orte: F3.orte, praemisse: F3.praemisse }).toLowerCase();
   ok(fremdText.includes('außerird') || fremdText.includes('nicht menschlich'),

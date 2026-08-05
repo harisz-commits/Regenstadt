@@ -75,7 +75,9 @@ function offeneStellen() {
     for (const s of ort.spots) {
       // Ausgänge nicht: Dort ist der neue Blickwinkel der nächste Ort selbst.
       if (s.kind === 'exit') continue;
-      if (s.detail) continue;
+      // Fall 3 nutzt fuer seine zusaetzlichen Beobachtungen einen verlustfreien
+      // Ausschnitt des Hauptbildes als Nahaufnahme.
+      if (s.detail || s.detailFocus) continue;
       if (!s.text || s.text.length < 40) continue;
       out.push({ ortId, ort, spot: s, datei: `details/${ortId}-${s.id}.jpg` });
     }

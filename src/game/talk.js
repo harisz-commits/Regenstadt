@@ -694,6 +694,7 @@ export function createTalk(host) {
       }
       img.src = base + c.portrait;
       img.alt = c.name;
+      img.style.objectPosition = c.portraitPosition || '50% 50%';
       nEl.textContent = c.name;
       rEl.textContent = c.role;
       aEl.textContent = c.appearance;

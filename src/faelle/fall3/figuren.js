@@ -2,7 +2,8 @@
 export const FIGUREN = {
   'f3-analytikerin': {
     id: 'f3-analytikerin', name: 'Nela Arendt', role: 'Zollanalyse · Wolkenhafen',
-    portrait: 'details/f2-technikerin.jpg',
+    portrait: 'plates/f3-zollgang-backdrop.png',
+    portraitPosition: '72% 53%',
     appearance: 'Dunkler Labormantel über Flugplatzkleidung, Schutzbrille im Haar, beide Hände auf dem Probentisch.',
     voice: 'präzise und knapp; korrigiert ungenaue Wörter sofort und wird bei unmöglichen Messwerten auffällig leise',
     secret: 'Sie hat das schwarze Glas vor drei Wochen schon einmal untersucht. Damals kam die Probe aus dem Institut und verschwand mitsamt ihrem Bericht. Sie hat eine Kopie der Messkurve behalten.',
@@ -23,7 +24,8 @@ export const FIGUREN = {
   },
   'f3-mechaniker': {
     id: 'f3-mechaniker', name: 'Toma Ber', role: 'Gondelmechaniker',
-    portrait: 'details/f2-steiger.jpg',
+    portrait: 'plates/f3-wrackhangar-backdrop.png',
+    portraitPosition: '66% 55%',
     appearance: 'Ölzeug, verbrannte Fingerspitzen, Werkzeugtasche offen auf dem Boden.',
     voice: 'spricht in kurzen technischen Feststellungen; flucht nur über Dinge, die absichtlich kaputt gemacht wurden',
     secret: 'Er hat vor dem Mord einen fremden Kern in die Gondel eingebaut und später wieder ausgebaut. Der Auftrag trug die Freigabe des Instituts. Er glaubte, es sei ein Navigationsversuch.',
@@ -44,7 +46,8 @@ export const FIGUREN = {
   },
   'f3-haendlerin': {
     id: 'f3-haendlerin', name: 'Sira Mohn', role: 'Händlerin · Umspannmarkt',
-    portrait: 'details/haendler.jpg',
+    portrait: 'plates/f3-nachtmarkt-backdrop.png',
+    portraitPosition: '24% 62%',
     appearance: 'Silberner Regenmantel, ein Auge hinter einer Schweißscheibe, die Hände immer unter dem Tresen.',
     voice: 'freundlich, schnell und ohne kostenlose Hauptsätze; nennt Preise auch dann, wenn niemand kaufen will',
     secret: 'Sie hat Klinikgeräte verkauft, die innen mit schwarzem Glas nachgerüstet waren. Bezahlt wurde über eine Stiftung des Instituts. Einer der Patienten brachte ihr später eine Linse, in der seine eigene Kindheit lief.',
@@ -65,7 +68,8 @@ export const FIGUREN = {
   },
   'f3-botaniker': {
     id: 'f3-botaniker', name: 'Eran Vey', role: 'Botaniker · Glasgärten',
-    portrait: 'details/f2-zeuge.jpg',
+    portrait: 'plates/f3-glasgarten-backdrop.png',
+    portraitPosition: '73% 55%',
     appearance: 'Nasse Hemdsärmel, Erde bis an die Ellenbogen, eine Lampe mit rotem Filter um den Hals.',
     voice: 'ruhig und bildhaft, bis es um Messwerte geht; dann spricht er Zahlen wie Namen aus',
     secret: 'Er ließ das Institut einen Kern zwischen die Pflanzen hängen. Die Pflanzen bildeten Blattadern nach, die wie gespeicherte Nervennetze aussehen. Voss kam persönlich, als Vale fotografierte.',
@@ -86,7 +90,8 @@ export const FIGUREN = {
   },
   'f3-funkerin': {
     id: 'f3-funkerin', name: 'Dalia Kern', role: 'Funkaufsicht · Antennenfeld',
-    portrait: 'details/f2-waerterin.jpg',
+    portrait: 'plates/f3-leitstelle-backdrop.png',
+    portraitPosition: '70% 55%',
     appearance: 'Kopfhörer nur auf einem Ohr, Wollmantel über dem Dienstanzug, Bleistift zwischen den Zähnen.',
     voice: 'trocken, geduldig und vollkommen unbeeindruckt von Titeln; zählt Pausen, bevor sie antwortet',
     secret: 'Das Signal stammt abwechselnd aus der Werft, der Klinik und dem Institut. Es überträgt keine Nachricht, sondern synchronisiert drei Teile derselben Maschine.',
@@ -107,7 +112,8 @@ export const FIGUREN = {
   },
   'f3-pfleger': {
     id: 'f3-pfleger', name: 'Ivo Sand', role: 'Pfleger · Nullklinik',
-    portrait: 'details/f2-pfoertnerin.jpg',
+    portrait: 'plates/f3-traumstation-backdrop.png',
+    portraitPosition: '24% 58%',
     appearance: 'Ausgeblichene Klinikjacke, zwei verschiedene Schuhe, Schlüsselband ohne Schlüssel.',
     voice: 'sanft und müde; redet über Patienten nie in der Vergangenheit, auch wenn sie verschwunden sind',
     secret: 'Er half bei sieben Versuchen. Nach jedem fehlten den Patienten genau drei Minuten. Beim achten, Vale, ordnete Voss einen Vollauszug an und ließ den Notarzt vor der Tür warten.',
@@ -128,7 +134,8 @@ export const FIGUREN = {
   },
   'f3-ueberlebende': {
     id: 'f3-ueberlebende', name: 'Mina Rell', role: 'Patientin sieben',
-    portrait: 'details/laborantin.jpg',
+    portrait: 'plates/f3-gedaechtnistresor-backdrop.png',
+    portraitPosition: '68% 58%',
     appearance: 'Decke um die Schultern, bloße Füße auf kalten Fliesen, Blick auf eine leere Stelle neben dir.',
     voice: 'spricht vorsichtig und prüft nach jedem Satz, ob er noch derselbe ist; plötzlich sehr klar bei Bildern',
     secret: 'Sie wachte während ihres Auszugs auf. Sie sah Voss am Steuerpult und Vale hinter dem Glas. Vale half ihr zu fliehen und versteckte eine Kopie seiner Beweise in der Maschine.',
@@ -149,7 +156,8 @@ export const FIGUREN = {
   },
   'f3-taucher': {
     id: 'f3-taucher', name: 'Borek Tann', role: 'Bergungstaucher',
-    portrait: 'details/f2-vorsteher.jpg',
+    portrait: 'plates/f3-werft-backdrop.png',
+    portraitPosition: '75% 61%',
     appearance: 'Trockentauchanzug bis zur Hüfte, graues Haar nass an der Stirn, Druckmesser noch am Handgelenk.',
     voice: 'langsam und konkret; benutzt Entfernungen statt Richtungen und sagt nie „Ding“, wenn er eine Form beschreiben kann',
     secret: 'Er barg den ersten Kern aus einem Caisson, der älter ist als die Werft. Das Institut ließ ihn zersägen, doch die Teile setzten sich im Wasser wieder zusammen.',
@@ -170,7 +178,8 @@ export const FIGUREN = {
   },
   'f3-archivar': {
     id: 'f3-archivar', name: 'Levin Oss', role: 'Archiv · Kontinuitätsinstitut',
-    portrait: 'details/f2-adjutant.jpg',
+    portrait: 'plates/f3-kaltarchiv-backdrop.png',
+    portraitPosition: '24% 59%',
     appearance: 'Dunkler Anzug ohne Abzeichen, weiße Handschuhe, eine leere Mappe fest an die Brust gedrückt.',
     voice: 'makellos höflich und passiv; wiederholt Fragen in korrekterer Form, um keine beantworten zu müssen',
     secret: 'Er löschte Voss’ Zugang und die medizinische Warnung aus dem Archiv, bewahrte aber die Papierdirektive, weil Papier nicht rückwirkend geändert werden kann.',
@@ -191,7 +200,8 @@ export const FIGUREN = {
   },
   'f3-direktorin': {
     id: 'f3-direktorin', name: 'Dr. Mara Voss', role: 'Direktorin für Kontinuität',
-    portrait: 'details/direktorin.jpg',
+    portrait: 'plates/f3-institut-backdrop.png',
+    portraitPosition: '72% 57%',
     appearance: 'Grauer Anzug, keine nassen Schultern trotz des Wegs, das Gesicht vom cyanfarbenen Kernlicht geteilt.',
     voice: 'ruhig, warm und unerbittlich logisch; spricht von Körpern als Trägern und von Erinnerung als dem einzigen Menschen, der zählt',
     secret: 'Sie ordnete den Vollauszug an, obwohl die Todesfolge dokumentiert war. Vale wollte die Versuche veröffentlichen; Voss wollte sein Wissen erhalten und seine Aussage verhindern. Für sie ist die Kopie Vale und der Leichnam nur eine leere Hülle.',

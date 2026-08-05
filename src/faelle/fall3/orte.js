@@ -7,6 +7,8 @@
  * vom Fundstück zur ganzen Maschine.
  */
 
+import { ZUSATZSPUREN } from './dichte.js';
+
 export const ORTE = {
   /* ====================================================================
      WOLKENHAFEN
@@ -547,3 +549,19 @@ export const ORTE = {
     ],
   },
 };
+
+/* Die zusaetzlichen Beobachtungen stehen in einer eigenen Datei, damit die
+   tragende Beweiskette lesbar bleibt. Sie werden vor den Ausgaengen einsortiert
+   und erhalten eine bildliche Nahansicht aus der verlustfreien Ortsplatte. */
+for (const [ortId, zusatz] of Object.entries(ZUSATZSPUREN)) {
+  const ort = ORTE[ortId];
+  const ersterAusgang = ort.spots.findIndex((spot) => spot.kind === 'exit');
+  ort.spots.splice(ersterAusgang < 0 ? ort.spots.length : ersterAusgang, 0, ...zusatz);
+}
+
+for (const ort of Object.values(ORTE)) {
+  for (const spot of ort.spots) {
+    if (spot.kind === 'exit' || spot.detail) continue;
+    spot.detailFocus = { u: spot.u, v: spot.v, zoom: spot.kind === 'person' || spot.kind === 'lab' ? 2.25 : 2.7 };
+  }
+}

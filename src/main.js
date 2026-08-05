@@ -75,8 +75,11 @@ async function loadLocation(id) {
   scene.sector = def.sector;
 
   const base = import.meta.env.BASE_URL || '/';
-  let img = await loadImage(`${base}plates/${def.backdrop}.jpg`);
-  if (!img) img = await loadImage(`${base}plates/${def.backdrop}.png`);
+  // Verlustfreie Platten haben Vorrang. Fall 3 liegt bewusst als PNG vor:
+  // die erste, stark komprimierte JPEG-Fassung verlor feine Gesichter,
+  // Kabel und Strukturen der Alien-Technik.
+  let img = await loadImage(`${base}plates/${def.backdrop}.png`);
+  if (!img) img = await loadImage(`${base}plates/${def.backdrop}.jpg`);
   if (img) {
     // WebGL nimmt ein Bild genauso entgegen wie ein Canvas — deshalb ist der
     // Tausch hier eine Zuweisung und kein Umbau.

@@ -17,6 +17,10 @@ Menschen loest, in schwarzem Glas speichert und in fremde Traeger schreibt.
 Von der versiegelten Gondel auf dem Wolkenhafen fuehrt der Fall ueber Markt,
 Glasgaerten, Antennenfeld, Nullklinik und versunkene Werft bis zum
 Kontinuitaetsinstitut ueber der Stadt.
+Jeder der einundzwanzig Orte bietet mindestens fuenf untersuchbare Motive
+(insgesamt 105). Jede Untersuchung zeigt eine eigene Nahansicht; die
+verlustfreien Hauptbilder stellen alle anwesenden Figuren direkt in der Szene
+dar.
 
 Alle drei Faelle stehen schon beim ersten Start zur Wahl. Abgeschlossene Faelle
 bleiben markiert und koennen jederzeit erneut gespielt werden
